@@ -1,8 +1,8 @@
-# Box Upload Github Action
+# Box Upload GitHub Action
 
-A Github action for uploading files or build artifacts to Box
+A GitHub action for uploading files or build artifacts to Box.
 
-**IMPORTANT** You must run `ncc build` before tagging a release.
+**IMPORTANT** You must `npm run build` before tagging a release.
 
 ## Build
 1. `npm i -g @vercel/ncc #Install NCC`

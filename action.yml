@@ -1,5 +1,8 @@
 name: 'Box Upload'
-description: 'Uploads a file to Box'
+description: 'A GitHub action for uploading files or build artifacts to Box.'
+branding:
+  icon: 'upload'
+  color: 'orange'
 inputs:
   box-client-sdk-config:
     description: JSON string downloaded from the Box Developer Console.

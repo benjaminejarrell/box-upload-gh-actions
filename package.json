@@ -1,10 +1,11 @@
 {
   "name": "box-upload-gh-actions",
-  "version": "1.0.0",
-  "description": "A Github action for uploading files or build artifacts to Box",
+  "version": "1.0",
+  "description": "A GitHub action for uploading files or build artifacts to Box.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build src/index.js"
   },
   "keywords": [],
   "author": "Benjamin Jarrell",
