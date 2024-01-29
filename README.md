@@ -1,23 +1,49 @@
-# Hello world javascript action
+# Box Upload Github Action
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+A Github action for uploading files or build artifacts to Box
 
+**IMPORTANT** You must run `ncc build` before tagging a release.
+
+## Build
+1. `npm i -g @vercel/ncc #Install NCC`
+2. `ncc build src/index.js`
+
+## Example
+```yaml
+- name: Upload cat pic to Box
+  uses: 
+  id: BoxUpload
+  with:
+    box-client-sdk-config: ${{ secrets.BOX_CLIENT_SDK_CONFIG }}
+    box-folder-id: 1234
+    file: cat.png
+```
 ## Inputs
 
-### `who-to-greet`
+### `box-client-sdk-config`
+JSON formatted output from Box developer console. Example:
 
-**Required** The name of the person to greet. Default `"World"`.
-
-## Outputs
-
-### `time`
-
-The time we greeted you.
-
-## Example usage
-
-```yaml
-uses: actions/hello-world-javascript-action@e76147da8e5c81eaf017dede5645551d4b94427b
-with:
-  who-to-greet: 'Mona the Octocat'
+```json
+{
+  "boxAppSettings": {
+    "clientID": "",
+    "clientSecret": "",
+    "appAuth": {
+      "publicKeyID": "",
+      "privateKey": "",
+      "passphrase": ""
+    }
+  },
+  "enterpriseID": ""
+}
 ```
+### `box-folder-id`
+Box folder ID for the destination. Can be found in the URL.
+
+### `file`
+File in local repository or pipeline to upload.
+
+## Optional Inputs
+
+### `destination-filename`
+Destination filename in Box. If not specified, the file will be named after the source file.

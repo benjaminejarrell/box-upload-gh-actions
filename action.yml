@@ -1,13 +1,22 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Box Upload'
+description: 'Uploads a file to Box'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  box-client-sdk-config:
+    description: JSON string downloaded from the Box Developer Console.
     required: true
-    default: 'World'
+  box-folder-id:
+    description: Box folder ID for the destination. Can be found in the URL.
+    required: true
+  file:
+    description: File to upload.
+    required: true
+  destination-filename:
+    description: Destination filename in Box. If not specified, source filename will be used.
+
 outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+  shared-link:
+    description: Shared link of the folder in Box, if it exists.
+
 runs:
   using: 'node20'
   main: 'dist/index.js'

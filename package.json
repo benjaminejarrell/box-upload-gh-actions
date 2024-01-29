@@ -1,16 +1,26 @@
 {
   "name": "box-upload-gh-actions",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Github action for uploading files or build artifacts to Box",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Benjamin Jarrell",
+  "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.1",
-    "@actions/github": "^6.0.0"
-  }
+    "@actions/github": "^6.0.0",
+    "box-node-sdk": "^3.4.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realchemistry/box-upload-gh-actions.git"
+  },
+  "bugs": {
+    "url": "https://github.com/realchemistry/box-upload-gh-actions/issues"
+  },
+  "homepage": "https://github.com/realchemistry/box-upload-gh-actions#readme"
 }
