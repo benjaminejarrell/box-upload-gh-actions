@@ -11,7 +11,7 @@ A GitHub action for uploading files or build artifacts to Box.
 ## Example
 ```yaml
 - name: Upload cat pic to Box
-  uses: 
+  uses: benjaminejarrell/box-upload-gh-actions@v1.2
   id: BoxUpload
   with:
     box-client-sdk-config: ${{ secrets.BOX_CLIENT_SDK_CONFIG }}
@@ -21,7 +21,16 @@ A GitHub action for uploading files or build artifacts to Box.
 ## Inputs
 
 ### `box-client-sdk-config`
-JSON formatted output from Box developer console. Example:
+JSON formatted output from Box developer console.
+1. Login to the [Box Developer Console](https://developer.box.com/)
+2. Create New App -> Custom App
+3. Authentication Method: Server Authentication (With JWT)
+4. Under Add and Manage Public Keys, Generate a Public/Private KeyPair
+5. Under App Settings, Download as JSON.
+6. In GitHub, create a new repository secret called `BOX_CLIENT_SDK_CONFIG` (Settings -> Security -> Actions)
+6. Copy the contents of the downloaded config.json file from Box into this secret.
+
+Example:
 
 ```json
 {
@@ -38,7 +47,7 @@ JSON formatted output from Box developer console. Example:
 }
 ```
 ### `box-folder-id`
-Box folder ID for the destination. Can be found in the URL.
+Box folder ID for the destination. Can be found in the URL after `/folder/`
 
 ### `file`
 File in local repository or pipeline to upload.
