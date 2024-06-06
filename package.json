@@ -15,7 +15,9 @@
     "@actions/github": "^6.0.0",
     "box-node-sdk": "^3.4.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/benjaminejarrell/box-upload-gh-actions.git"
