@@ -2,8 +2,6 @@
 
 A GitHub action for uploading files or build artifacts to Box.
 
-**IMPORTANT** You must `npm run build` before tagging a release.
-
 ## Build
 1. `npm i -g @vercel/ncc #Install NCC`
 2. `ncc build src/index.js`

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "ncc build src/index.js"
+    "package": "ncc build src/index.js"
   },
   "keywords": [],
   "author": "Benjamin Jarrell",
@@ -18,10 +18,10 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/realchemistry/box-upload-gh-actions.git"
+    "url": "git+https://github.com/benjaminejarrell/box-upload-gh-actions.git"
   },
   "bugs": {
-    "url": "https://github.com/realchemistry/box-upload-gh-actions/issues"
+    "url": "https://github.com/benjaminejarrell/box-upload-gh-actions/issues"
   },
-  "homepage": "https://github.com/realchemistry/box-upload-gh-actions#readme"
+  "homepage": "https://github.com/benjaminejarrell/box-upload-gh-actions#readme"
 }
