@@ -16,7 +16,7 @@
     "box-node-sdk": "^3.7.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38.2"
+    "@vercel/ncc": "^0.38.3"
   },
   "repository": {
     "type": "git",
