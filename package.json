@@ -13,7 +13,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
-    "box-node-sdk": "^3.8.2"
+    "box-node-sdk": "^10.2.0"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.38.3"
