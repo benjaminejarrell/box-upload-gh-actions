@@ -1,23 +1,19 @@
 on:
   push:
-    branches:
-      - main
 
-name: Package
+name: package
 
 jobs:
-  check:
+  pack:
     name: Package distribution file
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: main
+      uses: actions/checkout@v5
     - name: Node setup
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
     - name: Package
       run: |
         npm ci
@@ -27,4 +23,4 @@ jobs:
         git config --global user.name "GitHub Actions"
         git add dist/
         git commit -m "chore: Update dist" || echo "No changes to commit"
-        git push origin HEAD:main
+        git push origin HEAD:${{ github.ref_name }}
