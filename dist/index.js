@@ -2446,7 +2446,7 @@ class HttpClient {
         if (this._keepAlive && useProxy) {
             agent = this._proxyAgent;
         }
-        if (this._keepAlive && !useProxy) {
+        if (!useProxy) {
             agent = this._agent;
         }
         // if agent is already assigned use that agent.
@@ -2478,15 +2478,11 @@ class HttpClient {
             agent = tunnelAgent(agentOptions);
             this._proxyAgent = agent;
         }
-        // if reusing agent across request and tunneling agent isn't assigned create a new agent
-        if (this._keepAlive && !agent) {
+        // if tunneling agent isn't assigned create a new agent
+        if (!agent) {
             const options = { keepAlive: this._keepAlive, maxSockets };
             agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
             this._agent = agent;
-        }
-        // if not using private agent and tunnel agent isn't setup then use global agent
-        if (!agent) {
-            agent = usingSsl ? https.globalAgent : http.globalAgent;
         }
         if (usingSsl && this._ignoreSslError) {
             // we don't want to set NODE_TLS_REJECT_UNAUTHORIZED=0 since that will affect request for entire process
@@ -2509,7 +2505,7 @@ class HttpClient {
         }
         const usingSsl = parsedUrl.protocol === 'https:';
         proxyAgent = new undici_1.ProxyAgent(Object.assign({ uri: proxyUrl.href, pipelining: !this._keepAlive ? 0 : 1 }, ((proxyUrl.username || proxyUrl.password) && {
-            token: `${proxyUrl.username}:${proxyUrl.password}`
+            token: `Basic ${Buffer.from(`${proxyUrl.username}:${proxyUrl.password}`).toString('base64')}`
         })));
         this._proxyAgentDispatcher = proxyAgent;
         if (usingSsl && this._ignoreSslError) {
@@ -2623,11 +2619,11 @@ function getProxyUrl(reqUrl) {
     })();
     if (proxyVar) {
         try {
-            return new URL(proxyVar);
+            return new DecodedURL(proxyVar);
         }
         catch (_a) {
             if (!proxyVar.startsWith('http://') && !proxyVar.startsWith('https://'))
-                return new URL(`http://${proxyVar}`);
+                return new DecodedURL(`http://${proxyVar}`);
         }
     }
     else {
@@ -2685,6 +2681,19 @@ function isLoopbackAddress(host) {
         hostLower.startsWith('127.') ||
         hostLower.startsWith('[::1]') ||
         hostLower.startsWith('[0:0:0:0:0:0:0:1]'));
+}
+class DecodedURL extends URL {
+    constructor(url, base) {
+        super(url, base);
+        this._decodedUsername = decodeURIComponent(super.username);
+        this._decodedPassword = decodeURIComponent(super.password);
+    }
+    get username() {
+        return this._decodedUsername;
+    }
+    get password() {
+        return this._decodedPassword;
+    }
 }
 //# sourceMappingURL=proxy.js.map
 
@@ -3356,7 +3365,7 @@ Object.defineProperty(request, 'debug', {
 
 
 var caseless = __nccwpck_require__(737)
-var { v4: uuid } = __nccwpck_require__(12048)
+var { v4: uuid } = __nccwpck_require__(23379)
 var helpers = __nccwpck_require__(31072)
 
 var md5 = helpers.md5
@@ -4042,7 +4051,7 @@ exports.defer = defer
 "use strict";
 
 
-var { v4: uuid } = __nccwpck_require__(12048)
+var { v4: uuid } = __nccwpck_require__(23379)
 var CombinedStream = __nccwpck_require__(35630)
 var isstream = __nccwpck_require__(97234)
 var Buffer = (__nccwpck_require__(93058).Buffer)
@@ -4581,6 +4590,652 @@ Tunnel.defaultProxyHeaderWhiteList = defaultProxyHeaderWhiteList
 Tunnel.defaultProxyHeaderExclusiveList = defaultProxyHeaderExclusiveList
 exports.$ = Tunnel
 
+
+/***/ }),
+
+/***/ 23379:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+Object.defineProperty(exports, "v1", ({
+  enumerable: true,
+  get: function () {
+    return _v.default;
+  }
+}));
+Object.defineProperty(exports, "v3", ({
+  enumerable: true,
+  get: function () {
+    return _v2.default;
+  }
+}));
+Object.defineProperty(exports, "v4", ({
+  enumerable: true,
+  get: function () {
+    return _v3.default;
+  }
+}));
+Object.defineProperty(exports, "v5", ({
+  enumerable: true,
+  get: function () {
+    return _v4.default;
+  }
+}));
+Object.defineProperty(exports, "NIL", ({
+  enumerable: true,
+  get: function () {
+    return _nil.default;
+  }
+}));
+Object.defineProperty(exports, "version", ({
+  enumerable: true,
+  get: function () {
+    return _version.default;
+  }
+}));
+Object.defineProperty(exports, "validate", ({
+  enumerable: true,
+  get: function () {
+    return _validate.default;
+  }
+}));
+Object.defineProperty(exports, "stringify", ({
+  enumerable: true,
+  get: function () {
+    return _stringify.default;
+  }
+}));
+Object.defineProperty(exports, "parse", ({
+  enumerable: true,
+  get: function () {
+    return _parse.default;
+  }
+}));
+
+var _v = _interopRequireDefault(__nccwpck_require__(80394));
+
+var _v2 = _interopRequireDefault(__nccwpck_require__(75776));
+
+var _v3 = _interopRequireDefault(__nccwpck_require__(15925));
+
+var _v4 = _interopRequireDefault(__nccwpck_require__(6966));
+
+var _nil = _interopRequireDefault(__nccwpck_require__(21812));
+
+var _version = _interopRequireDefault(__nccwpck_require__(48427));
+
+var _validate = _interopRequireDefault(__nccwpck_require__(26697));
+
+var _stringify = _interopRequireDefault(__nccwpck_require__(55170));
+
+var _parse = _interopRequireDefault(__nccwpck_require__(28524));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ }),
+
+/***/ 96427:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function md5(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === 'string') {
+    bytes = Buffer.from(bytes, 'utf8');
+  }
+
+  return _crypto.default.createHash('md5').update(bytes).digest();
+}
+
+var _default = md5;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 21812:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _default = '00000000-0000-0000-0000-000000000000';
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 28524:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _validate = _interopRequireDefault(__nccwpck_require__(26697));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function parse(uuid) {
+  if (!(0, _validate.default)(uuid)) {
+    throw TypeError('Invalid UUID');
+  }
+
+  let v;
+  const arr = new Uint8Array(16); // Parse ########-....-....-....-............
+
+  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
+  arr[1] = v >>> 16 & 0xff;
+  arr[2] = v >>> 8 & 0xff;
+  arr[3] = v & 0xff; // Parse ........-####-....-....-............
+
+  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
+  arr[5] = v & 0xff; // Parse ........-....-####-....-............
+
+  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
+  arr[7] = v & 0xff; // Parse ........-....-....-####-............
+
+  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
+  arr[9] = v & 0xff; // Parse ........-....-....-....-############
+  // (Use "/" to avoid 32-bit truncation when bit-shifting high-order bytes)
+
+  arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000 & 0xff;
+  arr[11] = v / 0x100000000 & 0xff;
+  arr[12] = v >>> 24 & 0xff;
+  arr[13] = v >>> 16 & 0xff;
+  arr[14] = v >>> 8 & 0xff;
+  arr[15] = v & 0xff;
+  return arr;
+}
+
+var _default = parse;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 32748:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+var _default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 99510:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = rng;
+
+var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const rnds8Pool = new Uint8Array(256); // # of random values to pre-allocate
+
+let poolPtr = rnds8Pool.length;
+
+function rng() {
+  if (poolPtr > rnds8Pool.length - 16) {
+    _crypto.default.randomFillSync(rnds8Pool);
+
+    poolPtr = 0;
+  }
+
+  return rnds8Pool.slice(poolPtr, poolPtr += 16);
+}
+
+/***/ }),
+
+/***/ 39846:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function sha1(bytes) {
+  if (Array.isArray(bytes)) {
+    bytes = Buffer.from(bytes);
+  } else if (typeof bytes === 'string') {
+    bytes = Buffer.from(bytes, 'utf8');
+  }
+
+  return _crypto.default.createHash('sha1').update(bytes).digest();
+}
+
+var _default = sha1;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 55170:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _validate = _interopRequireDefault(__nccwpck_require__(26697));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Convert array of 16 byte values to UUID string format of the form:
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ */
+const byteToHex = [];
+
+for (let i = 0; i < 256; ++i) {
+  byteToHex.push((i + 0x100).toString(16).substr(1));
+}
+
+function stringify(arr, offset = 0) {
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  const uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase(); // Consistency check for valid UUID.  If this throws, it's likely due to one
+  // of the following:
+  // - One or more input array values don't map to a hex octet (leading to
+  // "undefined" in the uuid)
+  // - Invalid input values for the RFC `version` or `variant` fields
+
+  if (!(0, _validate.default)(uuid)) {
+    throw TypeError('Stringified UUID is invalid');
+  }
+
+  return uuid;
+}
+
+var _default = stringify;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 80394:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _rng = _interopRequireDefault(__nccwpck_require__(99510));
+
+var _stringify = _interopRequireDefault(__nccwpck_require__(55170));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+let _nodeId;
+
+let _clockseq; // Previous uuid creation time
+
+
+let _lastMSecs = 0;
+let _lastNSecs = 0; // See https://github.com/uuidjs/uuid for API details
+
+function v1(options, buf, offset) {
+  let i = buf && offset || 0;
+  const b = buf || new Array(16);
+  options = options || {};
+  let node = options.node || _nodeId;
+  let clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq; // node and clockseq need to be initialized to random values if they're not
+  // specified.  We do this lazily to minimize issues related to insufficient
+  // system entropy.  See #189
+
+  if (node == null || clockseq == null) {
+    const seedBytes = options.random || (options.rng || _rng.default)();
+
+    if (node == null) {
+      // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+      node = _nodeId = [seedBytes[0] | 0x01, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
+    }
+
+    if (clockseq == null) {
+      // Per 4.2.2, randomize (14 bit) clockseq
+      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
+    }
+  } // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+
+
+  let msecs = options.msecs !== undefined ? options.msecs : Date.now(); // Per 4.2.1.2, use count of uuid's generated during the current clock
+  // cycle to simulate higher resolution clock
+
+  let nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1; // Time since last uuid creation (in msecs)
+
+  const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 10000; // Per 4.2.1.2, Bump clockseq on clock regression
+
+  if (dt < 0 && options.clockseq === undefined) {
+    clockseq = clockseq + 1 & 0x3fff;
+  } // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+  // time interval
+
+
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+    nsecs = 0;
+  } // Per 4.2.1.2 Throw error if too many uuids are requested
+
+
+  if (nsecs >= 10000) {
+    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
+  }
+
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq; // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+
+  msecs += 12219292800000; // `time_low`
+
+  const tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+  b[i++] = tl >>> 24 & 0xff;
+  b[i++] = tl >>> 16 & 0xff;
+  b[i++] = tl >>> 8 & 0xff;
+  b[i++] = tl & 0xff; // `time_mid`
+
+  const tmh = msecs / 0x100000000 * 10000 & 0xfffffff;
+  b[i++] = tmh >>> 8 & 0xff;
+  b[i++] = tmh & 0xff; // `time_high_and_version`
+
+  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+
+  b[i++] = tmh >>> 16 & 0xff; // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+
+  b[i++] = clockseq >>> 8 | 0x80; // `clock_seq_low`
+
+  b[i++] = clockseq & 0xff; // `node`
+
+  for (let n = 0; n < 6; ++n) {
+    b[i + n] = node[n];
+  }
+
+  return buf || (0, _stringify.default)(b);
+}
+
+var _default = v1;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 75776:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _v = _interopRequireDefault(__nccwpck_require__(89565));
+
+var _md = _interopRequireDefault(__nccwpck_require__(96427));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const v3 = (0, _v.default)('v3', 0x30, _md.default);
+var _default = v3;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 89565:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = _default;
+exports.URL = exports.DNS = void 0;
+
+var _stringify = _interopRequireDefault(__nccwpck_require__(55170));
+
+var _parse = _interopRequireDefault(__nccwpck_require__(28524));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function stringToBytes(str) {
+  str = unescape(encodeURIComponent(str)); // UTF8 escape
+
+  const bytes = [];
+
+  for (let i = 0; i < str.length; ++i) {
+    bytes.push(str.charCodeAt(i));
+  }
+
+  return bytes;
+}
+
+const DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+exports.DNS = DNS;
+const URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+exports.URL = URL;
+
+function _default(name, version, hashfunc) {
+  function generateUUID(value, namespace, buf, offset) {
+    if (typeof value === 'string') {
+      value = stringToBytes(value);
+    }
+
+    if (typeof namespace === 'string') {
+      namespace = (0, _parse.default)(namespace);
+    }
+
+    if (namespace.length !== 16) {
+      throw TypeError('Namespace must be array-like (16 iterable integer values, 0-255)');
+    } // Compute hash of namespace and value, Per 4.3
+    // Future: Use spread syntax when supported on all platforms, e.g. `bytes =
+    // hashfunc([...namespace, ... value])`
+
+
+    let bytes = new Uint8Array(16 + value.length);
+    bytes.set(namespace);
+    bytes.set(value, namespace.length);
+    bytes = hashfunc(bytes);
+    bytes[6] = bytes[6] & 0x0f | version;
+    bytes[8] = bytes[8] & 0x3f | 0x80;
+
+    if (buf) {
+      offset = offset || 0;
+
+      for (let i = 0; i < 16; ++i) {
+        buf[offset + i] = bytes[i];
+      }
+
+      return buf;
+    }
+
+    return (0, _stringify.default)(bytes);
+  } // Function#name is not settable on some platforms (#270)
+
+
+  try {
+    generateUUID.name = name; // eslint-disable-next-line no-empty
+  } catch (err) {} // For CommonJS default export support
+
+
+  generateUUID.DNS = DNS;
+  generateUUID.URL = URL;
+  return generateUUID;
+}
+
+/***/ }),
+
+/***/ 15925:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _rng = _interopRequireDefault(__nccwpck_require__(99510));
+
+var _stringify = _interopRequireDefault(__nccwpck_require__(55170));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function v4(options, buf, offset) {
+  options = options || {};
+
+  const rnds = options.random || (options.rng || _rng.default)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+
+
+  rnds[6] = rnds[6] & 0x0f | 0x40;
+  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
+
+  if (buf) {
+    offset = offset || 0;
+
+    for (let i = 0; i < 16; ++i) {
+      buf[offset + i] = rnds[i];
+    }
+
+    return buf;
+  }
+
+  return (0, _stringify.default)(rnds);
+}
+
+var _default = v4;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 6966:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _v = _interopRequireDefault(__nccwpck_require__(89565));
+
+var _sha = _interopRequireDefault(__nccwpck_require__(39846));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const v5 = (0, _v.default)('v5', 0x50, _sha.default);
+var _default = v5;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 26697:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _regex = _interopRequireDefault(__nccwpck_require__(32748));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function validate(uuid) {
+  return typeof uuid === 'string' && _regex.default.test(uuid);
+}
+
+var _default = validate;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 48427:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _validate = _interopRequireDefault(__nccwpck_require__(26697));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function version(uuid) {
+  if (!(0, _validate.default)(uuid)) {
+    throw TypeError('Invalid UUID');
+  }
+
+  return parseInt(uuid.substr(14, 1), 16);
+}
+
+var _default = version;
+exports["default"] = _default;
 
 /***/ }),
 
@@ -9327,7 +9982,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Agent = void 0;
+const net = __importStar(__nccwpck_require__(69278));
 const http = __importStar(__nccwpck_require__(58611));
+const https_1 = __nccwpck_require__(65692);
 __exportStar(__nccwpck_require__(15183), exports);
 const INTERNAL = Symbol('AgentBaseInternalState');
 class Agent extends http.Agent {
@@ -9364,22 +10021,86 @@ class Agent extends http.Agent {
             .some((l) => l.indexOf('(https.js:') !== -1 ||
             l.indexOf('node:https:') !== -1);
     }
+    // In order to support async signatures in `connect()` and Node's native
+    // connection pooling in `http.Agent`, the array of sockets for each origin
+    // has to be updated synchronously. This is so the length of the array is
+    // accurate when `addRequest()` is next called. We achieve this by creating a
+    // fake socket and adding it to `sockets[origin]` and incrementing
+    // `totalSocketCount`.
+    incrementSockets(name) {
+        // If `maxSockets` and `maxTotalSockets` are both Infinity then there is no
+        // need to create a fake socket because Node.js native connection pooling
+        // will never be invoked.
+        if (this.maxSockets === Infinity && this.maxTotalSockets === Infinity) {
+            return null;
+        }
+        // All instances of `sockets` are expected TypeScript errors. The
+        // alternative is to add it as a private property of this class but that
+        // will break TypeScript subclassing.
+        if (!this.sockets[name]) {
+            // @ts-expect-error `sockets` is readonly in `@types/node`
+            this.sockets[name] = [];
+        }
+        const fakeSocket = new net.Socket({ writable: false });
+        this.sockets[name].push(fakeSocket);
+        // @ts-expect-error `totalSocketCount` isn't defined in `@types/node`
+        this.totalSocketCount++;
+        return fakeSocket;
+    }
+    decrementSockets(name, socket) {
+        if (!this.sockets[name] || socket === null) {
+            return;
+        }
+        const sockets = this.sockets[name];
+        const index = sockets.indexOf(socket);
+        if (index !== -1) {
+            sockets.splice(index, 1);
+            // @ts-expect-error  `totalSocketCount` isn't defined in `@types/node`
+            this.totalSocketCount--;
+            if (sockets.length === 0) {
+                // @ts-expect-error `sockets` is readonly in `@types/node`
+                delete this.sockets[name];
+            }
+        }
+    }
+    // In order to properly update the socket pool, we need to call `getName()` on
+    // the core `https.Agent` if it is a secureEndpoint.
+    getName(options) {
+        const secureEndpoint = this.isSecureEndpoint(options);
+        if (secureEndpoint) {
+            // @ts-expect-error `getName()` isn't defined in `@types/node`
+            return https_1.Agent.prototype.getName.call(this, options);
+        }
+        // @ts-expect-error `getName()` isn't defined in `@types/node`
+        return super.getName(options);
+    }
     createSocket(req, options, cb) {
         const connectOpts = {
             ...options,
             secureEndpoint: this.isSecureEndpoint(options),
         };
+        const name = this.getName(connectOpts);
+        const fakeSocket = this.incrementSockets(name);
         Promise.resolve()
             .then(() => this.connect(req, connectOpts))
             .then((socket) => {
+            this.decrementSockets(name, fakeSocket);
             if (socket instanceof http.Agent) {
-                // @ts-expect-error `addRequest()` isn't defined in `@types/node`
-                return socket.addRequest(req, connectOpts);
+                try {
+                    // @ts-expect-error `addRequest()` isn't defined in `@types/node`
+                    return socket.addRequest(req, connectOpts);
+                }
+                catch (err) {
+                    return cb(err);
+                }
             }
             this[INTERNAL].currentSocket = socket;
             // @ts-expect-error `createSocket()` isn't defined in `@types/node`
             super.createSocket(req, options, cb);
-        }, cb);
+        }, (err) => {
+            this.decrementSockets(name, fakeSocket);
+            cb(err);
+        });
     }
     createConnection() {
         const socket = this[INTERNAL].currentSocket;
@@ -15884,8 +16605,11 @@ const fsStat = (0, util_1.promisify)(fs_1.stat);
 const fsOpen = (0, util_1.promisify)(fs_1.open);
 const fsClose = (0, util_1.promisify)(fs_1.close);
 const fsUnlink = (0, util_1.promisify)(fs_1.unlink);
-const LIST_COMMANDS_DEFAULT = ["LIST -a", "LIST"];
-const LIST_COMMANDS_MLSD = ["MLSD", "LIST -a", "LIST"];
+const defaultClientOptions = {
+    allowSeparateTransferHost: true
+};
+const LIST_COMMANDS_DEFAULT = () => ["LIST -a", "LIST"];
+const LIST_COMMANDS_MLSD = () => ["MLSD", "LIST -a", "LIST"];
 /**
  * High-level API to interact with an FTP server.
  */
@@ -15895,10 +16619,13 @@ class Client {
      *
      * @param timeout  Timeout in milliseconds, use 0 for no timeout. Optional, default is 30 seconds.
      */
-    constructor(timeout = 30000) {
-        this.availableListCommands = LIST_COMMANDS_DEFAULT;
+    constructor(timeout = 30000, options = defaultClientOptions) {
+        this.availableListCommands = LIST_COMMANDS_DEFAULT();
         this.ftp = new FtpContext_1.FTPContext(timeout);
-        this.prepareTransfer = this._enterFirstCompatibleMode([transfer_1.enterPassiveModeIPv6, transfer_1.enterPassiveModeIPv4]);
+        this.prepareTransfer = this._enterFirstCompatibleMode([
+            transfer_1.enterPassiveModeIPv6,
+            options.allowSeparateTransferHost ? transfer_1.enterPassiveModeIPv4 : transfer_1.enterPassiveModeIPv4_forceControlHostIP
+        ]);
         this.parseList = parseList_1.parseList;
         this._progressTracker = new ProgressTracker_1.ProgressTracker();
     }
@@ -16046,7 +16773,7 @@ class Client {
         // Use MLSD directory listing if possible. See https://tools.ietf.org/html/rfc3659#section-7.8:
         // "The presence of the MLST feature indicates that both MLST and MLSD are supported."
         const supportsMLSD = features.has("MLST");
-        this.availableListCommands = supportsMLSD ? LIST_COMMANDS_MLSD : LIST_COMMANDS_DEFAULT;
+        this.availableListCommands = supportsMLSD ? LIST_COMMANDS_MLSD() : LIST_COMMANDS_DEFAULT();
         await this.send("TYPE I"); // Binary mode
         await this.sendIgnoringError("STRU F"); // Use file structure
         await this.sendIgnoringError("OPTS UTF8 ON"); // Some servers expect UTF-8 to be enabled explicitly and setting before login might not have worked.
@@ -16561,7 +17288,7 @@ class Client {
                 try {
                     const res = await strategy(ftp);
                     ftp.log("Optimal transfer strategy found.");
-                    this.prepareTransfer = strategy; // eslint-disable-line require-atomic-updates
+                    this.prepareTransfer = strategy;
                     return res;
                 }
                 catch (err) {
@@ -16619,7 +17346,7 @@ async function ensureLocalDirectory(path) {
     try {
         await fsStat(path);
     }
-    catch (err) {
+    catch (_a) {
         await fsMkDir(path, { recursive: true });
     }
 }
@@ -16627,7 +17354,7 @@ async function ignoreError(func) {
     try {
         return await func();
     }
-    catch (err) {
+    catch (_a) {
         // Ignore
         return undefined;
     }
@@ -17071,16 +17798,14 @@ class FTPContext {
         this._closeSocket(this._socket);
     }
     /**
-     * Close a socket. Sends FIN and ignores any error.
+     * Close a socket, ignores any error.
      * @protected
      */
     _closeSocket(socket) {
         if (socket) {
             this._removeSocketListeners(socket);
             socket.on("error", doNothing);
-            socket.on("timeout", () => socket.destroy());
-            socket.setTimeout(this.timeout);
-            socket.end();
+            socket.destroy();
         }
     }
     /**
@@ -17274,7 +17999,10 @@ Object.defineProperty(exports, "enterPassiveModeIPv6", ({ enumerable: true, get:
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ipIsPrivateV4Address = exports.upgradeSocket = exports.describeAddress = exports.describeTLS = void 0;
+exports.describeTLS = describeTLS;
+exports.describeAddress = describeAddress;
+exports.upgradeSocket = upgradeSocket;
+exports.ipIsPrivateV4Address = ipIsPrivateV4Address;
 const tls_1 = __nccwpck_require__(64756);
 /**
  * Returns a string describing the encryption on a given socket instance.
@@ -17286,7 +18014,6 @@ function describeTLS(socket) {
     }
     return "No encryption";
 }
-exports.describeTLS = describeTLS;
 /**
  * Returns a string describing the remote address of a socket.
  */
@@ -17296,7 +18023,6 @@ function describeAddress(socket) {
     }
     return `${socket.remoteAddress}:${socket.remotePort}`;
 }
-exports.describeAddress = describeAddress;
 /**
  * Upgrade a socket connection with TLS.
  */
@@ -17320,7 +18046,6 @@ function upgradeSocket(socket, options) {
         });
     });
 }
-exports.upgradeSocket = upgradeSocket;
 /**
  * Returns true if an IP is a private address according to https://tools.ietf.org/html/rfc1918#section-3.
  * This will handle IPv4-mapped IPv6 addresses correctly but return false for all other IPv6 addresses.
@@ -17338,7 +18063,6 @@ function ipIsPrivateV4Address(ip = "") {
         || (octets[0] === 192 && octets[1] === 168) // 192.168.0.0 - 192.168.255.255
         || ip === "127.0.0.1";
 }
-exports.ipIsPrivateV4Address = ipIsPrivateV4Address;
 
 
 /***/ }),
@@ -17349,7 +18073,11 @@ exports.ipIsPrivateV4Address = ipIsPrivateV4Address;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.positiveIntermediate = exports.positiveCompletion = exports.isMultiline = exports.isSingleLine = exports.parseControlResponse = void 0;
+exports.parseControlResponse = parseControlResponse;
+exports.isSingleLine = isSingleLine;
+exports.isMultiline = isMultiline;
+exports.positiveCompletion = positiveCompletion;
+exports.positiveIntermediate = positiveIntermediate;
 const LF = "\n";
 /**
  * Parse an FTP control response as a collection of messages. A message is a complete
@@ -17388,29 +18116,24 @@ function parseControlResponse(text) {
     const rest = tokenRegex ? lines.slice(startAt).join(LF) + LF : "";
     return { messages, rest };
 }
-exports.parseControlResponse = parseControlResponse;
 function isSingleLine(line) {
     return /^\d\d\d(?:$| )/.test(line);
 }
-exports.isSingleLine = isSingleLine;
 function isMultiline(line) {
     return /^\d\d\d-/.test(line);
 }
-exports.isMultiline = isMultiline;
 /**
  * Return true if an FTP return code describes a positive completion.
  */
 function positiveCompletion(code) {
     return code >= 200 && code < 300;
 }
-exports.positiveCompletion = positiveCompletion;
 /**
  * Return true if an FTP return code describes a positive intermediate response.
  */
 function positiveIntermediate(code) {
     return code >= 300 && code < 400;
 }
-exports.positiveIntermediate = positiveIntermediate;
 function isNotBlank(str) {
     return str.trim() !== "";
 }
@@ -17439,15 +18162,25 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseList = void 0;
+exports.parseList = parseList;
 const dosParser = __importStar(__nccwpck_require__(4439));
 const unixParser = __importStar(__nccwpck_require__(98003));
 const mlsdParser = __importStar(__nccwpck_require__(75287));
@@ -17491,7 +18224,6 @@ function parseList(rawList) {
         .filter((info) => info !== undefined);
     return parser.transformList(files);
 }
-exports.parseList = parseList;
 
 
 /***/ }),
@@ -17502,7 +18234,9 @@ exports.parseList = parseList;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.transformList = exports.parseLine = exports.testLine = void 0;
+exports.testLine = testLine;
+exports.parseLine = parseLine;
+exports.transformList = transformList;
 const FileInfo_1 = __nccwpck_require__(37666);
 /**
  * This parser is based on the FTP client library source code in Apache Commons Net provided
@@ -17522,7 +18256,6 @@ const RE_LINE = new RegExp("(\\S+)\\s+(\\S+)\\s+" // MM-dd-yy whitespace hh:mma|
 function testLine(line) {
     return /^\d{2}/.test(line) && RE_LINE.test(line);
 }
-exports.testLine = testLine;
 /**
  * Parse a single line of a DOS-style directory listing.
  */
@@ -17548,11 +18281,9 @@ function parseLine(line) {
     file.rawModifiedAt = groups[1] + " " + groups[2];
     return file;
 }
-exports.parseLine = parseLine;
 function transformList(files) {
     return files;
 }
-exports.transformList = transformList;
 
 
 /***/ }),
@@ -17563,7 +18294,10 @@ exports.transformList = transformList;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseMLSxDate = exports.transformList = exports.parseLine = exports.testLine = void 0;
+exports.testLine = testLine;
+exports.parseLine = parseLine;
+exports.transformList = transformList;
+exports.parseMLSxDate = parseMLSxDate;
 const FileInfo_1 = __nccwpck_require__(37666);
 function parseSize(value, info) {
     info.size = parseInt(value, 10);
@@ -17676,7 +18410,6 @@ function splitStringOnce(str, delimiter) {
 function testLine(line) {
     return /^\S+=\S+;/.test(line) || line.startsWith(" ");
 }
-exports.testLine = testLine;
 /**
  * Parse single line as MLSD listing, see specification at https://tools.ietf.org/html/rfc3659#section-7.
  */
@@ -17703,7 +18436,6 @@ function parseLine(line) {
     }
     return info;
 }
-exports.parseLine = parseLine;
 function transformList(files) {
     // Create a map of all files that are not symbolic links by their unique ID
     const nonLinksByID = new Map();
@@ -17731,7 +18463,6 @@ function transformList(files) {
     }
     return resolvedFiles;
 }
-exports.transformList = transformList;
 /**
  * Parse date as specified in https://tools.ietf.org/html/rfc3659#section-2.3.
  *
@@ -17748,7 +18479,6 @@ function parseMLSxDate(fact) {
     +fact.slice(15, 18) // Milliseconds
     ));
 }
-exports.parseMLSxDate = parseMLSxDate;
 
 
 /***/ }),
@@ -17759,7 +18489,9 @@ exports.parseMLSxDate = parseMLSxDate;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.transformList = exports.parseLine = exports.testLine = void 0;
+exports.testLine = testLine;
+exports.parseLine = parseLine;
+exports.transformList = transformList;
 const FileInfo_1 = __nccwpck_require__(37666);
 const JA_MONTH = "\u6708";
 const JA_DAY = "\u65e5";
@@ -17836,7 +18568,6 @@ const RE_LINE = new RegExp("([bcdelfmpSs-])" // file type
 function testLine(line) {
     return RE_LINE.test(line);
 }
-exports.testLine = testLine;
 /**
  * Parse a single line of a Unix-style directory listing.
  */
@@ -17894,11 +18625,9 @@ function parseLine(line) {
     }
     return file;
 }
-exports.parseLine = parseLine;
 function transformList(files) {
     return files;
 }
-exports.transformList = transformList;
 function parseMode(r, w, x) {
     let value = 0;
     if (r !== "-") {
@@ -17923,7 +18652,14 @@ function parseMode(r, w, x) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadTo = exports.uploadFrom = exports.connectForPassiveTransfer = exports.parsePasvResponse = exports.enterPassiveModeIPv4 = exports.parseEpsvResponse = exports.enterPassiveModeIPv6 = void 0;
+exports.enterPassiveModeIPv6 = enterPassiveModeIPv6;
+exports.parseEpsvResponse = parseEpsvResponse;
+exports.enterPassiveModeIPv4 = enterPassiveModeIPv4;
+exports.enterPassiveModeIPv4_forceControlHostIP = enterPassiveModeIPv4_forceControlHostIP;
+exports.parsePasvResponse = parsePasvResponse;
+exports.connectForPassiveTransfer = connectForPassiveTransfer;
+exports.uploadFrom = uploadFrom;
+exports.downloadTo = downloadTo;
 const netUtils_1 = __nccwpck_require__(76156);
 const stream_1 = __nccwpck_require__(2203);
 const tls_1 = __nccwpck_require__(64756);
@@ -17944,7 +18680,6 @@ async function enterPassiveModeIPv6(ftp) {
     await connectForPassiveTransfer(controlHost, port, ftp);
     return res;
 }
-exports.enterPassiveModeIPv6 = enterPassiveModeIPv6;
 /**
  * Parse an EPSV response. Returns only the port as in EPSV the host of the control connection is used.
  */
@@ -17961,7 +18696,6 @@ function parseEpsvResponse(message) {
     }
     return port;
 }
-exports.parseEpsvResponse = parseEpsvResponse;
 /**
  * Prepare a data socket using passive mode over IPv4.
  */
@@ -17982,7 +18716,24 @@ async function enterPassiveModeIPv4(ftp) {
     await connectForPassiveTransfer(target.host, target.port, ftp);
     return res;
 }
-exports.enterPassiveModeIPv4 = enterPassiveModeIPv4;
+/**
+ * Prepare a data socket using passive mode over IPv4. Ignore the IP provided by the PASV response,
+ * and use the control host IP. This is the same behaviour as with the more modern variant EPSV. Use
+ * this to fix issues around NAT or provide more security by preventing FTP bounce attacks.
+ */
+async function enterPassiveModeIPv4_forceControlHostIP(ftp) {
+    const res = await ftp.request("PASV");
+    const target = parsePasvResponse(res.message);
+    if (!target) {
+        throw new Error("Can't parse PASV response: " + res.message);
+    }
+    const controlHost = ftp.socket.remoteAddress;
+    if (controlHost === undefined) {
+        throw new Error("Control socket is disconnected, can't get remote address.");
+    }
+    await connectForPassiveTransfer(controlHost, target.port, ftp);
+    return res;
+}
 /**
  * Parse a PASV response.
  */
@@ -17997,7 +18748,6 @@ function parsePasvResponse(message) {
         port: (parseInt(groups[2], 10) & 255) * 256 + (parseInt(groups[3], 10) & 255)
     };
 }
-exports.parsePasvResponse = parsePasvResponse;
 function connectForPassiveTransfer(host, port, ftp) {
     return new Promise((resolve, reject) => {
         let socket = ftp._newSocket();
@@ -18039,7 +18789,6 @@ function connectForPassiveTransfer(host, port, ftp) {
         });
     });
 }
-exports.connectForPassiveTransfer = connectForPassiveTransfer;
 /**
  * Helps resolving/rejecting transfers.
  *
@@ -18164,7 +18913,6 @@ function uploadFrom(source, config) {
         // Ignore all other positive preliminary response codes (< 200)
     });
 }
-exports.uploadFrom = uploadFrom;
 function downloadTo(destination, config) {
     if (!config.ftp.dataSocket) {
         throw new Error("Download will be initiated but no data connection is available.");
@@ -18203,7 +18951,6 @@ function downloadTo(destination, config) {
         // Ignore all other positive preliminary response codes (< 200)
     });
 }
-exports.downloadTo = downloadTo;
 /**
  * Calls a function immediately if a condition is met or subscribes to an event and calls
  * it once the event is emitted.
@@ -24752,7 +25499,7 @@ module.exports = ret;
 
 /***/ }),
 
-/***/ 37419:
+/***/ 97581:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -24766,10 +25513,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __nccwpck_require__(94366);
-var errors_1 = __importDefault(__nccwpck_require__(55051));
-var stream_1 = __nccwpck_require__(2203);
-var APIRequest = __nccwpck_require__(1933);
+const bluebird_1 = __nccwpck_require__(94366);
+const errors_1 = __importDefault(__nccwpck_require__(21145));
+const stream_1 = __nccwpck_require__(2203);
+const APIRequest = __nccwpck_require__(34723);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -24783,8 +25530,8 @@ var APIRequest = __nccwpck_require__(1933);
  * @param {EventEmitter} eventBus The event bus for SDK events
  * @constructor
  */
-var APIRequestManager = /** @class */ (function () {
-    function APIRequestManager(config, eventBus) {
+class APIRequestManager {
+    constructor(config, eventBus) {
         this.config = config;
         this.eventBus = eventBus;
     }
@@ -24794,24 +25541,22 @@ var APIRequestManager = /** @class */ (function () {
      * @param {Object} options The request options
      * @returns {Promise<Response>} A promise resolving to the response object
      */
-    APIRequestManager.prototype.makeRequest = function (options /* FIXME */) {
+    makeRequest(options /* FIXME */) {
         // Add default APIRequestManager options to each request
         var requestConfig = this.config.extend({
             request: options,
         });
         // Make the request
         var apiRequest = new APIRequest(requestConfig, this.eventBus);
-        return bluebird_1.Promise.fromCallback(function (callback) {
-            return apiRequest.execute(callback);
-        }).catch(function (err) { return errors_1.default.unwrapAndThrow(err); });
-    };
+        return bluebird_1.Promise.fromCallback((callback) => apiRequest.execute(callback)).catch((err) => errors_1.default.unwrapAndThrow(err));
+    }
     /**
      * Make a request to the API, and return a read stream for the response.
      *
      * @param {Object} options The request options
      * @returns {Stream.Readable} The response stream
      */
-    APIRequestManager.prototype.makeStreamingRequest = function (options /* FIXME */) {
+    makeStreamingRequest(options /* FIXME */) {
         // Add default APIRequestManager options to each request
         var requestConfig = this.config.extend({
             request: options,
@@ -24832,15 +25577,14 @@ var APIRequestManager = /** @class */ (function () {
             return passThrough;
         }
         return stream;
-    };
-    return APIRequestManager;
-}());
+    }
+}
 module.exports = APIRequestManager;
 //# sourceMappingURL=api-request-manager.js.map
 
 /***/ }),
 
-/***/ 1933:
+/***/ 34723:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -24857,12 +25601,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var assert_1 = __importDefault(__nccwpck_require__(42613));
-var events_1 = __nccwpck_require__(24434);
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var config_1 = __importDefault(__nccwpck_require__(95790));
-var exponential_backoff_1 = __importDefault(__nccwpck_require__(65924));
-var request = __nccwpck_require__(19533);
+const assert_1 = __importDefault(__nccwpck_require__(42613));
+const events_1 = __nccwpck_require__(24434);
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const config_1 = __importDefault(__nccwpck_require__(652));
+const exponential_backoff_1 = __importDefault(__nccwpck_require__(25974));
+const request = __nccwpck_require__(19533);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -24903,16 +25647,16 @@ function isTemporaryError(response) {
 }
 function isClientErrorResponse(response) {
     if (!response || typeof response !== 'object') {
-        throw new Error("Expecting response to be an object, got: ".concat(String(response)));
+        throw new Error(`Expecting response to be an object, got: ${String(response)}`);
     }
-    var statusCode = response.statusCode;
+    const { statusCode } = response;
     if (typeof statusCode !== 'number') {
-        throw new Error("Expecting status code of response to be a number, got: ".concat(String(statusCode)));
+        throw new Error(`Expecting status code of response to be a number, got: ${String(statusCode)}`);
     }
     return 400 <= statusCode && statusCode < 500;
 }
 function createErrorForResponse(response) {
-    var errorMessage = "".concat(response.statusCode, " - ").concat(http_status_1.default[response.statusCode]);
+    var errorMessage = `${response.statusCode} - ${http_status_1.default[response.statusCode]}`;
     return new Error(errorMessage);
 }
 /**
@@ -24956,8 +25700,8 @@ function cleanSensitiveHeaders(requestObj) {
  * @param {EventEmitter} eventBus Event bus for the SDK instance
  * @constructor
  */
-var APIRequest = /** @class */ (function () {
-    function APIRequest(config, eventBus) {
+class APIRequest {
+    constructor(config, eventBus) {
         (0, assert_1.default)(config instanceof config_1.default, 'Config must be passed to APIRequest constructor');
         (0, assert_1.default)(eventBus instanceof events_1.EventEmitter, 'Valid event bus must be passed to APIRequest constructor');
         this.config = config;
@@ -24973,8 +25717,7 @@ var APIRequest = /** @class */ (function () {
      * @param {APIRequest~Callback} [callback] Callback for handling the response
      * @returns {void}
      */
-    APIRequest.prototype.execute = function (callback) {
-        var _this = this;
+    execute(callback) {
         this._callback = callback || this._callback;
         // Initiate an async- or stream-based request, based on the presence of the callback.
         if (this._callback) {
@@ -24987,27 +25730,27 @@ var APIRequest = /** @class */ (function () {
         else {
             this.request = request(this.config.request);
             this.stream = this.request;
-            this.stream.on('error', function (err) {
-                _this.eventBus.emit('response', err);
+            this.stream.on('error', (err) => {
+                this.eventBus.emit('response', err);
             });
-            this.stream.on('response', function (response) {
+            this.stream.on('response', (response) => {
                 if (isClientErrorResponse(response)) {
-                    _this.eventBus.emit('response', createErrorForResponse(response));
+                    this.eventBus.emit('response', createErrorForResponse(response));
                     return;
                 }
-                _this.eventBus.emit('response', null, response);
+                this.eventBus.emit('response', null, response);
             });
         }
-    };
+    }
     /**
      * Return the response read stream for a request. This will be undefined until
      * a stream-based request has been started.
      *
      * @returns {?ReadableStream} The response stream
      */
-    APIRequest.prototype.getResponseStream = function () {
+    getResponseStream() {
         return this.stream;
-    };
+    }
     /**
      * Handle the request response in the callback case.
      *
@@ -25017,7 +25760,7 @@ var APIRequest = /** @class */ (function () {
      * @returns {void}
      * @private
      */
-    APIRequest.prototype._handleResponse = function (err /* FIXME */, response /* FIXME */) {
+    _handleResponse(err /* FIXME */, response /* FIXME */) {
         // Clean sensitive headers here to prevent the user from accidentily using/logging them in prod
         cleanSensitiveHeaders(this.request);
         // If the API connected successfully but responded with a temporary error (like a 5xx code,
@@ -25053,7 +25796,7 @@ var APIRequest = /** @class */ (function () {
         // If the request was successful, emit & propagate the response!
         this.eventBus.emit('response', null, response);
         this._finish(null, response);
-    };
+    }
     /**
      * Attempt a retry. If the request hasn't exceeded it's maximum number of retries,
      * re-execute the request (after the retry interval). Otherwise, propagate a new error.
@@ -25062,7 +25805,7 @@ var APIRequest = /** @class */ (function () {
      * @returns {void}
      * @private
      */
-    APIRequest.prototype._retry = function (err /* FIXME */) {
+    _retry(err /* FIXME */) {
         this.numRetries = this.numRetries || 0;
         if (this.numRetries < this.config.numMaxRetries) {
             var retryTimeout;
@@ -25078,7 +25821,7 @@ var APIRequest = /** @class */ (function () {
                     numRetryAttempts: this.numRetries,
                     numMaxRetries: this.config.numMaxRetries,
                     retryIntervalMS: this.config.retryIntervalMS,
-                    totalElapsedTimeMS: totalElapsedTimeMS,
+                    totalElapsedTimeMS,
                 };
                 retryTimeout = this.config.retryStrategy(retryOptions);
                 // If the retry strategy doesn't return a number/time in ms, then propagate the response error to the user.
@@ -25105,7 +25848,7 @@ var APIRequest = /** @class */ (function () {
             err.maxRetriesExceeded = true;
             this._finish(err);
         }
-    };
+    }
     /**
      * Propagate the response to the provided callback.
      *
@@ -25114,24 +25857,23 @@ var APIRequest = /** @class */ (function () {
      * @returns {void}
      * @private
      */
-    APIRequest.prototype._finish = function (err, response) {
+    _finish(err, response) {
         var callback = this._callback;
-        process.nextTick(function () {
+        process.nextTick(() => {
             if (err) {
                 callback(err);
                 return;
             }
             callback(null, response);
         });
-    };
-    return APIRequest;
-}());
+    }
+}
 module.exports = APIRequest;
 //# sourceMappingURL=api-request.js.map
 
 /***/ }),
 
-/***/ 46850:
+/***/ 75996:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -25142,47 +25884,47 @@ module.exports = APIRequest;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var bluebird_1 = __nccwpck_require__(94366);
+const bluebird_1 = __nccwpck_require__(94366);
 // ------------------------------------------------------------------------------
 // API Resource Managers
 // ------------------------------------------------------------------------------
-var ai_generated_1 = __importDefault(__nccwpck_require__(92637));
-var collaboration_allowlist_1 = __importDefault(__nccwpck_require__(98007));
-var collaborations_1 = __importDefault(__nccwpck_require__(49842));
-var collections_1 = __importDefault(__nccwpck_require__(13731));
-var comments_1 = __importDefault(__nccwpck_require__(72338));
-var device_pins_1 = __importDefault(__nccwpck_require__(26099));
-var enterprise_1 = __importDefault(__nccwpck_require__(97355));
-var events_1 = __importDefault(__nccwpck_require__(32813));
-var files_1 = __importDefault(__nccwpck_require__(82697));
-var folders_1 = __importDefault(__nccwpck_require__(74111));
-var groups_1 = __importDefault(__nccwpck_require__(70524));
-var legal_hold_policies_1 = __importDefault(__nccwpck_require__(57212));
-var metadata_1 = __importDefault(__nccwpck_require__(49925));
-var recent_items_1 = __importDefault(__nccwpck_require__(44366));
-var retention_policies_1 = __importDefault(__nccwpck_require__(26635));
-var search_1 = __importDefault(__nccwpck_require__(69292));
-var shared_items_1 = __importDefault(__nccwpck_require__(63736));
-var sign_requests_generated_1 = __importDefault(__nccwpck_require__(20891));
-var sign_templates_generated_1 = __importDefault(__nccwpck_require__(90136));
-var storage_policies_1 = __importDefault(__nccwpck_require__(34354));
-var tasks_1 = __importDefault(__nccwpck_require__(5076));
-var terms_of_service_1 = __importDefault(__nccwpck_require__(88101));
-var trash_1 = __importDefault(__nccwpck_require__(70520));
-var users_1 = __importDefault(__nccwpck_require__(51390));
-var web_links_1 = __importDefault(__nccwpck_require__(5404));
-var webhooks_1 = __importDefault(__nccwpck_require__(27666));
-var file_requests_manager_1 = __importDefault(__nccwpck_require__(69451));
-var shield_information_barriers_generated_1 = __importDefault(__nccwpck_require__(53476));
-var shield_information_barrier_segments_generated_1 = __importDefault(__nccwpck_require__(78028));
-var shield_information_barrier_segment_members_generated_1 = __importDefault(__nccwpck_require__(6885));
-var shield_information_barrier_segment_restrictions_generated_1 = __importDefault(__nccwpck_require__(67453));
-var shield_information_barrier_reports_generated_1 = __importDefault(__nccwpck_require__(90345));
-var integration_mappings_1 = __importDefault(__nccwpck_require__(85402));
+const ai_generated_1 = __importDefault(__nccwpck_require__(23351));
+const collaboration_allowlist_1 = __importDefault(__nccwpck_require__(48877));
+const collaborations_1 = __importDefault(__nccwpck_require__(56340));
+const collections_1 = __importDefault(__nccwpck_require__(82657));
+const comments_1 = __importDefault(__nccwpck_require__(36996));
+const device_pins_1 = __importDefault(__nccwpck_require__(8649));
+const enterprise_1 = __importDefault(__nccwpck_require__(79213));
+const events_1 = __importDefault(__nccwpck_require__(4083));
+const files_1 = __importDefault(__nccwpck_require__(33519));
+const folders_1 = __importDefault(__nccwpck_require__(92749));
+const groups_1 = __importDefault(__nccwpck_require__(41526));
+const legal_hold_policies_1 = __importDefault(__nccwpck_require__(86086));
+const metadata_1 = __importDefault(__nccwpck_require__(75815));
+const recent_items_1 = __importDefault(__nccwpck_require__(52648));
+const retention_policies_1 = __importDefault(__nccwpck_require__(69897));
+const search_1 = __importDefault(__nccwpck_require__(12778));
+const shared_items_1 = __importDefault(__nccwpck_require__(20478));
+const sign_requests_generated_1 = __importDefault(__nccwpck_require__(1561));
+const sign_templates_generated_1 = __importDefault(__nccwpck_require__(19186));
+const storage_policies_1 = __importDefault(__nccwpck_require__(73120));
+const tasks_1 = __importDefault(__nccwpck_require__(19710));
+const terms_of_service_1 = __importDefault(__nccwpck_require__(14479));
+const trash_1 = __importDefault(__nccwpck_require__(87782));
+const users_1 = __importDefault(__nccwpck_require__(28112));
+const web_links_1 = __importDefault(__nccwpck_require__(22054));
+const webhooks_1 = __importDefault(__nccwpck_require__(67356));
+const file_requests_manager_1 = __importDefault(__nccwpck_require__(21013));
+const shield_information_barriers_generated_1 = __importDefault(__nccwpck_require__(40058));
+const shield_information_barrier_segments_generated_1 = __importDefault(__nccwpck_require__(990));
+const shield_information_barrier_segment_members_generated_1 = __importDefault(__nccwpck_require__(94883));
+const shield_information_barrier_segment_restrictions_generated_1 = __importDefault(__nccwpck_require__(98079));
+const shield_information_barrier_reports_generated_1 = __importDefault(__nccwpck_require__(26695));
+const integration_mappings_1 = __importDefault(__nccwpck_require__(48348));
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var util = __nccwpck_require__(39023), qs = __nccwpck_require__(83480), errors = __nccwpck_require__(55051), httpStatusCodes = __nccwpck_require__(97165), isIP = (__nccwpck_require__(69278).isIP), merge = __nccwpck_require__(50551), PagingIterator = __nccwpck_require__(6483), pkg = __nccwpck_require__(45991);
+var util = __nccwpck_require__(39023), qs = __nccwpck_require__(83480), errors = __nccwpck_require__(21145), httpStatusCodes = __nccwpck_require__(97165), isIP = (__nccwpck_require__(69278).isIP), merge = __nccwpck_require__(50551), PagingIterator = __nccwpck_require__(93033), pkg = __nccwpck_require__(45991);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -25248,17 +25990,17 @@ function getFullURL(defaultBasePath, url) {
  */
 function constructBoxUAHeader(client /* FIXME */) {
     var analyticsIdentifiers = {
-        agent: "box-node-sdk/".concat(pkg.version),
-        env: "Node/".concat(process.version.replace('v', '')),
+        agent: `box-node-sdk/${pkg.version}`,
+        env: `Node/${process.version.replace('v', '')}`,
     };
     if (client) {
-        analyticsIdentifiers.client = "".concat(client.name, "/").concat(client.version);
+        analyticsIdentifiers.client = `${client.name}/${client.version}`;
     }
     return Object.keys(analyticsIdentifiers)
-        .map(function (k) { return "".concat(k, "=").concat(analyticsIdentifiers[k]); })
+        .map((k) => `${k}=${analyticsIdentifiers[k]}`)
         .join('; ');
 }
-var BoxClient = /** @class */ (function () {
+class BoxClient {
     /**
      * The BoxClient can make API calls on behalf of a valid API Session. It is responsible
      * for formatting the requests and handling the response. Its goal is to deliver
@@ -25270,7 +26012,7 @@ var BoxClient = /** @class */ (function () {
      * @param {APIRequestManager} requestManager The API Request Manager
      * @constructor
      */
-    function BoxClient(apiSession, config /* FIXME */, requestManager) {
+    constructor(apiSession, config /* FIXME */, requestManager) {
         // the API Session used by the client for authentication
         this._session = apiSession;
         // Attach a request manager instance for making requests
@@ -25331,7 +26073,7 @@ var BoxClient = /** @class */ (function () {
      * @returns {Object} - a new object with the headers needed for the request
      * @private
      */
-    BoxClient.prototype._createHeadersForRequest = function (callerHeaders, accessToken) {
+    _createHeadersForRequest(callerHeaders, accessToken) {
         var headers = {};
         // 'Authorization' - contains your valid access token for authorization
         headers[HEADER_AUTHORIZATION] = buildAuthorizationHeader(accessToken);
@@ -25343,7 +26085,7 @@ var BoxClient = /** @class */ (function () {
             'X-Box-UA': constructBoxUAHeader(this._analyticsClient),
         });
         return headers;
-    };
+    }
     /**
      * Makes an API request to the Box API on behalf of the client. Before executing
      * the request, it first ensures the user has usable tokens. Will be called again
@@ -25355,34 +26097,33 @@ var BoxClient = /** @class */ (function () {
      * @returns {Promise} Promise resolving to the response
      * @private
      */
-    BoxClient.prototype._makeRequest = function (params /* FIXME */, callback) {
-        var _this = this;
+    _makeRequest(params /* FIXME */, callback) {
         var promise = this._session
             .getAccessToken(this._tokenOptions)
-            .then(function (accessToken) {
-            params.headers = _this._createHeadersForRequest(params.headers, accessToken);
+            .then((accessToken) => {
+            params.headers = this._createHeadersForRequest(params.headers, accessToken);
             if (params.streaming) {
                 // streaming is specific to the SDK, so delete it from params before continuing
                 delete params.streaming;
-                var responseStream = _this._requestManager.makeStreamingRequest(params);
+                var responseStream = this._requestManager.makeStreamingRequest(params);
                 // Listen to 'response' event, so we can cleanup the token store in case when the request is unauthorized
                 // due to expired access token
-                responseStream.on('response', function (response /* FIXME */) {
+                responseStream.on('response', (response /* FIXME */) => {
                     if (isUnauthorizedDueToExpiredAccessToken(response)) {
                         var expiredTokensError = errors.buildAuthError(response);
                         // Give the session a chance to handle the error (ex: a persistent session will clear the token store)
-                        if (_this._session.handleExpiredTokensError) {
-                            _this._session.handleExpiredTokensError(expiredTokensError);
+                        if (this._session.handleExpiredTokensError) {
+                            this._session.handleExpiredTokensError(expiredTokensError);
                         }
                     }
                 });
                 return responseStream;
             }
             // Make the request to Box, and perform standard response handling
-            return _this._requestManager.makeRequest(params);
+            return this._requestManager.makeRequest(params);
         });
         return promise
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (!response.statusCode) {
                 // Response is not yet complete, and is just a stream that will return the response later
                 // Just return the stream, since it doesn't need further response handling
@@ -25391,15 +26132,15 @@ var BoxClient = /** @class */ (function () {
             if (isUnauthorizedDueToExpiredAccessToken(response)) {
                 var expiredTokensError = errors.buildAuthError(response);
                 // Give the session a chance to handle the error (ex: a persistent session will clear the token store)
-                if (_this._session.handleExpiredTokensError) {
-                    return _this._session.handleExpiredTokensError(expiredTokensError);
+                if (this._session.handleExpiredTokensError) {
+                    return this._session.handleExpiredTokensError(expiredTokensError);
                 }
                 throw expiredTokensError;
             }
             return response;
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Set a custom header. A custom header is applied to every request for the life of the client. To
      * remove a header, set it's value to null.
@@ -25408,14 +26149,14 @@ var BoxClient = /** @class */ (function () {
      * @param {*} value The value of the custom header. Set to null to remove the given header.
      * @returns {void}
      */
-    BoxClient.prototype.setCustomHeader = function (header, value) {
+    setCustomHeader(header, value) {
         if (value) {
             this._customHeaders[header] = value;
         }
         else {
             delete this._customHeaders[header];
         }
-    };
+    }
     /**
      * Sets the list of requesting IP addresses for the X-Forwarded-For header. Used to give the API
      * better information for uploads, rate-limiting, etc.
@@ -25423,11 +26164,11 @@ var BoxClient = /** @class */ (function () {
      * @param {string[]} ips - Array of IP Addresses
      * @returns {void}
      */
-    BoxClient.prototype.setIPs = function (ips) {
-        var validIPs = ips.filter(function (ipString) { return isIP(ipString); }).join(', ');
+    setIPs(ips) {
+        var validIPs = ips.filter((ipString) => isIP(ipString)).join(', ');
         this.setCustomHeader(HEADER_XFF, validIPs);
         this._tokenOptions = { ip: validIPs };
-    };
+    }
     /**
      * Sets the shared item context on the API Session. Overwrites any current context.
      *
@@ -25435,18 +26176,18 @@ var BoxClient = /** @class */ (function () {
      * @param {?string} password The shared link password, null if no password exists.
      * @returns {void}
      */
-    BoxClient.prototype.setSharedContext = function (url, password) {
+    setSharedContext(url, password) {
         var sharedContextAuthHeader = this.buildSharedItemAuthHeader(url, password);
         this.setCustomHeader(HEADER_BOXAPI, sharedContextAuthHeader);
-    };
+    }
     /**
      * Removes any current shared item context from API Session.
      *
      * @returns {void}
      */
-    BoxClient.prototype.revokeSharedContext = function () {
+    revokeSharedContext() {
         this.setCustomHeader(HEADER_BOXAPI, null);
-    };
+    }
     /**
      * Set up the As-User context, which is used by enterprise admins to
      * impersonate their managed users and perform actions on their behalf.
@@ -25454,18 +26195,18 @@ var BoxClient = /** @class */ (function () {
      * @param {string} userID - The ID of the user to impersonate
      * @returns {void}
      */
-    BoxClient.prototype.asUser = function (userID) {
+    asUser(userID) {
         this.setCustomHeader(HEADER_AS_USER, userID);
-    };
+    }
     /**
      * Revoke the As-User context and return to making calls on behalf of the user
      * who owns the client's access token.
      *
      * @returns {void}
      */
-    BoxClient.prototype.asSelf = function () {
+    asSelf() {
         this.setCustomHeader(HEADER_AS_USER, null);
-    };
+    }
     /**
      * Revokes the client's access tokens. The client will no longer be tied to a user
      * and will be unable to make calls to the API, rendering it effectively useless.
@@ -25473,9 +26214,9 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} [callback] Called after revoking, with an error if one existed
      * @returns {Promise} A promise resolving when the client's access token is revoked
      */
-    BoxClient.prototype.revokeTokens = function (callback) {
+    revokeTokens(callback) {
         return this._session.revokeTokens(this._tokenOptions).asCallback(callback);
-    };
+    }
     /**
      * Exchange the client access token for one with lower scope
      * @param {string|string[]} scopes The scope(s) requested for the new token
@@ -25486,7 +26227,7 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} [callback] Called with the new token
      * @returns {Promise<TokenInfo>} A promise resolving to the exchanged token info
      */
-    BoxClient.prototype.exchangeToken = function (scopes, resource, options, callback) {
+    exchangeToken(scopes, resource, options, callback) {
         // Shuffle optional parameters
         if (typeof options === 'function') {
             callback = options;
@@ -25496,7 +26237,7 @@ var BoxClient = /** @class */ (function () {
         return this._session
             .exchangeToken(scopes, resource, opts)
             .asCallback(callback);
-    };
+    }
     /**
      * Makes GET request to Box API V2 endpoint
      *
@@ -25505,12 +26246,12 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} [callback] - passed final API response or err if request failed
      * @returns {void}
      */
-    BoxClient.prototype.get = function (path, params, callback) {
+    get(path, params, callback) {
         var newParams = merge({}, params || {});
         newParams.method = 'GET';
         newParams.url = getFullURL(this._baseURL, path);
         return this._makeRequest(newParams, callback);
-    };
+    }
     /**
      * Makes POST request to Box API V2 endpoint
      *
@@ -25519,12 +26260,12 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} [callback] - passed final API response or err if request failed
      * @returns {void}
      */
-    BoxClient.prototype.post = function (path, params, callback) {
+    post(path, params, callback) {
         var newParams = merge({}, params || {});
         newParams.method = 'POST';
         newParams.url = getFullURL(this._baseURL, path);
         return this._makeRequest(newParams, callback);
-    };
+    }
     /**
      * Makes PUT request to Box API V2 endpoint
      *
@@ -25533,12 +26274,12 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} callback - passed final API response or err if request failed
      * @returns {void}
      */
-    BoxClient.prototype.put = function (path, params, callback) {
+    put(path, params, callback) {
         var newParams = merge({}, params || {});
         newParams.method = 'PUT';
         newParams.url = getFullURL(this._baseURL, path);
         return this._makeRequest(newParams, callback);
-    };
+    }
     /**
      * Makes DELETE request to Box API V2 endpoint
      *
@@ -25547,12 +26288,12 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} callback - passed final API response or err if request failed
      * @returns {void}
      */
-    BoxClient.prototype.del = function (path, params, callback) {
+    del(path, params, callback) {
         var newParams = merge({}, params || {});
         newParams.method = 'DELETE';
         newParams.url = getFullURL(this._baseURL, path);
         return this._makeRequest(newParams, callback);
-    };
+    }
     /**
      * Makes an OPTIONS call to a Box API V2 endpoint
      *
@@ -25561,12 +26302,12 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} callback - Called with API call results, or err if call failed
      * @returns {void}
      */
-    BoxClient.prototype.options = function (path, params, callback) {
+    options(path, params, callback) {
         var newParams = merge({}, params || {});
         newParams.method = 'OPTIONS';
         newParams.url = getFullURL(this._baseURL, path);
         return this._makeRequest(newParams, callback);
-    };
+    }
     /**
      * Makes a POST call to a Box API V2 upload endpoint
      * @param {string} path - path to an upload API endpoint
@@ -25575,7 +26316,7 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} callback - called with API call results, or an error if the call failed
      * @returns {void}
      */
-    BoxClient.prototype.upload = function (path, params, formData, callback) {
+    upload(path, params, formData, callback) {
         var defaults = {
             method: 'POST',
         };
@@ -25584,7 +26325,7 @@ var BoxClient = /** @class */ (function () {
         newParams.formData = formData;
         newParams.timeout = this._uploadRequestTimeoutMS;
         return this._makeRequest(newParams, callback);
-    };
+    }
     /**
      * Build the 'BoxApi' Header used for authenticating access to a shared item
      *
@@ -25592,13 +26333,13 @@ var BoxClient = /** @class */ (function () {
      * @param {string} [password] The shared link password
      * @returns {string} A properly formatted 'BoxApi' header
      */
-    BoxClient.prototype.buildSharedItemAuthHeader = function (url, password) {
-        var encodedURL = encodeURIComponent(url), encodedPassword = encodeURIComponent(password !== null && password !== void 0 ? password : '');
+    buildSharedItemAuthHeader(url, password) {
+        var encodedURL = encodeURIComponent(url), encodedPassword = encodeURIComponent(password ?? '');
         if (password) {
             return util.format('shared_link=%s&shared_link_password=%s', encodedURL, encodedPassword);
         }
         return util.format('shared_link=%s', encodedURL);
-    };
+    }
     /**
      * Return a callback that properly handles a successful response code by passing the response
      * body to the original callback. Any request error or unsuccessful response codes are propagated
@@ -25607,7 +26348,7 @@ var BoxClient = /** @class */ (function () {
      * @param {Function} callback The original callback given by the consumer
      * @returns {?Function} A new callback that processes the response before passing it to the callback.
      */
-    BoxClient.prototype.defaultResponseHandler = function (callback) {
+    defaultResponseHandler(callback) {
         var self = this;
         if (!callback) {
             return null;
@@ -25631,13 +26372,13 @@ var BoxClient = /** @class */ (function () {
             // Unexpected Response
             callback(errors.buildUnexpectedResponseError(response));
         };
-    };
+    }
     /**
      * Wrap a client method with the default handler for both callback and promise styles
      * @param {Function} method The client method (e.g. client.get)
      * @returns {Function}  The wrapped method
      */
-    BoxClient.prototype.wrapWithDefaultHandler = function (method) {
+    wrapWithDefaultHandler(method) {
         var self = this;
         return function wrappedClientMethod( /* arguments */) {
             // Check if the last argument is a callback
@@ -25648,7 +26389,7 @@ var BoxClient = /** @class */ (function () {
             }
             var ret = method.apply(self, arguments);
             if (ret instanceof bluebird_1.Promise) {
-                ret = ret.then(function (response) {
+                ret = ret.then((response) => {
                     if (response.statusCode >= HTTP_STATUS_CODE_SUCCESS_BLOCK_RANGE[0] &&
                         response.statusCode <= HTTP_STATUS_CODE_SUCCESS_BLOCK_RANGE[1]) {
                         if (self._useIterators && PagingIterator.isIterable(response)) {
@@ -25665,7 +26406,7 @@ var BoxClient = /** @class */ (function () {
             }
             return ret;
         };
-    };
+    }
     /**
      * Add a SDK plugin. Warning: This will modify the box-client interface and can override existing properties.
      * @param {string} name Plugin name. Will be accessible via client.<plugin-name>
@@ -25674,16 +26415,15 @@ var BoxClient = /** @class */ (function () {
      * @returns {void}
      * @throws Will throw an error if plugin name matches an existing method on box-client
      */
-    BoxClient.prototype.plug = function (name, plugin, options) {
+    plug(name, plugin, options) {
         options = options || {};
         if (name in this && typeof this[name] === 'function') {
             throw new Error('You cannot define a plugin that overrides an existing method on the client');
         }
         // Create plugin and export plugin onto client.
         this[name] = plugin(this, options);
-    };
-    return BoxClient;
-}());
+    }
+}
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -25734,7 +26474,7 @@ module.exports = BoxClient;
 
 /***/ }),
 
-/***/ 58212:
+/***/ 31430:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -25742,32 +26482,6 @@ module.exports = BoxClient;
 /**
  * @fileoverview Box SDK for Node.js
  */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -25804,13 +26518,13 @@ var __importStar = (this && this.__importStar) || (function () {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var events_1 = __nccwpck_require__(24434);
-var qs = __importStar(__nccwpck_require__(83480));
-var CCGAPISession = __nccwpck_require__(54525);
-var APIRequestManager = __nccwpck_require__(37419);
-var BoxClient = __nccwpck_require__(46850);
-var TokenManager = __nccwpck_require__(49498);
-var Config = __nccwpck_require__(95790), BasicAPISession = __nccwpck_require__(26932), PersistentAPISession = __nccwpck_require__(36919), AppAuthSession = __nccwpck_require__(8910), Webhooks = __nccwpck_require__(27666);
+const events_1 = __nccwpck_require__(24434);
+const qs = __importStar(__nccwpck_require__(83480));
+const CCGAPISession = __nccwpck_require__(40211);
+const APIRequestManager = __nccwpck_require__(97581);
+const BoxClient = __nccwpck_require__(75996);
+const TokenManager = __nccwpck_require__(35184);
+const Config = __nccwpck_require__(652), BasicAPISession = __nccwpck_require__(10178), PersistentAPISession = __nccwpck_require__(97893), AppAuthSession = __nccwpck_require__(55180), Webhooks = __nccwpck_require__(67356);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -25830,22 +26544,20 @@ var Config = __nccwpck_require__(95790), BasicAPISession = __nccwpck_require__(2
  * @param {UserConfigurationOptions} params User settings used to initialize and customize the SDK
  * @constructor
  */
-var BoxSDKNode = /** @class */ (function (_super) {
-    __extends(BoxSDKNode, _super);
-    function BoxSDKNode(params) {
-        var _this = _super.call(this) || this;
-        var eventBus = new events_1.EventEmitter();
-        var self = _this;
+class BoxSDKNode extends events_1.EventEmitter {
+    constructor(params) {
+        super();
+        const eventBus = new events_1.EventEmitter();
+        const self = this;
         eventBus.on('response', function () {
-            var args /* FIXME */ = [].slice.call(arguments);
+            const args /* FIXME */ = [].slice.call(arguments);
             args.unshift('response');
             self.emit.apply(self, args);
         });
         // Setup the configuration with the given params
-        _this.config = new Config(params);
-        _this._eventBus = eventBus;
-        _this._setup();
-        return _this;
+        this.config = new Config(params);
+        this._eventBus = eventBus;
+        this._setup();
     }
     /**
      * Setup the SDK instance by instantiating necessary objects with current
@@ -25854,29 +26566,29 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @returns {void}
      * @private
      */
-    BoxSDKNode.prototype._setup = function () {
+    _setup() {
         // Instantiate the request manager
         this.requestManager = new APIRequestManager(this.config, this._eventBus);
         // Initialize the rest of the SDK with the given configuration
         this.tokenManager = new TokenManager(this.config, this.requestManager);
         this.ccgSession = new CCGAPISession(this.config, this.tokenManager);
-    };
+    }
     /**
      * Gets the BoxSDKNode instance by passing boxAppSettings json downloaded from the developer console.
      *
      * @param {Object} appConfig boxAppSettings object retrieved from Dev Console.
      * @returns {BoxSDKNode} an instance that has been preconfigured with the values from the Dev Console
      */
-    BoxSDKNode.getPreconfiguredInstance = function (appConfig /* FIXME */) {
+    static getPreconfiguredInstance(appConfig /* FIXME */) {
         if (typeof appConfig.boxAppSettings !== 'object') {
             throw new TypeError('Configuration does not include boxAppSettings object.');
         }
-        var boxAppSettings = appConfig.boxAppSettings;
-        var webhooks = appConfig.webhooks;
+        const boxAppSettings = appConfig.boxAppSettings;
+        const webhooks = appConfig.webhooks;
         if (typeof webhooks === 'object') {
             Webhooks.setSignatureKeys(webhooks.primaryKey, webhooks.secondaryKey);
         }
-        var params = {};
+        const params = {};
         if (typeof boxAppSettings.clientID === 'string') {
             params.clientID = boxAppSettings.clientID;
         }
@@ -25891,7 +26603,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
                 keyID: boxAppSettings.appAuth.publicKeyID, // Assign publicKeyID to keyID
                 privateKey: boxAppSettings.appAuth.privateKey,
             };
-            var passphrase = boxAppSettings.appAuth.passphrase;
+            const passphrase = boxAppSettings.appAuth.passphrase;
             if (typeof passphrase === 'string') {
                 params.appAuth.passphrase = passphrase;
             }
@@ -25900,17 +26612,17 @@ var BoxSDKNode = /** @class */ (function (_super) {
             params.enterpriseID = appConfig.enterpriseID;
         }
         return new BoxSDKNode(params);
-    };
+    }
     /**
      * Updates the SDK configuration with new parameters.
      *
      * @param {UserConfigurationOptions} params User settings
      * @returns {void}
      */
-    BoxSDKNode.prototype.configure = function (params) {
+    configure(params) {
         this.config = this.config.extend(params);
         this._setup();
-    };
+    }
     /**
      * Returns a Box Client with a Basic API Session. The client is able to make requests on behalf of a user.
      * A basic session has no access to a user's refresh token. Because of this, once the session's tokens
@@ -25919,10 +26631,10 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {string} accessToken A user's Box API access token
      * @returns {BoxClient} Returns a new Box Client paired to a new BasicAPISession
      */
-    BoxSDKNode.prototype.getBasicClient = function (accessToken) {
-        var apiSession = new BasicAPISession(accessToken, this.tokenManager);
+    getBasicClient(accessToken) {
+        const apiSession = new BasicAPISession(accessToken, this.tokenManager);
         return new BoxClient(apiSession, this.config, this.requestManager);
-    };
+    }
     /**
      * Returns a Box Client with a Basic API Session. The client is able to make requests on behalf of a user.
      * A basic session has no access to a user's refresh token. Because of this, once the session's tokens
@@ -25931,12 +26643,12 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {string} accessToken A user's Box API access token
      * @returns {BoxClient} Returns a new Box Client paired to a new BasicAPISession
      */
-    BoxSDKNode.getBasicClient = function (accessToken) {
+    static getBasicClient(accessToken) {
         return new BoxSDKNode({
             clientID: '',
             clientSecret: '',
         }).getBasicClient(accessToken);
-    };
+    }
     /**
      * Returns a Box Client with a persistent API session. A persistent API session helps manage the user's tokens,
      * and can refresh them automatically if the access token expires. If a central data-store is given, the session
@@ -25950,10 +26662,10 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {TokenStore} [tokenStore] An optional token store for reading/writing tokens to session
      * @returns {BoxClient} Returns a new Box Client paired to a new PersistentAPISession
      */
-    BoxSDKNode.prototype.getPersistentClient = function (tokenInfo /* FIXME */, tokenStore) {
-        var apiSession = new PersistentAPISession(tokenInfo, tokenStore, this.config, this.tokenManager);
+    getPersistentClient(tokenInfo /* FIXME */, tokenStore) {
+        const apiSession = new PersistentAPISession(tokenInfo, tokenStore, this.config, this.tokenManager);
         return new BoxClient(apiSession, this.config, this.requestManager);
-    };
+    }
     /**
      * Returns a Box Client configured to use Client Credentials Grant for a service account. Requires enterprise ID
      * to be set when configuring SDK instance.
@@ -25962,7 +26674,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * same tokens, which allows them to refresh them efficiently and reduce load on both the application and
      * the API.
      */
-    BoxSDKNode.prototype.getAnonymousClient = function () {
+    getAnonymousClient() {
         if (!this.config.enterpriseID) {
             throw new Error('Enterprise ID must be passed');
         }
@@ -25970,7 +26682,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
             boxSubjectType: 'enterprise',
             boxSubjectId: this.config.enterpriseID,
         });
-    };
+    }
     /**
      * Returns a Box Client configured to use Client Credentials Grant for a specified user.
      *
@@ -25979,17 +26691,20 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * same tokens, which allows them to refresh them efficiently and reduce load on both the application and
      * the API.
      */
-    BoxSDKNode.prototype.getCCGClientForUser = function (userId) {
+    getCCGClientForUser(userId) {
         return this._getCCGClient({
             boxSubjectType: 'user',
             boxSubjectId: userId,
         });
-    };
-    BoxSDKNode.prototype._getCCGClient = function (config) {
-        var anonymousTokenManager = new TokenManager(__assign(__assign({}, this.config), config), this.requestManager);
-        var newAnonymousSession = new CCGAPISession(this.config, anonymousTokenManager);
+    }
+    _getCCGClient(config) {
+        const anonymousTokenManager = new TokenManager({
+            ...this.config,
+            ...config,
+        }, this.requestManager);
+        const newAnonymousSession = new CCGAPISession(this.config, anonymousTokenManager);
         return new BoxClient(newAnonymousSession, this.config, this.requestManager);
-    };
+    }
     /**
      * Create a new client using App Auth for the given entity. This allows either
      * managing App Users (as the enterprise) or performing operations as the App
@@ -26000,7 +26715,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {TokenStore} [tokenStore] (Optional) the token store to use for caching tokens
      * @returns {BoxClient} A new client authorized as the app user or enterprise
      */
-    BoxSDKNode.prototype.getAppAuthClient = function (type, id, tokenStore) {
+    getAppAuthClient(type, id, tokenStore) {
         if (type === 'enterprise' && !id) {
             if (this.config.enterpriseID) {
                 id = this.config.enterpriseID;
@@ -26009,9 +26724,9 @@ var BoxSDKNode = /** @class */ (function (_super) {
                 throw new Error('Enterprise ID must be passed');
             }
         }
-        var appAuthSession = new AppAuthSession(type, id, this.config, this.tokenManager, tokenStore);
+        const appAuthSession = new AppAuthSession(type, id, this.config, this.tokenManager, tokenStore);
         return new BoxClient(appAuthSession, this.config, this.requestManager);
-    };
+    }
     /**
      * Generate the URL for the authorize page to send users to for the first leg of
      * the OAuth2 flow.
@@ -26019,10 +26734,10 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {Object} params The OAuth2 parameters
      * @returns {string} The authorize page URL
      */
-    BoxSDKNode.prototype.getAuthorizeURL = function (params) {
+    getAuthorizeURL(params) {
         params.client_id = this.config.clientID;
-        return "".concat(this.config.authorizeRootURL, "/oauth2/authorize?").concat(qs.stringify(params));
-    };
+        return `${this.config.authorizeRootURL}/oauth2/authorize?${qs.stringify(params)}`;
+    }
     /**
      * Acquires token info using an authorization code
      *
@@ -26031,11 +26746,11 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {Function} [callback] - passed a TokenInfo object if tokens were granted successfully
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    BoxSDKNode.prototype.getTokensAuthorizationCodeGrant = function (authorizationCode, options, callback) {
+    getTokensAuthorizationCodeGrant(authorizationCode, options, callback) {
         return this.tokenManager
             .getTokensAuthorizationCodeGrant(authorizationCode, options /* FIXME */)
             .asCallback(callback);
-    };
+    }
     /**
      * Refreshes the access and refresh tokens for a given refresh token.
      *
@@ -26044,7 +26759,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {Function} [callback] - passed a TokenInfo object if tokens were granted successfully
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    BoxSDKNode.prototype.getTokensRefreshGrant = function (refreshToken, options, callback) {
+    getTokensRefreshGrant(refreshToken, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = null;
@@ -26052,7 +26767,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
         return this.tokenManager
             .getTokensRefreshGrant(refreshToken, options /* FIXME */)
             .asCallback(callback);
-    };
+    }
     /**
      * Gets tokens for enterprise administration of app users
      * @param {string} enterpriseID The ID of the enterprise to generate a token for
@@ -26060,7 +26775,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {Function} [callback] Passed the tokens if successful
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    BoxSDKNode.prototype.getEnterpriseAppAuthTokens = function (enterpriseID, options, callback) {
+    getEnterpriseAppAuthTokens(enterpriseID, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = null;
@@ -26076,7 +26791,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
         return this.tokenManager
             .getTokensJWTGrant('enterprise', enterpriseID, options /* FIXME */)
             .asCallback(callback);
-    };
+    }
     /**
      * Gets tokens for App Users via a JWT grant
      * @param {string} userID The ID of the App User to generate a token for
@@ -26084,7 +26799,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {Function} [callback] Passed the tokens if successful
      * @returns {Promise<TokentInfo>} Promise resolving to the token info
      */
-    BoxSDKNode.prototype.getAppUserTokens = function (userID, options, callback) {
+    getAppUserTokens(userID, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = null;
@@ -26092,7 +26807,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
         return this.tokenManager
             .getTokensJWTGrant('user', userID, options /* FIXME */)
             .asCallback(callback);
-    };
+    }
     /**
      * Revokes a token pair associated with a given access or refresh token.
      *
@@ -26101,7 +26816,7 @@ var BoxSDKNode = /** @class */ (function (_super) {
      * @param {Function} [callback] - If err, revoke failed. Otherwise, revoke succeeded.
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    BoxSDKNode.prototype.revokeTokens = function (token, options, callback) {
+    revokeTokens(token, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = null;
@@ -26109,23 +26824,22 @@ var BoxSDKNode = /** @class */ (function (_super) {
         return this.tokenManager
             .revokeTokens(token, options /* FIXME */)
             .asCallback(callback);
-    };
-    /**
-     * Expose the BoxClient property enumerations to the SDK as a whole. This allows
-     * the consumer to access and use these values from anywhere in their application
-     * (like a helper) by requiring the SDK, instead of needing to pass the client.
-     */
-    BoxSDKNode.accessLevels = BoxSDKNode.prototype.accessLevels;
-    BoxSDKNode.collaborationRoles = BoxSDKNode.prototype.collaborationRoles;
-    BoxSDKNode.CURRENT_USER_ID = BoxSDKNode.prototype.CURRENT_USER_ID;
-    /**
-     * Expose Webhooks.validateMessage() to the SDK as a whole. This allows
-     * the consumer to call BoxSDK.validateWebhookMessage() by just requiring the SDK,
-     * instead of needing to create a client (which is not needed to validate messages).
-     */
-    BoxSDKNode.validateWebhookMessage = Webhooks.validateMessage;
-    return BoxSDKNode;
-}(events_1.EventEmitter));
+    }
+}
+/**
+ * Expose the BoxClient property enumerations to the SDK as a whole. This allows
+ * the consumer to access and use these values from anywhere in their application
+ * (like a helper) by requiring the SDK, instead of needing to pass the client.
+ */
+BoxSDKNode.accessLevels = BoxSDKNode.prototype.accessLevels;
+BoxSDKNode.collaborationRoles = BoxSDKNode.prototype.collaborationRoles;
+BoxSDKNode.CURRENT_USER_ID = BoxSDKNode.prototype.CURRENT_USER_ID;
+/**
+ * Expose Webhooks.validateMessage() to the SDK as a whole. This allows
+ * the consumer to call BoxSDK.validateWebhookMessage() by just requiring the SDK,
+ * instead of needing to create a client (which is not needed to validate messages).
+ */
+BoxSDKNode.validateWebhookMessage = Webhooks.validateMessage;
 /**
  * Expose the BoxClient property enumerations to the SDK as a whole. This allows
  * the consumer to access and use these values from anywhere in their application
@@ -26140,7 +26854,7 @@ module.exports = BoxSDKNode;
 
 /***/ }),
 
-/***/ 8168:
+/***/ 47134:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -26148,35 +26862,20 @@ module.exports = BoxSDKNode;
 /**
  * @fileoverview Upload manager for large file uploads
  */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var bluebird_1 = __nccwpck_require__(94366);
+const bluebird_1 = __nccwpck_require__(94366);
 // -----------------------------------------------------------------------------
 // Requirements
 // -----------------------------------------------------------------------------
-var events_1 = __nccwpck_require__(24434);
-var stream_1 = __nccwpck_require__(2203);
-var crypto_1 = __importDefault(__nccwpck_require__(76982));
+const events_1 = __nccwpck_require__(24434);
+const stream_1 = __nccwpck_require__(2203);
+const crypto_1 = __importDefault(__nccwpck_require__(76982));
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var DEFAULT_OPTIONS = Object.freeze({
+const DEFAULT_OPTIONS = Object.freeze({
     parallelism: 4,
     retryInterval: 1000,
 });
@@ -26185,8 +26884,7 @@ var DEFAULT_OPTIONS = Object.freeze({
  * it succeeds.
  * @private
  */
-var Chunk = /** @class */ (function (_super) {
-    __extends(Chunk, _super);
+class Chunk extends events_1.EventEmitter {
     /**
      * Create a Chunk, representing a part of a file being uploaded
      * @param {BoxClient} client The Box SDK client
@@ -26197,76 +26895,72 @@ var Chunk = /** @class */ (function (_super) {
      * @param {Object} options The options from the ChunkedUploader
      * @param {int} options.retryInterval The number of ms to wait before retrying a chunk upload
      */
-    function Chunk(client, sessionID, chunk, offset, totalSize, options) {
-        var _this = _super.call(this) || this;
-        _this.client = client;
-        _this.sessionID = sessionID;
-        _this.chunk = chunk;
-        _this.length = chunk.length;
-        _this.offset = offset;
-        _this.totalSize = totalSize;
-        _this.options = options;
-        _this.data = null;
-        _this.retry = null;
-        _this.canceled = false;
-        return _this;
+    constructor(client, sessionID, chunk, offset, totalSize, options) {
+        super();
+        this.client = client;
+        this.sessionID = sessionID;
+        this.chunk = chunk;
+        this.length = chunk.length;
+        this.offset = offset;
+        this.totalSize = totalSize;
+        this.options = options;
+        this.data = null;
+        this.retry = null;
+        this.canceled = false;
     }
     /**
      * Get the final object representation of this chunk for the API
      * @returns {UploadPart} The chunk object
      */
-    Chunk.prototype.getData = function () {
+    getData() {
         return this.data.part;
-    };
+    }
     /**
      * Upload a chunk to the API
      * @returns {void}
      * @emits Chunk#uploaded
      * @emits Chunk#error
      */
-    Chunk.prototype.upload = function () {
-        var _this = this;
-        this.client.files.uploadPart(this.sessionID, this.chunk, this.offset, this.totalSize, function (err /* FIXME */, data /* FIXME */) {
-            if (_this.canceled) {
-                _this.chunk = null;
+    upload() {
+        this.client.files.uploadPart(this.sessionID, this.chunk, this.offset, this.totalSize, (err /* FIXME */, data /* FIXME */) => {
+            if (this.canceled) {
+                this.chunk = null;
                 return;
             }
             if (err) {
                 // handle the error or retry
                 if (err.statusCode) {
                     // an API error, probably not retryable!
-                    _this.emit('error', err);
+                    this.emit('error', err);
                 }
                 else {
                     // maybe a network error, retry
-                    _this.retry = setTimeout(function () { return _this.upload(); }, _this.options.retryInterval);
+                    this.retry = setTimeout(() => this.upload(), this.options.retryInterval);
                 }
                 return;
             }
             // Record the chunk data for commit, and try to free up the chunk buffer
-            _this.data = data;
-            _this.chunk = null;
-            _this.emit('uploaded', data);
+            this.data = data;
+            this.chunk = null;
+            this.emit('uploaded', data);
         });
-    };
+    }
     /**
      * Cancel trying to upload a chunk, preventing it from retrying and clearing
      * the associated buffer
      * @returns {void}
      */
-    Chunk.prototype.cancel = function () {
+    cancel() {
         clearTimeout(this.retry); // number or NodeJS.Timeout
         this.chunk = null;
         this.canceled = true;
-    };
-    return Chunk;
-}(events_1.EventEmitter));
+    }
+}
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
 /** Manager for uploading a file in chunks */
-var ChunkedUploader = /** @class */ (function (_super) {
-    __extends(ChunkedUploader, _super);
+class ChunkedUploader extends events_1.EventEmitter {
     /**
      * Create an upload manager
      * @param {BoxClient} client The client to use to upload the file
@@ -26278,56 +26972,52 @@ var ChunkedUploader = /** @class */ (function (_super) {
      * @param {int} [options.parallelism=4] The number of concurrent chunks to upload
      * @param {Object} [options.fileAttributes] Attributes to set on the file during commit
      */
-    function ChunkedUploader(client, uploadSessionInfo, file, size, options) {
-        var _this = _super.call(this) || this;
-        _this._client = client;
-        _this._sessionID = uploadSessionInfo.id;
-        _this._partSize = uploadSessionInfo.part_size;
-        _this._uploadSessionInfo = uploadSessionInfo;
+    constructor(client, uploadSessionInfo, file, size, options) {
+        super();
+        this._client = client;
+        this._sessionID = uploadSessionInfo.id;
+        this._partSize = uploadSessionInfo.part_size;
+        this._uploadSessionInfo = uploadSessionInfo;
         if (file instanceof stream_1.Readable) {
             // Pause the stream so we can read specific chunks from it
-            _this._stream = file.pause();
-            _this._streamBuffer = [];
+            this._stream = file.pause();
+            this._streamBuffer = [];
         }
         else if (file instanceof Buffer || typeof file === 'string') {
-            _this._file = file;
+            this._file = file;
         }
         else {
             throw new TypeError('file must be a Stream, Buffer, or string!');
         }
-        _this._size = size;
-        _this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-        _this._isStarted = false;
-        _this._numChunksInFlight = 0;
-        _this._chunks = [];
-        _this._position = 0;
-        _this._fileHash = crypto_1.default.createHash('sha1');
-        return _this;
+        this._size = size;
+        this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+        this._isStarted = false;
+        this._numChunksInFlight = 0;
+        this._chunks = [];
+        this._position = 0;
+        this._fileHash = crypto_1.default.createHash('sha1');
     }
     /**
      * Start an upload
      * @returns {Promise<Object>} A promise resolving to the uploaded file
      */
-    ChunkedUploader.prototype.start = function () {
-        var _this = this;
+    start() {
         if (this._isStarted) {
             return this._promise;
         }
         // Create the initial chunks
-        for (var i = 0; i < this._options.parallelism; i++) {
-            this._getNextChunk(function (chunk /* FIXME */) {
-                return chunk ? _this._uploadChunk(chunk) : _this._commit();
-            });
+        for (let i = 0; i < this._options.parallelism; i++) {
+            this._getNextChunk((chunk /* FIXME */) => chunk ? this._uploadChunk(chunk) : this._commit());
         }
         this._isStarted = true;
         /* eslint-disable promise/avoid-new */
-        this._promise = new bluebird_1.Promise(function (resolve, reject) {
-            _this._resolve = resolve;
-            _this._reject = reject;
+        this._promise = new bluebird_1.Promise((resolve, reject) => {
+            this._resolve = resolve;
+            this._reject = reject;
         });
         /* eslint-enable promise/avoid-new */
         return this._promise;
-    };
+    }
     /**
      * Abort a running upload, which cancels all currently uploading chunks,
      * attempts to free up held memory, and aborts the upload session.  This
@@ -26336,37 +27026,35 @@ var ChunkedUploader = /** @class */ (function (_super) {
      * @emits ChunkedUploader#aborted
      * @emits ChunkedUploader#abortFailed
      */
-    ChunkedUploader.prototype.abort = function () {
-        var _this = this;
-        this._chunks.forEach(function (chunk) { return chunk.removeAllListeners().cancel(); });
+    abort() {
+        this._chunks.forEach((chunk) => chunk.removeAllListeners().cancel());
         this._chunks = [];
         this._file = null;
         this._stream = null;
         return (this._client.files
             .abortUploadSession(this._sessionID)
             /* eslint-disable promise/always-return */
-            .then(function () {
-            _this.emit('aborted');
+            .then(() => {
+            this.emit('aborted');
         })
             /* eslint-enable promise/always-return */
-            .catch(function (err /* FIXME */) {
-            _this.emit('abortFailed', err);
+            .catch((err /* FIXME */) => {
+            this.emit('abortFailed', err);
             throw err;
         }));
-    };
+    }
     /**
      * Get the next chunk of the file to be uploaded
      * @param {Function} callback Called with the next chunk of the file to be uploaded
      * @returns {void}
      * @private
      */
-    ChunkedUploader.prototype._getNextChunk = function (callback) {
-        var _this = this;
+    _getNextChunk(callback) {
         if (this._position >= this._size) {
             callback(null);
             return;
         }
-        var buf;
+        let buf;
         if (this._file) {
             // Buffer/string case, just get the slice we need
             buf = this._file.slice(this._position, this._position + this._partSize);
@@ -26379,22 +27067,22 @@ var ChunkedUploader = /** @class */ (function (_super) {
             buf = this._stream.read(this._partSize);
             if (!buf) {
                 // stream needs to read more, retry later
-                setImmediate(function () { return _this._getNextChunk(callback); });
+                setImmediate(() => this._getNextChunk(callback));
                 return;
             }
             else if (buf.length > this._partSize) {
                 // stream is done reading and had extra data, buffer the remainder of the file
-                for (var i = 0; i < buf.length; i += this._partSize) {
+                for (let i = 0; i < buf.length; i += this._partSize) {
                     this._streamBuffer.push(buf.slice(i, i + this._partSize));
                 }
                 buf = this._streamBuffer.shift();
             }
         }
         this._fileHash.update(buf);
-        var chunk = new Chunk(this._client, this._sessionID, buf, this._position, this._size, this._options);
+        let chunk = new Chunk(this._client, this._sessionID, buf, this._position, this._size, this._options);
         this._position += buf.length;
         callback(chunk);
-    };
+    }
     /**
      * Upload a chunk
      * @param {Chunk} chunk The chunk to upload
@@ -26402,89 +27090,69 @@ var ChunkedUploader = /** @class */ (function (_super) {
      * @emits ChunkedUploader#chunkError
      * @emits ChunkedUploader#chunkUploaded
      */
-    ChunkedUploader.prototype._uploadChunk = function (chunk /* FIXME */) {
-        var _this = this;
+    _uploadChunk(chunk /* FIXME */) {
         this._numChunksInFlight += 1;
-        chunk.on('error', function (err /* FIXME */) { return _this.emit('chunkError', err); });
-        chunk.on('uploaded', function (data /* FIXME */) {
-            _this._numChunksInFlight -= 1;
-            _this.emit('chunkUploaded', data);
-            _this._getNextChunk(function (nextChunk /* FIXME */) {
-                return nextChunk ? _this._uploadChunk(nextChunk) : _this._commit();
-            });
+        chunk.on('error', (err /* FIXME */) => this.emit('chunkError', err));
+        chunk.on('uploaded', (data /* FIXME */) => {
+            this._numChunksInFlight -= 1;
+            this.emit('chunkUploaded', data);
+            this._getNextChunk((nextChunk /* FIXME */) => nextChunk ? this._uploadChunk(nextChunk) : this._commit());
         });
         chunk.upload();
         this._chunks.push(chunk);
-    };
+    }
     /**
      * Commit the upload, finalizing it
      * @returns {void}
      * @emits ChunkedUploader#uploadComplete
      * @emits ChunkedUploader#error
      */
-    ChunkedUploader.prototype._commit = function () {
-        var _this = this;
+    _commit() {
         if (!this._isStarted || this._numChunksInFlight > 0) {
             return;
         }
-        var hash = this._fileHash.digest('base64');
+        let hash = this._fileHash.digest('base64');
         this._isStarted = false;
-        var options = Object.assign({
-            parts: this._chunks.map(function (c) { return c.getData(); }),
+        let options = Object.assign({
+            parts: this._chunks.map((c) => c.getData()),
         }, this._options.fileAttributes);
-        this._client.files.commitUploadSession(this._sessionID, hash, options, function (err /* FIMXE */, file /* FIMXE */) {
+        this._client.files.commitUploadSession(this._sessionID, hash, options, (err /* FIMXE */, file /* FIMXE */) => {
             // It's not clear what the SDK can do here, so we just return the error and session info
             // so users can retry if they wish
             if (err) {
-                _this.emit('error', {
-                    uploadSession: _this._uploadSessionInfo,
+                this.emit('error', {
+                    uploadSession: this._uploadSessionInfo,
                     error: err,
                 });
-                _this._reject(err);
+                this._reject(err);
                 return;
             }
-            _this.emit('uploadComplete', file);
-            _this._resolve(file);
+            this.emit('uploadComplete', file);
+            this._resolve(file);
         });
-    };
-    return ChunkedUploader;
-}(events_1.EventEmitter));
+    }
+}
 module.exports = ChunkedUploader;
 //# sourceMappingURL=chunked-uploader.js.map
 
 /***/ }),
 
-/***/ 66892:
-/***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
+/***/ 84034:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 /**
  * @fileoverview Enterprise event stream backed by the enterprise events API
  */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var stream_1 = __nccwpck_require__(2203);
+const stream_1 = __nccwpck_require__(2203);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var DEFAULT_OPTIONS = Object.freeze({
+const DEFAULT_OPTIONS = Object.freeze({
     pollingInterval: 60, // seconds
     chunkSize: 500,
     streamType: 'admin_logs',
@@ -26512,29 +27180,28 @@ var DEFAULT_OPTIONS = Object.freeze({
  * @constructor
  * @extends Readable
  */
-var EnterpriseEventStream = /** @class */ (function (_super) {
-    __extends(EnterpriseEventStream, _super);
-    function EnterpriseEventStream(client, options) {
-        var _this = _super.call(this, {
+class EnterpriseEventStream extends stream_1.Readable {
+    constructor(client, options) {
+        super({
             objectMode: true,
-        }) || this;
+        });
         /**
          * @var {BoxClient} - The client for making API calls
          * @private
          */
-        _this._client = client;
+        this._client = client;
         /**
          * @var {Object} - Options
          * @private
          */
-        _this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+        this._options = Object.assign({}, DEFAULT_OPTIONS, options);
         // Handle the case where the caller passes streamPosition = 0 instead of streamPosition = '0'.
-        if (_this._options.streamType === 'admin_logs' &&
-            !_this._options.startDate &&
-            !_this._options.streamPosition &&
-            _this._options.streamPosition !== 0) {
+        if (this._options.streamType === 'admin_logs' &&
+            !this._options.startDate &&
+            !this._options.streamPosition &&
+            this._options.streamPosition !== 0) {
             // If neither startDate nor streamPosition is specified, start from the current time.
-            _this._options.startDate = new Date()
+            this._options.startDate = new Date()
                 .toISOString()
                 .replace(/\.000Z$/, '-00:00');
         }
@@ -26542,21 +27209,20 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
          * @var {?string} - The current stream position
          * @private
          */
-        _this._streamPosition = _this._options.streamPosition;
-        return _this;
+        this._streamPosition = this._options.streamPosition;
     }
     /**
      * @returns {?number} - Returns null if no events have been fetched from Box yet.
      */
-    EnterpriseEventStream.prototype.getStreamPosition = function () {
+    getStreamPosition() {
         return this._streamPosition;
-    };
+    }
     /**
      * Get the stream state.
      *
      * @returns {Object} - The stream state
      */
-    EnterpriseEventStream.prototype.getStreamState = function () {
+    getStreamState() {
         // We need to return both streamPosition and startDate, since streamPosition will be null until
         // the first set of events is returned from Box.
         return {
@@ -26565,21 +27231,21 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
             endDate: this._options.endDate,
             eventTypeFilter: this._options.eventTypeFilter,
         };
-    };
+    }
     /**
      * Set the stream state.
      *
      * @param {Object} state - The stream state
      * @returns {void}
      */
-    EnterpriseEventStream.prototype.setStreamState = function (state) {
+    setStreamState(state) {
         // We need to set both streamPosition and startDate, since streamPosition will be null until
         // the first set of events is returned from Box.
         this._streamPosition = state.streamPosition;
         this._options.startDate = state.startDate;
         this._options.endDate = state.endDate;
         this._options.eventTypeFilter = state.eventTypeFilter;
-    };
+    }
     /**
      * Fetch the next chunk of events
      *
@@ -26589,8 +27255,8 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
      * @returns {void}
      * @private
      */
-    EnterpriseEventStream.prototype.fetchEvents = function (callback) {
-        var self = this, params = {
+    fetchEvents(callback) {
+        const self = this, params = {
             stream_type: this._options.streamType,
         };
         // Use the current stream position.
@@ -26610,7 +27276,7 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
         if (this._options.chunkSize) {
             params.limit = this._options.chunkSize;
         }
-        this._client.events.get(params, function (err /* FIXME */, result /* FIXME */) {
+        this._client.events.get(params, (err /* FIXME */, result /* FIXME */) => {
             if (err) {
                 self.emit('error', err);
                 // If there was a "permanent" error, we would call the callback with it here.
@@ -26626,10 +27292,10 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
                     return;
                 }
                 // There were no events returned (or an error occurred), so schedule another poll.
-                var delay = self._options.pollingInterval * 1000;
+                const delay = self._options.pollingInterval * 1000;
                 // Stream readers can use this to flush buffered events to a downstream system.
                 self.emit('wait', delay);
-                setTimeout(function () {
+                setTimeout(() => {
                     self.fetchEvents(callback);
                 }, delay);
                 return;
@@ -26643,7 +27309,7 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
             self.emit('newStreamState', self.getStreamState());
             callback(null, result.entries);
         });
-    };
+    }
     /**
      * Implementation of the stream-internal read function.	This is called
      * by the stream whenever it needs more data, and will not be called again
@@ -26651,11 +27317,11 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
      * @returns {void}
      * @private
      */
-    EnterpriseEventStream.prototype._read = function () {
+    _read() {
         // Fetch the next chunk of events.
-        var self = this;
+        const self = this;
         // This will poll forever until events are available.
-        this.fetchEvents(function (err /* FIXME */, events /* FIXME */) {
+        this.fetchEvents((err /* FIXME */, events /* FIXME */) => {
             if (err || !events || events.length === 0) {
                 // Close the stream if there was a "permanent" failure or we reached the end of the events.
                 self.push(null);
@@ -26665,10 +27331,10 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
             // Without this, _read() would be called again from inside each push(),
             // resulting in multiple parallel calls to fetchEvents().
             // See https://github.com/nodejs/node/issues/3203
-            var wasPaused = self.isPaused();
+            const wasPaused = self.isPaused();
             self.pause();
             // Push all of the events into the stream.
-            events.forEach(function (event /* FIXME */) {
+            events.forEach((event /* FIXME */) => {
                 self.push(event);
             });
             if (!wasPaused) {
@@ -26676,15 +27342,14 @@ var EnterpriseEventStream = /** @class */ (function (_super) {
                 self.resume();
             }
         });
-    };
-    return EnterpriseEventStream;
-}(stream_1.Readable));
+    }
+}
 module.exports = EnterpriseEventStream;
 //# sourceMappingURL=enterprise-event-stream.js.map
 
 /***/ }),
 
-/***/ 75910:
+/***/ 3416:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -26692,34 +27357,19 @@ module.exports = EnterpriseEventStream;
 /**
  * @fileoverview Event stream backed by the events API
  */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __nccwpck_require__(94366);
-var querystring_1 = __importDefault(__nccwpck_require__(83480));
-var stream_1 = __nccwpck_require__(2203);
+const bluebird_1 = __nccwpck_require__(94366);
+const querystring_1 = __importDefault(__nccwpck_require__(83480));
+const stream_1 = __nccwpck_require__(2203);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var DEFAULT_OPTIONS = Object.freeze({
+const DEFAULT_OPTIONS = Object.freeze({
     deduplicationFilterSize: 5000,
     retryDelay: 1000,
     fetchInterval: 1000,
@@ -26738,73 +27388,70 @@ var DEFAULT_OPTIONS = Object.freeze({
  * @constructor
  * @extends Readable
  */
-var EventStream = /** @class */ (function (_super) {
-    __extends(EventStream, _super);
-    function EventStream(client, streamPosition, options) {
-        var _this = _super.call(this, {
+class EventStream extends stream_1.Readable {
+    constructor(client, streamPosition, options) {
+        super({
             objectMode: true,
-        }) || this;
+        });
         /**
          * @var {BoxClient} The client for making API calls
          * @private
          */
-        _this._client = client;
+        this._client = client;
         /**
          * @var {string} The latest stream position
          * @private
          */
-        _this._streamPosition = streamPosition;
+        this._streamPosition = streamPosition;
         /**
          * @var {?Object} The information for how to long poll
          * @private
          */
-        _this._longPollInfo = undefined;
+        this._longPollInfo = undefined;
         /**
          * @var {int} The number of long poll requests we've made against one URL so far
          * @private
          */
-        _this._longPollRetries = 0;
+        this._longPollRetries = 0;
         /**
          * @var {Object.<string, boolean>} Hash of event IDs we've already pushed
          * @private
          */
-        _this._dedupHash = {};
+        this._dedupHash = {};
         /**
          * Rate limiting promise to ensure that events are not fetched too often,
          * initially resolved to allow an immediate API call.
          * @var {Promise}
          * @private
          */
-        _this._rateLimiter = bluebird_1.Promise.resolve();
-        _this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-        return _this;
+        this._rateLimiter = bluebird_1.Promise.resolve();
+        this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     }
     /**
      * Retrieve the url and params for long polling for new updates
      * @returns {Promise} Promise for testing purposes
      * @private
      */
-    EventStream.prototype.getLongPollInfo = function () {
-        var _this = this;
+    getLongPollInfo() {
         if (this.destroyed) {
             return bluebird_1.Promise.resolve(false);
         }
         return this._client.events
             .getLongPollInfo()
-            .then(function (longPollInfo) {
+            .then((longPollInfo) => {
             // On getting new long poll info, reset everything
-            _this._longPollInfo = longPollInfo;
-            _this._longPollRetries = 0;
-            return _this.doLongPoll();
+            this._longPollInfo = longPollInfo;
+            this._longPollRetries = 0;
+            return this.doLongPoll();
         })
-            .catch(function (err /* FIXME */) {
-            _this.emit('error', err);
+            .catch((err /* FIXME */) => {
+            this.emit('error', err);
             // Only retry on resolvable errors
             if (!err.authExpired) {
-                _this.retryPollInfo();
+                this.retryPollInfo();
             }
         });
-    };
+    }
     /**
      * Long poll for notification of new events.	We do this rather than
      * polling for the events directly in order to minimize the number of API
@@ -26812,8 +27459,7 @@ var EventStream = /** @class */ (function (_super) {
      * @returns {Promise} Promise for testing pruposes
      * @private
      */
-    EventStream.prototype.doLongPoll = function () {
-        var _this = this;
+    doLongPoll() {
         if (this.destroyed) {
             return bluebird_1.Promise.resolve(false);
         }
@@ -26835,43 +27481,41 @@ var EventStream = /** @class */ (function (_super) {
         this._longPollRetries += 1;
         return this._client
             .wrapWithDefaultHandler(this._client.get)(url, options)
-            .then(function (data /* FIXME */) {
-            if (_this.destroyed) {
+            .then((data /* FIXME */) => {
+            if (this.destroyed) {
                 return false;
             }
             if (data.message === 'reconnect') {
-                return _this.getLongPollInfo();
+                return this.getLongPollInfo();
             }
             // We don't expect any messages other than reconnect and new_change, so if
             // we get one just retry the long poll
             if (data.message !== 'new_change') {
-                return _this.doLongPoll();
+                return this.doLongPoll();
             }
-            return _this.fetchEvents();
+            return this.fetchEvents();
         })
-            .catch(function () {
-            _this.retryPollInfo();
+            .catch(() => {
+            this.retryPollInfo();
         });
-    };
+    }
     /**
      * Retries long-polling after a delay.
      * Does not attempt if stream is already destroyed.
      * @returns {void}
      * @private
      */
-    EventStream.prototype.retryPollInfo = function () {
-        var _this = this;
+    retryPollInfo() {
         if (!this.destroyed) {
-            this._retryTimer = setTimeout(function () { return _this.getLongPollInfo(); }, this._options.retryDelay);
+            this._retryTimer = setTimeout(() => this.getLongPollInfo(), this._options.retryDelay);
         }
-    };
+    }
     /**
      * Fetch the latest group of events and push them into the stream
      * @returns {Promise} Promise for testing purposes
      * @private
      */
-    EventStream.prototype.fetchEvents = function () {
-        var _this = this;
+    fetchEvents() {
         if (this.destroyed) {
             return bluebird_1.Promise.resolve(false);
         }
@@ -26880,52 +27524,50 @@ var EventStream = /** @class */ (function (_super) {
             limit: 500,
         };
         // Get new events after the rate limiter expires
-        return this._rateLimiter.then(function () {
-            return _this._client.events
-                .get(eventParams)
-                .then(function (events /* FIXME */) {
-                // Reset the rate limiter
-                _this._rateLimiter = bluebird_1.Promise.delay(_this._options.fetchInterval);
-                // If the response wasn't what we expected, re-poll
-                if (!events.entries || !events.next_stream_position) {
-                    return _this.doLongPoll();
-                }
-                _this._streamPosition = events.next_stream_position;
-                // De-duplicate the fetched events, since the API often returns
-                // the same events at multiple subsequent stream positions
-                var newEvents = events.entries.filter(function (event /* FIXME */) { return !_this._dedupHash[event.event_id]; });
-                // If there aren't any non-duplicate events, go back to polling
-                if (newEvents.length === 0) {
-                    return _this.doLongPoll();
-                }
-                // Pause the stream to avoid race conditions while pushing in the new events.
-                // Without this, _read() would be called again from inside each push(),
-                // resulting in multiple parallel calls to fetchEvents().
-                // See https://github.com/nodejs/node/issues/3203
-                var wasPaused = _this.isPaused();
-                _this.pause();
-                // Push new events into the stream
-                newEvents.forEach(function (event /* FIXME */) {
-                    _this._dedupHash[event.event_id] = true;
-                    _this.push(event);
-                });
-                if (!wasPaused) {
-                    // This will deliver the events and trigger the next call to _read() once they have been consumed.
-                    _this.resume();
-                }
-                // Once the deduplication filter gets too big, clean it up
-                if (Object.keys(_this._dedupHash).length >=
-                    _this._options.deduplicationFilterSize) {
-                    _this.cleanupDedupFilter(events.entries);
-                }
-                return true;
-            })
-                .catch(function (err /* FIXME */) {
-                _this.emit('error', err);
-                _this.retryPollInfo();
+        return this._rateLimiter.then(() => this._client.events
+            .get(eventParams)
+            .then((events /* FIXME */) => {
+            // Reset the rate limiter
+            this._rateLimiter = bluebird_1.Promise.delay(this._options.fetchInterval);
+            // If the response wasn't what we expected, re-poll
+            if (!events.entries || !events.next_stream_position) {
+                return this.doLongPoll();
+            }
+            this._streamPosition = events.next_stream_position;
+            // De-duplicate the fetched events, since the API often returns
+            // the same events at multiple subsequent stream positions
+            var newEvents = events.entries.filter((event /* FIXME */) => !this._dedupHash[event.event_id]);
+            // If there aren't any non-duplicate events, go back to polling
+            if (newEvents.length === 0) {
+                return this.doLongPoll();
+            }
+            // Pause the stream to avoid race conditions while pushing in the new events.
+            // Without this, _read() would be called again from inside each push(),
+            // resulting in multiple parallel calls to fetchEvents().
+            // See https://github.com/nodejs/node/issues/3203
+            var wasPaused = this.isPaused();
+            this.pause();
+            // Push new events into the stream
+            newEvents.forEach((event /* FIXME */) => {
+                this._dedupHash[event.event_id] = true;
+                this.push(event);
             });
-        });
-    };
+            if (!wasPaused) {
+                // This will deliver the events and trigger the next call to _read() once they have been consumed.
+                this.resume();
+            }
+            // Once the deduplication filter gets too big, clean it up
+            if (Object.keys(this._dedupHash).length >=
+                this._options.deduplicationFilterSize) {
+                this.cleanupDedupFilter(events.entries);
+            }
+            return true;
+        })
+            .catch((err /* FIXME */) => {
+            this.emit('error', err);
+            this.retryPollInfo();
+        }));
+    }
     /**
      * Clean up the deduplication filter, to prevent it from growing
      * too big and eating up memory.	We look at the latest set of events
@@ -26935,16 +27577,15 @@ var EventStream = /** @class */ (function (_super) {
      * @returns {void}
      * @private
      */
-    EventStream.prototype.cleanupDedupFilter = function (latestEvents /* FIXME */) {
-        var _this = this;
+    cleanupDedupFilter(latestEvents /* FIXME */) {
         var dedupIDs = Object.keys(this._dedupHash);
-        dedupIDs.forEach(function (eventID) {
-            var isEventCleared = !latestEvents.find(function (e /* FIXME */) { return e.event_id === eventID; });
+        dedupIDs.forEach((eventID) => {
+            var isEventCleared = !latestEvents.find((e /* FIXME */) => e.event_id === eventID);
             if (isEventCleared) {
-                delete _this._dedupHash[eventID];
+                delete this._dedupHash[eventID];
             }
         });
-    };
+    }
     /**
      * Implementation of the stream-internal read function.	This is called
      * by the stream whenever it needs more data, and will not be called again
@@ -26952,10 +27593,10 @@ var EventStream = /** @class */ (function (_super) {
      * @returns {void}
      * @private
      */
-    EventStream.prototype._read = function () {
+    _read() {
         // Start the process of getting new events
         this.getLongPollInfo();
-    };
+    }
     /**
      * Implementation of stream-internal `_destroy` function (v8.0.0 and later).
      * Called by stream consumers to effectively stop polling via the public
@@ -26963,12 +27604,11 @@ var EventStream = /** @class */ (function (_super) {
      * @returns {void}
      * @private
      */
-    EventStream.prototype._destroy = function () {
+    _destroy() {
         clearTimeout(this._retryTimer);
         delete this._retryTimer;
-    };
-    return EventStream;
-}(stream_1.Readable));
+    }
+}
 // backwards-compat for Node.js pre-v8.0.0
 /* istanbul ignore if */
 if (typeof stream_1.Readable.prototype.destroy !== 'function') {
@@ -26978,10 +27618,9 @@ if (typeof stream_1.Readable.prototype.destroy !== 'function') {
      * @public
      */
     EventStream.prototype.destroy = function (error) {
-        var _this = this;
         if (!this.destroyed) {
-            process.nextTick(function () {
-                _this.emit('close');
+            process.nextTick(() => {
+                this.emit('close');
             });
             this.destroyed = true;
             this._destroy();
@@ -26994,33 +27633,22 @@ module.exports = EventStream;
 
 /***/ }),
 
-/***/ 92637:
+/***/ 23351:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var AIManager = /** @class */ (function () {
+class AIManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function AIManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27032,13 +27660,13 @@ var AIManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.AiResponseFull>} A promise resolving to the result or rejecting with an error
      */
-    AIManager.prototype.ask = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('ai', 'ask'), params = {
+    ask(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('ai', 'ask'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Send AI request to generate text
      *
@@ -27048,13 +27676,13 @@ var AIManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.AiResponse>} A promise resolving to the result or rejecting with an error
      */
-    AIManager.prototype.textGen = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('ai', 'text_gen'), params = {
+    textGen(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('ai', 'text_gen'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Get AI agent default configuration
      *
@@ -27066,20 +27694,19 @@ var AIManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.AiAgentAsk | schemas.AiAgentTextGen>} A promise resolving to the result or rejecting with an error
      */
-    AIManager.prototype.getAiAgentDefaultConfig = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('ai_agent_default'), params = {
+    getAiAgentDefaultConfig(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('ai_agent_default'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return AIManager;
-}());
+    }
+}
 module.exports = AIManager;
 //# sourceMappingURL=ai.generated.js.map
 
 /***/ }),
 
-/***/ 98007:
+/***/ 48877:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -27090,7 +27717,7 @@ module.exports = AIManager;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -27107,7 +27734,7 @@ var CollaborationAllowlistDirection;
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/collaboration_whitelist_entries', TARGET_ENTRY_PATH = '/collaboration_whitelist_exempt_targets';
+const BASE_PATH = '/collaboration_whitelist_entries', TARGET_ENTRY_PATH = '/collaboration_whitelist_exempt_targets';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -27118,8 +27745,8 @@ var BASE_PATH = '/collaboration_whitelist_entries', TARGET_ENTRY_PATH = '/collab
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var CollaborationAllowlist = /** @class */ (function () {
-    function CollaborationAllowlist(client) {
+class CollaborationAllowlist {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27135,16 +27762,16 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Passed the collaboration allowlist information if it was created successfully
      * @returns {Promise<Object>} A promise resolve to the collaboration allowlist object
      */
-    CollaborationAllowlist.prototype.addDomain = function (domain, direction, callback) {
+    addDomain(domain, direction, callback) {
         var params = {
             body: {
-                domain: domain,
-                direction: direction,
+                domain,
+                direction,
             },
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Requests a collaboration allowlist entry with a given ID.
      *
@@ -27156,11 +27783,11 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Passed the collaboration allowlist information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the collaboration allowlist object
      */
-    CollaborationAllowlist.prototype.getAllowlistedDomain = function (domainID, options, callback) {
+    getAllowlistedDomain(domainID, options, callback) {
         var params = { qs: options };
         var apiPath = (0, url_path_1.default)(BASE_PATH, domainID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Requests all collaboration allowlist entries within an enterprise.
      *
@@ -27173,13 +27800,13 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of collaboration allowlists if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of collaboration allowlists
      */
-    CollaborationAllowlist.prototype.getAllAllowlistedDomains = function (options, callback) {
+    getAllAllowlistedDomains(options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a given collaboration allowlist entry.
      *
@@ -27190,10 +27817,10 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    CollaborationAllowlist.prototype.removeDomain = function (domainID, callback) {
+    removeDomain(domainID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, domainID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Adds a Box User to the exempt target list.
      *
@@ -27204,7 +27831,7 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Passed a collaboration allowlist for user if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to a user collaboration allowlist
      */
-    CollaborationAllowlist.prototype.addExemption = function (userID, callback) {
+    addExemption(userID, callback) {
         var params = {
             body: {
                 user: {
@@ -27215,7 +27842,7 @@ var CollaborationAllowlist = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(TARGET_ENTRY_PATH);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Retrieves information about a collaboration allowlist for user by allowlist ID.
      *
@@ -27227,13 +27854,13 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Passed the collaboration allowlist information for a user if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the collaboration allowlist object
      */
-    CollaborationAllowlist.prototype.getExemption = function (exemptionID, options, callback) {
+    getExemption(exemptionID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(TARGET_ENTRY_PATH, exemptionID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Retrieve a list of all exemptions to an enterprise's collaboration allowlist.
      *
@@ -27246,13 +27873,13 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of user collaboration allowlists if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of user collaboration allowlists
      */
-    CollaborationAllowlist.prototype.getAllExemptions = function (options, callback) {
+    getAllExemptions(options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(TARGET_ENTRY_PATH);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a given user collaboration allowlist.
      *
@@ -27263,12 +27890,11 @@ var CollaborationAllowlist = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    CollaborationAllowlist.prototype.removeExemption = function (exemptionID, callback) {
+    removeExemption(exemptionID, callback) {
         var apiPath = (0, url_path_1.default)(TARGET_ENTRY_PATH, exemptionID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    return CollaborationAllowlist;
-}());
+    }
+}
 /**
  * Enum of valid collaboration allowlist directions
  *
@@ -27281,7 +27907,7 @@ module.exports = CollaborationAllowlist;
 
 /***/ }),
 
-/***/ 49842:
+/***/ 56340:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -27292,11 +27918,11 @@ module.exports = CollaborationAllowlist;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/collaborations';
+const BASE_PATH = '/collaborations';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -27307,8 +27933,8 @@ var BASE_PATH = '/collaborations';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Collaborations = /** @class */ (function () {
-    function Collaborations(client) {
+class Collaborations {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27322,13 +27948,13 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Passed the collaboration information if it was acquired successfully
      * @returns {Promise<Collaboration>} A promise resolving to the collaboration object
      */
-    Collaborations.prototype.get = function (collaborationID, options, callback) {
-        var params = {
+    get(collaborationID, options, callback) {
+        const params = {
             qs: options,
         };
-        var apiPath = (0, url_path_1.default)(BASE_PATH, collaborationID);
+        const apiPath = (0, url_path_1.default)(BASE_PATH, collaborationID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Gets a user's pending collaborations
      *
@@ -27338,21 +27964,21 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Called with a collection of pending collaborations if successful
      * @returns {Promise<Collaborations>} A promise resolving to the collection of pending collaborations
      */
-    Collaborations.prototype.getPending = function (callback) {
-        var params = {
+    getPending(callback) {
+        const params = {
             qs: {
                 status: 'pending',
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(BASE_PATH, params, callback);
-    };
-    Collaborations.prototype.updateInternal = function (collaborationID, updates, callback) {
-        var params = {
+    }
+    updateInternal(collaborationID, updates, callback) {
+        const params = {
             body: updates,
         };
-        var apiPath = (0, url_path_1.default)(BASE_PATH, collaborationID);
+        const apiPath = (0, url_path_1.default)(BASE_PATH, collaborationID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Update some information about a given collaboration.
      *
@@ -27364,9 +27990,9 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated collaboration information if it was acquired successfully
      * @returns {Promise<Collaboration>} A promise resolving to the updated collaboration object
      */
-    Collaborations.prototype.update = function (collaborationID, updates, callback) {
+    update(collaborationID, updates, callback) {
         return this.updateInternal(collaborationID, updates, callback);
-    };
+    }
     /**
      * Update the status of a pending collaboration.
      *
@@ -27378,11 +28004,11 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated collaboration information if it was acquired successfully
      * @returns {Promise<Collaboration>} A promise resolving to the accepted collaboration object
      */
-    Collaborations.prototype.respondToPending = function (collaborationID, newStatus, callback) {
+    respondToPending(collaborationID, newStatus, callback) {
         return this.updateInternal(collaborationID, {
             status: newStatus,
         }, callback);
-    };
+    }
     /**
      * Invite a collaborator to a folder. You'll have to create the 'accessible_by' input object
      * yourself, but the method allows for multiple types of collaborator invites. See
@@ -27407,8 +28033,8 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Called with the new collaboration if successful
      * @returns {Promise<Collaboration>} A promise resolving to the created collaboration object
      */
-    Collaborations.prototype.create = function (accessibleBy, itemID, role, options, callback) {
-        var defaultOptions = {
+    create(accessibleBy, itemID, role, options, callback) {
+        const defaultOptions = {
             type: 'folder',
         };
         if (typeof options === 'function') {
@@ -27416,14 +28042,14 @@ var Collaborations = /** @class */ (function () {
             options = {};
         }
         options = Object.assign({}, defaultOptions, options);
-        var params = {
+        const params = {
             body: {
                 item: {
                     type: options.type,
                     id: itemID,
                 },
                 accessible_by: accessibleBy,
-                role: role,
+                role,
             },
         };
         if (typeof options.can_view_path === 'boolean') {
@@ -27438,7 +28064,7 @@ var Collaborations = /** @class */ (function () {
             params.body.is_access_only = options.is_access_only;
         }
         return this.client.wrapWithDefaultHandler(this.client.post)(BASE_PATH, params, callback);
-    };
+    }
     /**
      * Invite a user to collaborate on an item via their user ID.
      *
@@ -27455,17 +28081,17 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Called with the new collaboration if successful
      * @returns {Promise<Collaboration>} A promise resolving to the created collaboration object
      */
-    Collaborations.prototype.createWithUserID = function (userID, itemID, role, options, callback) {
+    createWithUserID(userID, itemID, role, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = {};
         }
-        var accessibleBy = {
+        const accessibleBy = {
             type: 'user',
-            id: "".concat(userID),
+            id: `${userID}`,
         };
         return this.create(accessibleBy, itemID, role, options, callback);
-    };
+    }
     /**
      * Invite a user to collaborate on an item via their user login email address.
      *
@@ -27482,17 +28108,17 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Called with the new collaboration if successful
      * @returns {Promise<Collaboration>} A promise resolving to the created collaboration object
      */
-    Collaborations.prototype.createWithUserEmail = function (email, itemID, role, options, callback) {
+    createWithUserEmail(email, itemID, role, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = {};
         }
-        var accessibleBy = {
+        const accessibleBy = {
             type: 'user',
             login: email,
         };
         return this.create(accessibleBy, itemID, role, options, callback);
-    };
+    }
     /**
      * Invite a group to collaborate on an item via their group ID.
      *
@@ -27509,17 +28135,17 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Called with the new collaboration if successful
      * @returns {Promise<Collaboration>} A promise resolving to the created collaboration object
      */
-    Collaborations.prototype.createWithGroupID = function (groupID, itemID, role, options, callback) {
+    createWithGroupID(groupID, itemID, role, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = {};
         }
-        var accessibleBy = {
+        const accessibleBy = {
             type: 'group',
-            id: "".concat(groupID),
+            id: `${groupID}`,
         };
         return this.create(accessibleBy, itemID, role, options, callback);
-    };
+    }
     /**
      * Delete a given collaboration.
      *
@@ -27530,18 +28156,17 @@ var Collaborations = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Collaborations.prototype.delete = function (collaborationID, callback) {
-        var apiPath = (0, url_path_1.default)(BASE_PATH, collaborationID);
+    delete(collaborationID, callback) {
+        const apiPath = (0, url_path_1.default)(BASE_PATH, collaborationID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    return Collaborations;
-}());
+    }
+}
 module.exports = Collaborations;
 //# sourceMappingURL=collaborations.js.map
 
 /***/ }),
 
-/***/ 13731:
+/***/ 82657:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -27552,14 +28177,14 @@ module.exports = Collaborations;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/collections';
+const BASE_PATH = '/collections';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -27570,8 +28195,8 @@ var BASE_PATH = '/collections';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Collections = /** @class */ (function () {
-    function Collections(client) {
+class Collections {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27583,9 +28208,9 @@ var Collections = /** @class */ (function () {
      * @param {Function} [callback] - Called with a collection of collections if successful
      * @returns {Promise<Object>} A promise resolving to the collection of collections
      */
-    Collections.prototype.getAll = function (callback) {
+    getAll(callback) {
         return this.client.wrapWithDefaultHandler(this.client.get)(BASE_PATH, {}, callback);
-    };
+    }
     /**
      * Requests the items in the collection object with a given ID.
      *
@@ -27597,21 +28222,20 @@ var Collections = /** @class */ (function () {
      * @param {Function} [callback] - Passed the items information if they were acquired successfully
      * @returns {Promise<Object>} A promise resolving to the collection of items in the collection
      */
-    Collections.prototype.getItems = function (collectionID, options, callback) {
+    getItems(collectionID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, collectionID, 'items');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return Collections;
-}());
+    }
+}
 module.exports = Collections;
 //# sourceMappingURL=collections.js.map
 
 /***/ }),
 
-/***/ 72338:
+/***/ 36996:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -27622,14 +28246,14 @@ module.exports = Collections;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/comments';
+const BASE_PATH = '/comments';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -27640,8 +28264,8 @@ var BASE_PATH = '/comments';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Comments = /** @class */ (function () {
-    function Comments(client) {
+class Comments {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27655,13 +28279,13 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - Passed the comment information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the comment object
      */
-    Comments.prototype.get = function (commentID, options, callback) {
+    get(commentID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, commentID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Posts a new comment on a file.
      *
@@ -27673,7 +28297,7 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - passed the new comment data if it was posted successfully
      * @returns {Promise<Object>} A promise resolving to the new comment object
      */
-    Comments.prototype.create = function (fileID, commentBody, callback) {
+    create(fileID, commentBody, callback) {
         // @TODO(bemerick) 2013-10-29: Don't hardcode this 'item'. Abstract to all commentable types...
         var params = {
             body: {
@@ -27685,7 +28309,7 @@ var Comments = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(BASE_PATH, params, callback);
-    };
+    }
     /**
      * Posts a new tagged comment on a file.
      *
@@ -27697,7 +28321,7 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - passed the new tagged comment data if it was posted successfully
      * @returns {Promise<Object>} A promise resolving to the new comment object
      */
-    Comments.prototype.createTaggedComment = function (fileID, commentBody, callback) {
+    createTaggedComment(fileID, commentBody, callback) {
         var params = {
             body: {
                 item: {
@@ -27708,7 +28332,7 @@ var Comments = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(BASE_PATH, params, callback);
-    };
+    }
     /**
      * Posts a new comment as a reply to another comment.
      *
@@ -27720,7 +28344,7 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - passed the new comment data if it was posted successfully
      * @returns {Promise<Object>} A promise resolving to the new comment object
      */
-    Comments.prototype.reply = function (commentID, commentBody, callback) {
+    reply(commentID, commentBody, callback) {
         var params = {
             body: {
                 item: {
@@ -27731,7 +28355,7 @@ var Comments = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(BASE_PATH, params, callback);
-    };
+    }
     /**
      * Posts a new tagged comment as a reply to another comment.
      *
@@ -27743,7 +28367,7 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - passed the new tagged comment data if it was posted successfully
      * @returns {Promise<Object>} A promise resolving to the new comment object
      */
-    Comments.prototype.createTaggedReply = function (commentID, commentBody, callback) {
+    createTaggedReply(commentID, commentBody, callback) {
         var params = {
             body: {
                 item: {
@@ -27754,7 +28378,7 @@ var Comments = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(BASE_PATH, params, callback);
-    };
+    }
     /**
      * Update some information about a given comment.
      *
@@ -27766,13 +28390,13 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated comment information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the updated comment object
      */
-    Comments.prototype.update = function (commentID, updates, callback) {
+    update(commentID, updates, callback) {
         var params = {
             body: updates,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, commentID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a given comment.
      *
@@ -27783,18 +28407,17 @@ var Comments = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Comments.prototype.delete = function (commentID, callback) {
+    delete(commentID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, commentID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    return Comments;
-}());
+    }
+}
 module.exports = Comments;
 //# sourceMappingURL=comments.js.map
 
 /***/ }),
 
-/***/ 26099:
+/***/ 8649:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -27806,14 +28429,14 @@ module.exports = Comments;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/device_pinners', ENTERPRISES_PATH = '/enterprises', DEVICE_PINNERS_SUBRESOURCE = 'device_pinners';
+const BASE_PATH = '/device_pinners', ENTERPRISES_PATH = '/enterprises', DEVICE_PINNERS_SUBRESOURCE = 'device_pinners';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -27824,8 +28447,8 @@ var BASE_PATH = '/device_pinners', ENTERPRISES_PATH = '/enterprises', DEVICE_PIN
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var DevicePins = /** @class */ (function () {
-    function DevicePins(client) {
+class DevicePins {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27839,12 +28462,12 @@ var DevicePins = /** @class */ (function () {
      * @param {Function} [callback] - Passed the device pin if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the device pin object
      */
-    DevicePins.prototype.get = function (pinID, options, callback) {
+    get(pinID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, pinID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a specific device pinning record
      *
@@ -27856,12 +28479,12 @@ var DevicePins = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    DevicePins.prototype.delete = function (pinID, options, callback) {
+    delete(pinID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, pinID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Get all device pin records for the current enterprise
      *
@@ -27872,29 +28495,27 @@ var DevicePins = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of device pins if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of device pins
      */
-    DevicePins.prototype.getAll = function (options, callback) {
-        var _this = this;
+    getAll(options, callback) {
         return this.client.users
             .get(this.client.CURRENT_USER_ID, { fields: 'enterprise' })
-            .then(function (data /* FIXME */) {
+            .then((data /* FIXME */) => {
             if (!data.enterprise || !data.enterprise.id) {
                 throw new Error('User must be in an enterprise to view device pins');
             }
             var apiPath = (0, url_path_1.default)(ENTERPRISES_PATH, data.enterprise.id, DEVICE_PINNERS_SUBRESOURCE), params = {
                 qs: options,
             };
-            return _this.client.wrapWithDefaultHandler(_this.client.get)(apiPath, params);
+            return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params);
         })
             .asCallback(callback);
-    };
-    return DevicePins;
-}());
+    }
+}
 module.exports = DevicePins;
 //# sourceMappingURL=device-pins.js.map
 
 /***/ }),
 
-/***/ 97355:
+/***/ 79213:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -27905,7 +28526,7 @@ module.exports = DevicePins;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -27945,7 +28566,7 @@ var EnterpriseRole;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var USERS_PATH = '/users', INVITES_PATH = '/invites', FOLDERS_SUBRESOURCE = 'folders', ROOT_FOLDER_ID = '0';
+const USERS_PATH = '/users', INVITES_PATH = '/invites', FOLDERS_SUBRESOURCE = 'folders', ROOT_FOLDER_ID = '0';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -27956,8 +28577,8 @@ var USERS_PATH = '/users', INVITES_PATH = '/invites', FOLDERS_SUBRESOURCE = 'fol
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Enterprise = /** @class */ (function () {
-    function Enterprise(client) {
+class Enterprise {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -27976,12 +28597,12 @@ var Enterprise = /** @class */ (function () {
      * @param {Function} [callback] - Passed the list of users if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of users
      */
-    Enterprise.prototype.getUsers = function (options, callback) {
+    getUsers(options, callback) {
         var apiPath = (0, url_path_1.default)(USERS_PATH), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Invites a user to join the enterprise
      *
@@ -27993,7 +28614,7 @@ var Enterprise = /** @class */ (function () {
      * @param {Function} [callback] - Passed the invite object if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the invite object
      */
-    Enterprise.prototype.inviteUser = function (enterpriseID, email, callback) {
+    inviteUser(enterpriseID, email, callback) {
         var apiPath = (0, url_path_1.default)(INVITES_PATH), params = {
             body: {
                 enterprise: {
@@ -28005,7 +28626,7 @@ var Enterprise = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Create a new user in the current enterprise
      *
@@ -28032,13 +28653,13 @@ var Enterprise = /** @class */ (function () {
      * @param {Function} [callback] - Passed the created user if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created user
      */
-    Enterprise.prototype.addUser = function (login, name, options, callback) {
+    addUser(login, name, options, callback) {
         var apiPath = (0, url_path_1.default)(USERS_PATH), params = {
-            body: { login: login, name: name },
+            body: { login, name },
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Create a new app user in the current enterprise
      *
@@ -28056,16 +28677,16 @@ var Enterprise = /** @class */ (function () {
      * @param {Function} [callback] - Passed the created user if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created user
      */
-    Enterprise.prototype.addAppUser = function (name, options, callback) {
+    addAppUser(name, options, callback) {
         var apiPath = (0, url_path_1.default)(USERS_PATH), params = {
             body: {
-                name: name,
+                name,
                 is_platform_access_only: true,
             },
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Transfers all of a user's files into another user's account.
      *
@@ -28077,16 +28698,15 @@ var Enterprise = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new folder which contains all the files if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the folder containing the transferred content
      */
-    Enterprise.prototype.transferUserContent = function (sourceUserID, destUserID, callback) {
+    transferUserContent(sourceUserID, destUserID, callback) {
         var apiPath = (0, url_path_1.default)(USERS_PATH, sourceUserID, FOLDERS_SUBRESOURCE, ROOT_FOLDER_ID), params = {
             body: {
                 owned_by: { id: destUserID },
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
-    return Enterprise;
-}());
+    }
+}
 Enterprise.prototype.userTypes = EnterpriseUserType;
 Enterprise.prototype.userStatuses = EnterpriseUserStatus;
 Enterprise.prototype.userRoles = EnterpriseRole;
@@ -28095,7 +28715,7 @@ module.exports = Enterprise;
 
 /***/ }),
 
-/***/ 32813:
+/***/ 4083:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -28103,29 +28723,18 @@ module.exports = Enterprise;
 /**
  * @fileoverview Manager for the Box Events Resource
  */
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __nccwpck_require__(94366);
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var enterprise_event_stream_1 = __importDefault(__nccwpck_require__(66892));
-var event_stream_1 = __importDefault(__nccwpck_require__(75910));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const bluebird_1 = __nccwpck_require__(94366);
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const enterprise_event_stream_1 = __importDefault(__nccwpck_require__(84034));
+const event_stream_1 = __importDefault(__nccwpck_require__(3416));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -28217,9 +28826,9 @@ var EventType;
 // Private
 // ------------------------------------------------------------------------------
 // Base path for all files endpoints
-var BASE_PATH = '/events';
+const BASE_PATH = '/events';
 /** @const {string} */
-var CURRENT_STREAM_POSITION = 'now';
+const CURRENT_STREAM_POSITION = 'now';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -28229,8 +28838,8 @@ var CURRENT_STREAM_POSITION = 'now';
  * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
  * @constructor
  */
-var Events = /** @class */ (function () {
-    function Events(client) {
+class Events {
+    constructor(client) {
         // Attach the client, for making API calls
         this.client = client;
     }
@@ -28243,7 +28852,7 @@ var Events = /** @class */ (function () {
      * @param {Function} [callback] Passed the current stream position if successful
      * @returns {Promise<string>} A promise resolving to the stream position
      */
-    Events.prototype.getCurrentStreamPosition = function (callback) {
+    getCurrentStreamPosition(callback) {
         var params = {
             qs: {
                 stream_position: CURRENT_STREAM_POSITION,
@@ -28252,14 +28861,14 @@ var Events = /** @class */ (function () {
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== http_status_1.default.OK) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
             return response.body.next_stream_position;
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Get a chunk of events
      *
@@ -28289,19 +28898,19 @@ var Events = /** @class */ (function () {
      * @param {Function} [callback] Passed the current stream position if successful
      * @returns {Promise<Object>} A promise resolving to the collection of events
      */
-    Events.prototype.get = function (options, callback) {
-        var params = {
+    get(options, callback) {
+        const params = {
             qs: options,
         };
         if (options &&
             options.stream_type &&
             options.stream_type === 'admin_logs_streaming') {
-            var created_after = options.created_after, created_before = options.created_before, filteredOptions = __rest(options, ["created_after", "created_before"]);
+            const { created_after, created_before, ...filteredOptions } = options;
             params.qs = filteredOptions;
         }
-        var apiPath = (0, url_path_1.default)(BASE_PATH);
+        const apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get information for long-polling until new events are available
      *
@@ -28311,22 +28920,22 @@ var Events = /** @class */ (function () {
      * @param {Function} [callback] Passed the long poll info if successful
      * @returns {Promise<Object>} A promise resolving to the long poll info
      */
-    Events.prototype.getLongPollInfo = function (callback) {
-        var apiPath = (0, url_path_1.default)(BASE_PATH);
+    getLongPollInfo(callback) {
+        const apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client
             .options(apiPath, {})
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== http_status_1.default.OK) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
-            var longpollInfo = response.body.entries.find(function (entry /* FIXME */) { return entry.type === 'realtime_server'; });
+            let longpollInfo = response.body.entries.find((entry /* FIXME */) => entry.type === 'realtime_server');
             if (!longpollInfo) {
                 throw errors_1.default.buildResponseError('No valid long poll server specified', response);
             }
             return longpollInfo;
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Create a stream of events, using the long-poll API to wait for new events.
      *
@@ -28341,8 +28950,8 @@ var Events = /** @class */ (function () {
      * @param {Function} [callback] Passed the events stream if successful
      * @returns {Promise<EventStream>} A promise resolving to the event stream
      */
-    Events.prototype.getEventStream = function (streamPosition, options, callback) {
-        var self = this;
+    getEventStream(streamPosition, options, callback) {
+        const self = this;
         if (typeof streamPosition === 'string') {
             if (typeof options === 'function') {
                 callback = options;
@@ -28358,11 +28967,9 @@ var Events = /** @class */ (function () {
             options = {};
         }
         return this.getCurrentStreamPosition()
-            .then(function (currentStreamPosition /* FIXME */) {
-            return new event_stream_1.default(self.client, currentStreamPosition, options);
-        })
+            .then((currentStreamPosition /* FIXME */) => new event_stream_1.default(self.client, currentStreamPosition, options))
             .asCallback(callback);
-    };
+    }
     /**
      * Create a stream of enterprise events.
      *
@@ -28398,12 +29005,11 @@ var Events = /** @class */ (function () {
      * @param {Function} [callback] Passed the events stream if successful
      * @returns {Promise<EnterpriseEventStream>} A promise resolving to the enterprise event stream
      */
-    Events.prototype.getEnterpriseEventStream = function (options, callback) {
-        var self = this;
+    getEnterpriseEventStream(options, callback) {
+        const self = this;
         return bluebird_1.Promise.resolve(new enterprise_event_stream_1.default(self.client, options)).asCallback(callback);
-    };
-    return Events;
-}());
+    }
+}
 Events.prototype.CURRENT_STREAM_POSITION = CURRENT_STREAM_POSITION;
 Events.prototype.enterpriseEventTypes = EventType;
 module.exports = Events;
@@ -28411,28 +29017,17 @@ module.exports = Events;
 
 /***/ }),
 
-/***/ 69451:
+/***/ 21013:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
-var FileRequestsManager = /** @class */ (function () {
-    function FileRequestsManager(client) {
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
+class FileRequestsManager {
+    constructor(client) {
         // Attach the client, for making API calls
         this.client = client;
     }
@@ -28442,20 +29037,20 @@ var FileRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] passed the user info if it was acquired successfully
      * @returns {Promise<FileRequest>} a promise with FileRequest details
      */
-    FileRequestsManager.prototype.getById = function (fileRequestId, callback) {
-        var apiPath = (0, url_path_1.default)('file_requests', fileRequestId);
+    getById(fileRequestId, callback) {
+        const apiPath = (0, url_path_1.default)('file_requests', fileRequestId);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, callback);
-    };
+    }
     /**
      * Delete File Request.
      * @param {string} fileRequestId File Request ID
      * @param {Function} [callback] passed the user info if it was acquired successfully
      * @returns {Promise<void>} Returns a promise resolving to nothing
      */
-    FileRequestsManager.prototype.delete = function (fileRequestId, callback) {
-        var apiPath = (0, url_path_1.default)('file_requests', fileRequestId);
+    delete(fileRequestId, callback) {
+        const apiPath = (0, url_path_1.default)('file_requests', fileRequestId);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, callback);
-    };
+    }
     /**
      * Copies existing FileRequest to new folder
      * @param {string} fileRequestIdToCopy ID of file request to copy
@@ -28472,10 +29067,10 @@ var FileRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] passed the user info if it was acquired successfully
      * @returns {Promise<FileRequest>} Returns a promise with FileRequest details
      */
-    FileRequestsManager.prototype.copy = function (fileRequestIdToCopy, copyRequest, callback) {
-        var apiPath = (0, url_path_1.default)('file_requests', fileRequestIdToCopy, 'copy');
+    copy(fileRequestIdToCopy, copyRequest, callback) {
+        const apiPath = (0, url_path_1.default)('file_requests', fileRequestIdToCopy, 'copy');
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, { body: copyRequest }, callback);
-    };
+    }
     /**
      * Update existing file request
      * @param {string} fileRequestId ID of file request
@@ -28493,22 +29088,24 @@ var FileRequestsManager = /** @class */ (function () {
      * @param {Function} callback passed the user info if it was acquired successfully
      * @returns {Promise<FileRequest>} Returns a promise with FileRequest details
      */
-    FileRequestsManager.prototype.update = function (fileRequestId, fileRequestChange, originalRequestEtag, callback) {
-        var apiPath = (0, url_path_1.default)('file_requests', fileRequestId);
-        var params = { body: fileRequestChange };
+    update(fileRequestId, fileRequestChange, originalRequestEtag, callback) {
+        const apiPath = (0, url_path_1.default)('file_requests', fileRequestId);
+        let params = { body: fileRequestChange };
         if (originalRequestEtag) {
-            params = __assign(__assign({}, params), { headers: { 'if-match': originalRequestEtag } });
+            params = {
+                ...params,
+                headers: { 'if-match': originalRequestEtag },
+            };
         }
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
-    return FileRequestsManager;
-}());
+    }
+}
 module.exports = FileRequestsManager;
 //# sourceMappingURL=file-requests-manager.js.map
 
 /***/ }),
 
-/***/ 82697:
+/***/ 33519:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -28522,14 +29119,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __importDefault(__nccwpck_require__(94366));
-var crypto_1 = __importDefault(__nccwpck_require__(76982));
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var stream_1 = __nccwpck_require__(2203);
-var url_template_1 = __importDefault(__nccwpck_require__(94058));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
-var ChunkedUploader = __nccwpck_require__(8168);
+const bluebird_1 = __importDefault(__nccwpck_require__(94366));
+const crypto_1 = __importDefault(__nccwpck_require__(76982));
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const stream_1 = __nccwpck_require__(2203);
+const url_template_1 = __importDefault(__nccwpck_require__(94058));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
+const ChunkedUploader = __nccwpck_require__(47134);
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -28562,7 +29159,7 @@ var LockType;
 // Private
 // -----------------------------------------------------------------------------
 // Base path for all files endpoints
-var BASE_PATH = '/files', VERSIONS_SUBRESOURCE = '/versions', WATERMARK_SUBRESOURCE = '/watermark', UPLOAD_SESSION_SUBRESOURCE = '/upload_sessions', ZIP_DOWNLOAD_PATH = '/zip_downloads';
+const BASE_PATH = '/files', VERSIONS_SUBRESOURCE = '/versions', WATERMARK_SUBRESOURCE = '/watermark', UPLOAD_SESSION_SUBRESOURCE = '/upload_sessions', ZIP_DOWNLOAD_PATH = '/zip_downloads';
 /**
  * Returns the multipart form value for file upload metadata.
  * @param {string} parentFolderID - the ID of the parent folder to upload to
@@ -28610,7 +29207,7 @@ function createFileContentFormData(content, options) {
  * @returns {Promise<string>} A promise resolving to the content URL template
  */
 function pollRepresentationInfo(client, infoURL) {
-    return client.get(infoURL).then(function (response /* FIXME */) {
+    return client.get(infoURL).then((response /* FIXME */) => {
         if (response.statusCode !== 200) {
             throw errors_1.default.buildUnexpectedResponseError(response);
         }
@@ -28622,11 +29219,9 @@ function pollRepresentationInfo(client, infoURL) {
                 return info;
             case 'none':
             case 'pending':
-                return bluebird_1.default.delay(1000).then(function () {
-                    return pollRepresentationInfo(client, infoURL);
-                });
+                return bluebird_1.default.delay(1000).then(() => pollRepresentationInfo(client, infoURL));
             default:
-                throw new Error("Unknown representation status: ".concat(info.status.state));
+                throw new Error(`Unknown representation status: ${info.status.state}`);
         }
     });
 }
@@ -28639,8 +29234,8 @@ function pollRepresentationInfo(client, infoURL) {
  * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
  * @constructor
  */
-var Files = /** @class */ (function () {
-    function Files(client) {
+class Files {
+    constructor(client) {
         // Attach the client, for making API calls
         this.client = client;
     }
@@ -28655,13 +29250,13 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the file information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the file object
      */
-    Files.prototype.get = function (fileID, options, callback) {
+    get(fileID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Requests a download URL for a given file.
      *
@@ -28676,7 +29271,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the download URL if request was successful.
      * @returns {Promise<string>} A promise resolving to the file's download URL
      */
-    Files.prototype.getDownloadURL = function (fileID, options, callback) {
+    getDownloadURL(fileID, options, callback) {
         var params = {
             qs: options,
         };
@@ -28684,7 +29279,7 @@ var Files = /** @class */ (function () {
         // Handle Special API Response
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             switch (response.statusCode) {
                 // 302 - Found
                 // No data returned, but the location header points to a download link for that file.
@@ -28699,7 +29294,7 @@ var Files = /** @class */ (function () {
             }
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Requests a Readable Stream for the given file ID.
      *
@@ -28716,8 +29311,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - passed the readable stream if request was successful
      * @returns {Promise<Readable>} A promise resolving for the file stream
      */
-    Files.prototype.getReadStream = function (fileID, options, callback) {
-        var _this = this;
+    getReadStream(fileID, options, callback) {
         options = options || {};
         var downloadStreamOptions = {
             streaming: true,
@@ -28726,14 +29320,14 @@ var Files = /** @class */ (function () {
         if (options.byteRange) {
             var range = options.byteRange;
             delete options.byteRange;
-            downloadStreamOptions.headers.Range = "bytes=".concat(range[0], "-").concat(range[1]);
+            downloadStreamOptions.headers.Range = `bytes=${range[0]}-${range[1]}`;
         }
         // Get the download URL to download from
         return (this.getDownloadURL(fileID, options)
             // Return a read stream to download the file
-            .then(function (url) { return _this.client.get(url, downloadStreamOptions); })
+            .then((url) => this.client.get(url, downloadStreamOptions))
             .asCallback(callback));
-    };
+    }
     /**
      * Gets the comments on a file.
      *
@@ -28745,13 +29339,13 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - passed the file comments if they were successfully acquired
      * @returns {Promise<Object>} A promise resolving to the collection of comments
      */
-    Files.prototype.getComments = function (fileID, options, callback) {
+    getComments(fileID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, '/comments');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Update some information about a given file.
      *
@@ -28765,7 +29359,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated file information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the update file object
      */
-    Files.prototype.update = function (fileID, updates, callback) {
+    update(fileID, updates, callback) {
         var params = {
             body: updates,
         };
@@ -28783,7 +29377,7 @@ var Files = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Add a file to a given collection
      *
@@ -28795,22 +29389,21 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated file if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated file object
      */
-    Files.prototype.addToCollection = function (fileID, collectionID, callback) {
-        var _this = this;
+    addToCollection(fileID, collectionID, callback) {
         return this.get(fileID, { fields: 'collections' })
-            .then(function (data) {
+            .then((data) => {
             var collections = data.collections || [];
             // Convert to correct format
-            collections = collections.map(function (c /* FIXME */) { return ({
+            collections = collections.map((c /* FIXME */) => ({
                 id: c.id,
-            }); });
-            if (!collections.find(function (c /* FIXME */) { return c.id === collectionID; })) {
+            }));
+            if (!collections.find((c /* FIXME */) => c.id === collectionID)) {
                 collections.push({ id: collectionID });
             }
-            return _this.update(fileID, { collections: collections });
+            return this.update(fileID, { collections });
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Remove a file from a given collection
      *
@@ -28822,19 +29415,18 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated file if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated file object
      */
-    Files.prototype.removeFromCollection = function (fileID, collectionID, callback) {
-        var _this = this;
+    removeFromCollection(fileID, collectionID, callback) {
         return this.get(fileID, { fields: 'collections' })
-            .then(function (data /* FIXME */) {
+            .then((data /* FIXME */) => {
             var collections = data.collections || [];
             // Convert to correct object format and remove the specified collection
             collections = collections
-                .map(function (c /* FIXME */) { return ({ id: c.id }); })
-                .filter(function (c /* FIXME */) { return c.id !== collectionID; });
-            return _this.update(fileID, { collections: collections });
+                .map((c /* FIXME */) => ({ id: c.id }))
+                .filter((c /* FIXME */) => c.id !== collectionID);
+            return this.update(fileID, { collections });
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Move a file into a new parent folder.
      *
@@ -28846,7 +29438,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated file information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the updated file object
      */
-    Files.prototype.move = function (fileID, newParentID, callback) {
+    move(fileID, newParentID, callback) {
         var params = {
             body: {
                 parent: {
@@ -28856,7 +29448,7 @@ var Files = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Copy a file into a new folder.
      *
@@ -28871,7 +29463,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - passed the new file info if call was successful
      * @returns {Promise<Object>} A promise resolving to the new file object
      */
-    Files.prototype.copy = function (fileID, newParentID, options, callback) {
+    copy(fileID, newParentID, options, callback) {
         // @NOTE(mwiller) 2016-10-25: Shuffle arguments to maintain backward compatibility
         //  This can be removed at the v2.0 update
         if (typeof options === 'function') {
@@ -28887,7 +29479,7 @@ var Files = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, '/copy');
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a given file.
      *
@@ -28900,7 +29492,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Files.prototype.delete = function (fileID, options, callback) {
+    delete(fileID, options, callback) {
         // Switch around arguments if necessary for backwards compatibility
         if (typeof options === 'function') {
             callback = options;
@@ -28914,7 +29506,7 @@ var Files = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Get preflight information for a new file upload.  Without any file data,
      * this will return an upload URL and token to be used when uploading the file.
@@ -28934,7 +29526,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with upload data if successful, or err if the upload would not succeed
      * @returns {Promise<Object>} A promise resolving to the upload data
      */
-    Files.prototype.preflightUploadFile = function (parentFolderID, fileData, options, callback) {
+    preflightUploadFile(parentFolderID, fileData, options, callback) {
         var params = {
             body: {
                 parent: {
@@ -28948,7 +29540,7 @@ var Files = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, '/content');
         return this.client.wrapWithDefaultHandler(this.client.options)(apiPath, params, callback);
-    };
+    }
     /**
      * Get preflight information for a file version upload.  Without any file data,
      * this will return an upload URL and token to be used when uploading the file.
@@ -28968,7 +29560,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with upload data if successful, or err if the upload would not succeed
      * @returns {Promise<Object>} A promise resolving to the upload data
      */
-    Files.prototype.preflightUploadNewFileVersion = function (fileID, fileData, options, callback) {
+    preflightUploadNewFileVersion(fileID, fileData, options, callback) {
         var params = {
             qs: options,
         };
@@ -28977,7 +29569,7 @@ var Files = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, '/content');
         return this.client.wrapWithDefaultHandler(this.client.options)(apiPath, params, callback);
-    };
+    }
     /**
      * If there are previous versions of this file, this method can be used to promote one of the older
      * versions to the top of the stack. This actually mints a copy of the old version and puts it on
@@ -28992,7 +29584,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the promoted file version information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the promoted file version
      */
-    Files.prototype.promoteVersion = function (fileID, versionID, callback) {
+    promoteVersion(fileID, versionID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, VERSIONS_SUBRESOURCE, '/current'), params = {
             body: {
                 type: 'file_version',
@@ -29000,7 +29592,7 @@ var Files = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Uploads a new file. Unlike non-upload methods, this method will not perform any retries.
      * This method currently does not support any optional parameters such as contentModifiedAt.
@@ -29021,7 +29613,7 @@ var Files = /** @class */ (function () {
      * upload failed
      * @returns {Promise<Object>} A promise resolving to the uploaded file
      */
-    Files.prototype.uploadFile = function (parentFolderID, filename, content, options, callback) {
+    uploadFile(parentFolderID, filename, content, options, callback) {
         // Shuffle around optional parameter
         if (typeof options === 'function') {
             callback = options;
@@ -29038,7 +29630,7 @@ var Files = /** @class */ (function () {
             content: createFileContentFormData(content, formOptions),
         };
         return this.client.wrapWithDefaultHandler(this.client.upload)(apiPath, null, multipartFormData, callback);
-    };
+    }
     /**
      * Uploads a new version of a file. Unlike non-upload methods, this method will not perform any retries.
      * This method currently does not support any optional parameters such as contentModifiedAt.
@@ -29058,7 +29650,7 @@ var Files = /** @class */ (function () {
      * upload failed
      * @returns {Promise<Object>} A promise resolving to the uploaded file
      */
-    Files.prototype.uploadNewFileVersion = function (fileID, content, options, callback) {
+    uploadNewFileVersion(fileID, content, options, callback) {
         // Shuffle around optional parameter
         if (typeof options === 'function') {
             callback = options;
@@ -29076,7 +29668,7 @@ var Files = /** @class */ (function () {
         }
         multipartFormData.content = createFileContentFormData(content, formOptions);
         return this.client.wrapWithDefaultHandler(this.client.upload)(apiPath, null, multipartFormData, callback);
-    };
+    }
     /**
      * Retrieves all metadata associated with a file.
      *
@@ -29087,10 +29679,10 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - called with an array of metadata when successful
      * @returns {Promise<Object>} A promise resolving to a collection of metadata on the file
      */
-    Files.prototype.getAllMetadata = function (fileID, callback) {
+    getAllMetadata(fileID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, 'metadata');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Retrieve a single metadata template instance for a file.
      *
@@ -29103,10 +29695,10 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the metadata template if successful
      * @returns {Promise<Object>} A promise resolving to the metadata template
      */
-    Files.prototype.getMetadata = function (fileID, scope, template, callback) {
+    getMetadata(fileID, scope, template, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, 'metadata', scope, template);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Adds metadata to a file.  Metadata must either match a template schema or
      * be placed into the unstructured "properties" template in global scope.
@@ -29121,12 +29713,12 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with error if unsuccessful
      * @returns {Promise<Object>} A promise resolving to the new metadata
      */
-    Files.prototype.addMetadata = function (fileID, scope, template, data, callback) {
+    addMetadata(fileID, scope, template, data, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, 'metadata', scope, template), params = {
             body: data,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Updates a metadata template instance with JSON Patch-formatted data.
      *
@@ -29140,7 +29732,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with updated metadata if successful
      * @returns {Promise<Object>} A promise resolving to the updated metadata
      */
-    Files.prototype.updateMetadata = function (fileID, scope, template, patch, callback) {
+    updateMetadata(fileID, scope, template, patch, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, 'metadata', scope, template), params = {
             body: patch,
             headers: {
@@ -29148,7 +29740,7 @@ var Files = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Sets metadata on a file, overwriting any metadata that exists for the provided keys.
      *
@@ -29159,23 +29751,22 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with updated metadata if successful
      * @returns {Promise<Object>} A promise resolving to the updated metadata
      */
-    Files.prototype.setMetadata = function (fileID, scope, template, metadata, callback) {
-        var _this = this;
+    setMetadata(fileID, scope, template, metadata, callback) {
         return this.addMetadata(fileID, scope, template, metadata)
-            .catch(function (err /* FIXME */) {
+            .catch((err /* FIXME */) => {
             if (err.statusCode !== 409) {
                 throw err;
             }
             // Metadata already exists on the file; update instead
-            var updates = Object.keys(metadata).map(function (key) { return ({
+            var updates = Object.keys(metadata).map((key) => ({
                 op: 'add',
-                path: "/".concat(key),
+                path: `/${key}`,
                 value: metadata[key],
-            }); });
-            return _this.updateMetadata(fileID, scope, template, updates);
+            }));
+            return this.updateMetadata(fileID, scope, template, updates);
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Deletes a metadata template from a file.
      *
@@ -29188,10 +29779,10 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Files.prototype.deleteMetadata = function (fileID, scope, template, callback) {
+    deleteMetadata(fileID, scope, template, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, 'metadata', scope, template);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Permanently deletes an item that is in the trash. The item will no longer exist in Box. This action cannot be undone.
      *
@@ -29204,7 +29795,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Files.prototype.deletePermanently = function (fileID, options, callback) {
+    deletePermanently(fileID, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = {};
@@ -29217,7 +29808,7 @@ var Files = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, '/trash');
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Retrieves a file that has been moved to the trash.
      *
@@ -29229,13 +29820,13 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the trashed file information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the trashed file
      */
-    Files.prototype.getTrashedFile = function (fileID, options, callback) {
+    getTrashedFile(fileID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, 'trash');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Retrieves all of the tasks for given file.
      *
@@ -29247,13 +29838,13 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the file tasks if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to a collections of tasks on the file
      */
-    Files.prototype.getTasks = function (fileID, options, callback) {
+    getTasks(fileID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, '/tasks');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to retrieve an expiring URL for creating an embedded preview session.
      * The URL will expire after 60 seconds and the preview session will expire after 60 minutes.
@@ -29265,7 +29856,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed with the embed link if successful, error otherwise
      * @returns {Promise<string>} A promise resolving to the file embed link URL
      */
-    Files.prototype.getEmbedLink = function (fileID, callback) {
+    getEmbedLink(fileID, callback) {
         var params = {
             qs: {
                 fields: 'expiring_embed_link',
@@ -29274,14 +29865,14 @@ var Files = /** @class */ (function () {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID);
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== http_status_1.default.OK) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
             return response.body.expiring_embed_link.url;
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Locks  a file.
      *
@@ -29295,7 +29886,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed with the locked file information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the locked file object
      */
-    Files.prototype.lock = function (fileID, options, callback) {
+    lock(fileID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID), params = {
             body: {
                 lock: {
@@ -29305,7 +29896,7 @@ var Files = /** @class */ (function () {
         };
         Object.assign(params.body.lock, options);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Unlocks a file.
      *
@@ -29316,14 +29907,14 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed with the unlocked file information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the unlocked file object
      */
-    Files.prototype.unlock = function (fileID, callback) {
+    unlock(fileID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID), params = {
             body: {
                 lock: null,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Restores an item that has been moved to the trash. Default behavior is to
      * restore the item to the folder it was in before it was moved to the trash.
@@ -29341,7 +29932,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Called with item information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the restored file object
      */
-    Files.prototype.restoreFromTrash = function (fileID, options, callback) {
+    restoreFromTrash(fileID, options, callback) {
         // Set up the parent_id parameter
         if (options && options.parent_id) {
             options.parent = {
@@ -29353,7 +29944,7 @@ var Files = /** @class */ (function () {
             body: options || {},
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * If there are previous versions of this file, this method can be used to retrieve information
      * about the older versions.
@@ -29366,12 +29957,12 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of previous file versions if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of file versions
      */
-    Files.prototype.getVersions = function (fileID, options, callback) {
+    getVersions(fileID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, VERSIONS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to retrieve the watermark for a corresponding Box file.
      *
@@ -29383,20 +29974,20 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the watermark information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the watermark info
      */
-    Files.prototype.getWatermark = function (fileID, options, callback) {
+    getWatermark(fileID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, WATERMARK_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== 200) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
             return response.body.watermark;
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Used to apply or update the watermark for a corresponding Box file.
      *
@@ -29408,7 +29999,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the watermark information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the watermark info
      */
-    Files.prototype.applyWatermark = function (fileID, options, callback) {
+    applyWatermark(fileID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, WATERMARK_SUBRESOURCE), params = {
             body: {
                 watermark: {
@@ -29418,7 +30009,7 @@ var Files = /** @class */ (function () {
         };
         Object.assign(params.body.watermark, options);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to remove the watermark for a corresponding Box file.
      *
@@ -29429,10 +30020,10 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Files.prototype.removeWatermark = function (fileID, callback) {
+    removeWatermark(fileID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, WATERMARK_SUBRESOURCE);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Discards a specific file version to the trash. Depending on the enterprise settings
      * for this user, the item will either be actually deleted from Box or moved to the trash.
@@ -29447,7 +30038,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Files.prototype.deleteVersion = function (fileID, versionID, options, callback) {
+    deleteVersion(fileID, versionID, options, callback) {
         // Switch around arguments if necessary for backwwards compatibility
         if (typeof options === 'function') {
             callback = options;
@@ -29461,7 +30052,7 @@ var Files = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, VERSIONS_SUBRESOURCE, versionID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Creates a session used to upload a new file in chunks..  This will first
      * verify that the file can be created and then open a session for uploading
@@ -29476,7 +30067,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the upload session info if successful
      * @returns {Promise<Object>} A promise resolving to the new upload session object
      */
-    Files.prototype.createUploadSession = function (folderID, size, name, callback) {
+    createUploadSession(folderID, size, name, callback) {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, UPLOAD_SESSION_SUBRESOURCE), params = {
             body: {
@@ -29486,7 +30077,7 @@ var Files = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiURL, params, callback);
-    };
+    }
     /**
      * Creates a session used to upload a new version of a file in chunks.  This
      * will first verify that the version can be created and then open a session for
@@ -29500,7 +30091,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the upload session info if successful
      * @returns {Promise<Object>} A promise resolving to the new upload session object
      */
-    Files.prototype.createNewVersionUploadSession = function (fileID, size, callback) {
+    createNewVersionUploadSession(fileID, size, callback) {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, fileID, UPLOAD_SESSION_SUBRESOURCE), params = {
             body: {
@@ -29508,7 +30099,7 @@ var Files = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiURL, params, callback);
-    };
+    }
     /**
      * Uploads a chunk of a file to an open upload session
      *
@@ -29522,29 +30113,29 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the part definition if successful
      * @returns {Promise<Object>} A promise resolving to the part object
      */
-    Files.prototype.uploadPart = function (sessionID, part, offset, totalSize, callback) {
+    uploadPart(sessionID, part, offset, totalSize, callback) {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, UPLOAD_SESSION_SUBRESOURCE, sessionID);
         var hash = crypto_1.default.createHash('sha1').update(part).digest('base64');
         var params = {
             headers: {
                 'Content-Type': 'application/octet-stream',
-                Digest: "SHA=".concat(hash),
-                'Content-Range': "bytes ".concat(offset, "-").concat(offset + part.length - 1, "/").concat(totalSize),
+                Digest: `SHA=${hash}`,
+                'Content-Range': `bytes ${offset}-${offset + part.length - 1}/${totalSize}`,
             },
             json: false,
             body: part,
         };
         return this.client
             .put(apiURL, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== 200) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
             return JSON.parse(response.body);
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Commit an upload session after all parts have been uploaded, creating the new file
      *
@@ -29559,8 +30150,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new file information if successful
      * @returns {Promise<Object>} A promise resolving to the uploaded file object
      */
-    Files.prototype.commitUploadSession = function (sessionID, fileHash, options, callback) {
-        var _this = this;
+    commitUploadSession(sessionID, fileHash, options, callback) {
         options = options || {};
         var userParts;
         if (options.parts) {
@@ -29570,18 +30160,18 @@ var Files = /** @class */ (function () {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, UPLOAD_SESSION_SUBRESOURCE, sessionID, 'commit'), params = {
             headers: {
-                Digest: "SHA=".concat(fileHash),
+                Digest: `SHA=${fileHash}`,
             },
             body: {
                 attributes: options,
             },
         };
-        var fetchParts = function (offset /* FIXME */, fetchedParts /* FIXME */) {
-            var pagingOptions = {
+        var fetchParts = (offset /* FIXME */, fetchedParts /* FIXME */) => {
+            let pagingOptions = {
                 limit: 1000,
-                offset: offset,
+                offset,
             };
-            return _this.getUploadSessionParts(sessionID, pagingOptions).then(function (data /* FIXME */) {
+            return this.getUploadSessionParts(sessionID, pagingOptions).then((data /* FIXME */) => {
                 fetchedParts = fetchedParts.concat(data.entries);
                 if (data.offset + data.entries.length >= data.total_count) {
                     return bluebird_1.default.resolve(fetchedParts);
@@ -29590,29 +30180,29 @@ var Files = /** @class */ (function () {
             });
         };
         return (userParts ? bluebird_1.default.resolve(userParts) : fetchParts(0, []))
-            .then(function (parts /* FIXME */) {
+            .then((parts /* FIXME */) => {
             // Commit the upload with the list of parts
             params.body.parts = parts;
-            return _this.client.post(apiURL, params);
+            return this.client.post(apiURL, params);
         })
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode === 201) {
                 return response.body;
             }
             if (response.statusCode === 202) {
                 var retryInterval = response.headers['retry-after'] || 1;
-                return bluebird_1.default.delay(retryInterval * 1000).then(function () {
+                return bluebird_1.default.delay(retryInterval * 1000).then(() => {
                     // Ensure we don't have to fetch parts from the API again on retry
                     options = Object.assign({}, options, {
                         parts: params.body.parts,
                     });
-                    return _this.commitUploadSession(sessionID, fileHash, options);
+                    return this.commitUploadSession(sessionID, fileHash, options);
                 });
             }
             throw errors_1.default.buildUnexpectedResponseError(response);
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Abort an upload session, discarding any chunks that were uploaded to it
      *
@@ -29623,11 +30213,11 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Files.prototype.abortUploadSession = function (sessionID, callback) {
+    abortUploadSession(sessionID, callback) {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, UPLOAD_SESSION_SUBRESOURCE, sessionID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiURL, null, callback);
-    };
+    }
     /**
      * Get a list of all parts that have been uploaded to an upload session
      *
@@ -29641,13 +30231,13 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the list of parts if successful
      * @returns {Promise<Object>} A promise resolving to the collection of uploaded parts
      */
-    Files.prototype.getUploadSessionParts = function (sessionID, options, callback) {
+    getUploadSessionParts(sessionID, options, callback) {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, UPLOAD_SESSION_SUBRESOURCE, sessionID, 'parts'), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiURL, params, callback);
-    };
+    }
     /**
      * Get the status of an upload session, e.g. whether or not is has started or
      * finished committing
@@ -29659,11 +30249,11 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the session status if successful
      * @returns {Promise<Object>} A promise resolving to the upload session object
      */
-    Files.prototype.getUploadSession = function (sessionID, callback) {
+    getUploadSession(sessionID, callback) {
         var apiURL = this.client._uploadBaseURL +
             (0, url_path_1.default)(BASE_PATH, UPLOAD_SESSION_SUBRESOURCE, sessionID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiURL, null, callback);
-    };
+    }
     /**
      * Upload a file in chunks, which is generally faster and more reliable for
      * large files.
@@ -29682,19 +30272,16 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the uploader if successful
      * @returns {Promise<ChunkedUploader>} A promise resolving to the chunked uploader
      */
-    Files.prototype.getChunkedUploader = function (folderID, size, name, file, options, callback) {
-        var _this = this;
+    getChunkedUploader(folderID, size, name, file, options, callback) {
         if (file instanceof stream_1.Readable) {
             // Need to pause the stream immediately to prevent certain libraries,
             // e.g. request from placing the stream into flowing mode and consuming bytes
             file.pause();
         }
         return this.createUploadSession(folderID, size, name)
-            .then(function (sessionInfo /* FIXME */) {
-            return new ChunkedUploader(_this.client, sessionInfo, file, size, options);
-        })
+            .then((sessionInfo /* FIXME */) => new ChunkedUploader(this.client, sessionInfo, file, size, options))
             .asCallback(callback);
-    };
+    }
     /**
      * Upload a new file version in chunks, which is generally faster and more
      * reliable for large files.
@@ -29712,19 +30299,16 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the uploader if successful
      * @returns {Promise<ChunkedUploader>} A promise resolving to the chunked uploader
      */
-    Files.prototype.getNewVersionChunkedUploader = function (fileID, size, file, options, callback) {
-        var _this = this;
+    getNewVersionChunkedUploader(fileID, size, file, options, callback) {
         if (file instanceof stream_1.Readable) {
             // Need to pause the stream immediately to prevent certain libraries,
             // e.g. request from placing the stream into flowing mode and consuming bytes
             file.pause();
         }
         return this.createNewVersionUploadSession(fileID, size)
-            .then(function (sessionInfo /* FIXME */) {
-            return new ChunkedUploader(_this.client, sessionInfo, file, size, options);
-        })
+            .then((sessionInfo /* FIXME */) => new ChunkedUploader(this.client, sessionInfo, file, size, options))
             .asCallback(callback);
-    };
+    }
     /**
      * Requests collaborations on a given file.
      *
@@ -29739,13 +30323,13 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed the collaborations if successful, error otherwise
      * @returns {Promise<schemas.Collaborations>} A promise resolving to the collection of collaborations on the file
      */
-    Files.prototype.getCollaborations = function (fileID, options, callback) {
+    getCollaborations(fileID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID, '/collaborations');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Requests information for all representation objects generated for a specific Box file
      *
@@ -29760,8 +30344,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed an array of representaton objects if successful
      * @returns {Promise<Object>} A promise resolving to the representation response objects
      */
-    Files.prototype.getRepresentationInfo = function (fileID, representationType, options, callback) {
-        var _this = this;
+    getRepresentationInfo(fileID, representationType, options, callback) {
         if (typeof options === 'function') {
             callback = options;
             options = {};
@@ -29780,7 +30363,7 @@ var Files = /** @class */ (function () {
         var apiPath = (0, url_path_1.default)(BASE_PATH, fileID);
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             switch (response.statusCode) {
                 // 202 - A Box file representation will be generated, but is not ready yet
                 case http_status_1.default.ACCEPTED:
@@ -29790,17 +30373,17 @@ var Files = /** @class */ (function () {
                 case http_status_1.default.OK:
                     if (options && options.generateRepresentations) {
                         var data = response.body.representations.entries;
-                        var promiseArray = data.map(function (entry /* FIXME */) {
+                        var promiseArray = data.map((entry /* FIXME */) => {
                             switch (entry.status.state) {
                                 case 'success':
                                 case 'viewable':
                                 case 'error':
                                     return bluebird_1.default.resolve(entry);
                                 default:
-                                    return pollRepresentationInfo(_this.client, entry.info.url);
+                                    return pollRepresentationInfo(this.client, entry.info.url);
                             }
                         });
-                        return bluebird_1.default.all(promiseArray).then(function (entries) { return ({ entries: entries }); });
+                        return bluebird_1.default.all(promiseArray).then((entries) => ({ entries }));
                     }
                     return response.body.representations;
                 // Unexpected Response
@@ -29809,7 +30392,7 @@ var Files = /** @class */ (function () {
             }
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Get the contents of a representation of a file, e.g, the binary content of an image or pdf.
      *
@@ -29823,23 +30406,21 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] Passed a stream over the representation contents if successful
      * @returns {Promise<Readable>} A promise resolving to a stream over the representation contents
      */
-    Files.prototype.getRepresentationContent = function (fileID, representationType, options, callback) {
-        var _this = this;
+    getRepresentationContent(fileID, representationType, options, callback) {
         if (!representationType) {
             throw new Error('Must provide a valid X-Rep-Hints string');
         }
         options = Object.assign({ assetPath: '' }, options);
         return this.getRepresentationInfo(fileID, representationType)
-            .then(function (reps /* FIXME */) {
-            var _a;
+            .then((reps /* FIXME */) => {
             var repInfo = reps.entries.pop();
             if (!repInfo) {
                 throw new Error('Could not get information for requested representation');
             }
             // If the representation is paged, we need to specify which page to get the content for
             // If the assetPath is not specified, we default to the first pages
-            if (!(options === null || options === void 0 ? void 0 : options.assetPath) && ((_a = repInfo.properties) === null || _a === void 0 ? void 0 : _a.paged) == 'true') {
-                options.assetPath = "1.".concat(repInfo.representation);
+            if (!options?.assetPath && repInfo.properties?.paged == 'true') {
+                options.assetPath = `1.${repInfo.representation}`;
             }
             switch (repInfo.status.state) {
                 case 'success':
@@ -29849,24 +30430,24 @@ var Files = /** @class */ (function () {
                     throw new Error('Representation had error status');
                 case 'none':
                 case 'pending':
-                    return pollRepresentationInfo(_this.client, repInfo.info.url).then(function (info /* FIXME */) {
+                    return pollRepresentationInfo(this.client, repInfo.info.url).then((info /* FIXME */) => {
                         if (info.status.state === 'error') {
                             throw new Error('Representation had error status');
                         }
                         return info.content.url_template;
                     });
                 default:
-                    throw new Error("Unknown representation status: ".concat(repInfo.status.state));
+                    throw new Error(`Unknown representation status: ${repInfo.status.state}`);
             }
         })
-            .then(function (assetURLTemplate) {
+            .then((assetURLTemplate) => {
             var url = url_template_1.default
                 .parse(assetURLTemplate)
                 .expand({ asset_path: options.assetPath });
-            return _this.client.get(url, { streaming: true });
+            return this.client.get(url, { streaming: true });
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Creates a zip of multiple files and folders.
      *
@@ -29878,15 +30459,15 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] Passed a zip information object
      * @returns {Promise<string>} A promise resolving to a zip information object
      */
-    Files.prototype.createZip = function (name, items /* FIXME */, callback) {
+    createZip(name, items /* FIXME */, callback) {
         var params = {
             body: {
                 download_file_name: name,
-                items: items,
+                items,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(ZIP_DOWNLOAD_PATH, params, callback);
-    };
+    }
     /**
      * Creates a zip of multiple files and folders and downloads it.
      *
@@ -29899,8 +30480,7 @@ var Files = /** @class */ (function () {
      * @param {Function} [callback] - Passed a zip download status object
      * @returns {Promise<Readable>} A promise resolving to a zip download status object
      */
-    Files.prototype.downloadZip = function (name, items /* FIXME */, stream, callback) {
-        var _this = this;
+    downloadZip(name, items /* FIXME */, stream, callback) {
         var downloadStreamOptions = {
             streaming: true,
             headers: {},
@@ -29908,31 +30488,26 @@ var Files = /** @class */ (function () {
         var params = {
             body: {
                 download_file_name: name,
-                items: items,
+                items,
             },
         };
         return this.client
             .post(ZIP_DOWNLOAD_PATH, params)
-            .then(function (response /* FIXME */) {
-            return _this.client
-                .get(response.body.download_url, downloadStreamOptions)
-                .then(function (responseStream) {
-                responseStream.pipe(stream);
-                // eslint-disable-next-line promise/avoid-new
-                return new bluebird_1.default(function (resolve, reject) {
-                    responseStream.on('end', function () { return resolve('Done downloading'); });
-                    responseStream.on('error', function (error) { return reject(error); });
-                }).then(function () {
-                    return _this.client
-                        .get(response.body.status_url)
-                        .then(function (responseStatus /* FIXME */) { return responseStatus.body; });
-                });
-            });
-        })
+            .then((response /* FIXME */) => this.client
+            .get(response.body.download_url, downloadStreamOptions)
+            .then((responseStream) => {
+            responseStream.pipe(stream);
+            // eslint-disable-next-line promise/avoid-new
+            return new bluebird_1.default((resolve, reject) => {
+                responseStream.on('end', () => resolve('Done downloading'));
+                responseStream.on('error', (error) => reject(error));
+            }).then(() => this.client
+                .get(response.body.status_url)
+                .then((responseStatus /* FIXME */) => responseStatus.body));
+        }))
             .asCallback(callback);
-    };
-    return Files;
-}());
+    }
+}
 /**
  * Enum of valid x-rep- hint values for generating representation info
  *
@@ -29945,7 +30520,7 @@ module.exports = Files;
 
 /***/ }),
 
-/***/ 74111:
+/***/ 92749:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -29956,12 +30531,12 @@ module.exports = Files;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/folders', FOLDER_LOCK = '/folder_locks', WATERMARK_SUBRESOURCE = '/watermark';
+const BASE_PATH = '/folders', FOLDER_LOCK = '/folder_locks', WATERMARK_SUBRESOURCE = '/watermark';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -29972,8 +30547,8 @@ var BASE_PATH = '/folders', FOLDER_LOCK = '/folder_locks', WATERMARK_SUBRESOURCE
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Folders = /** @class */ (function () {
-    function Folders(client) {
+class Folders {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -29987,13 +30562,13 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the folder information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the folder object
      */
-    Folders.prototype.get = function (folderID, options, callback) {
+    get(folderID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Requests items contained within a given folder.
      *
@@ -30005,13 +30580,13 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the folder information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the collection of the items in the folder
      */
-    Folders.prototype.getItems = function (folderID, options, callback) {
+    getItems(folderID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, '/items');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Requests collaborations on a given folder.
      *
@@ -30023,13 +30598,13 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the folder information if it was acquired successfully
      * @returns {Promise<schemas.Collaborations>} A promise resolving to the collection of collaborations
      */
-    Folders.prototype.getCollaborations = function (folderID, options, callback) {
+    getCollaborations(folderID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, '/collaborations');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Creates a new Folder within a parent folder
      *
@@ -30041,17 +30616,17 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - passed the new folder info if call was successful
      * @returns {Promise<Object>} A promise resolving to the created folder object
      */
-    Folders.prototype.create = function (parentFolderID, name, callback) {
+    create(parentFolderID, name, callback) {
         var params = {
             body: {
-                name: name,
+                name,
                 parent: {
                     id: parentFolderID,
                 },
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(BASE_PATH, params, callback);
-    };
+    }
     /**
      * Copy a folder into a new, different folder
      *
@@ -30065,7 +30640,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - passed the new folder info if call was successful
      * @returns {Promise<Object>} A promise resolving to the new folder object
      */
-    Folders.prototype.copy = function (folderID, newParentID, options, callback) {
+    copy(folderID, newParentID, options, callback) {
         // @NOTE(mwiller) 2016-10-25: Shuffle arguments to maintain backward compatibility
         //  This can be removed at the v2.0 update
         if (typeof options === 'function') {
@@ -30081,7 +30656,7 @@ var Folders = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, '/copy');
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Update some information about a given folder.
      *
@@ -30095,7 +30670,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated folder information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the updated folder object
      */
-    Folders.prototype.update = function (folderID, updates, callback) {
+    update(folderID, updates, callback) {
         var params = {
             body: updates,
         };
@@ -30113,7 +30688,7 @@ var Folders = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Add a folder to a given collection
      *
@@ -30125,22 +30700,21 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated folder if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated folder object
      */
-    Folders.prototype.addToCollection = function (folderID, collectionID, callback) {
-        var _this = this;
+    addToCollection(folderID, collectionID, callback) {
         return this.get(folderID, { fields: 'collections' })
-            .then(function (data /* FIXME */) {
+            .then((data /* FIXME */) => {
             var collections = data.collections || [];
             // Convert to correct format
-            collections = collections.map(function (c /* FIXME */) { return ({
+            collections = collections.map((c /* FIXME */) => ({
                 id: c.id,
-            }); });
-            if (!collections.find(function (c /* FIXME */) { return c.id === collectionID; })) {
+            }));
+            if (!collections.find((c /* FIXME */) => c.id === collectionID)) {
                 collections.push({ id: collectionID });
             }
-            return _this.update(folderID, { collections: collections });
+            return this.update(folderID, { collections });
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Remove a folder from a given collection
      *
@@ -30152,19 +30726,18 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated folder if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated folder object
      */
-    Folders.prototype.removeFromCollection = function (folderID, collectionID, callback) {
-        var _this = this;
+    removeFromCollection(folderID, collectionID, callback) {
         return this.get(folderID, { fields: 'collections' })
-            .then(function (data /* FIXME */) {
+            .then((data /* FIXME */) => {
             var collections = data.collections || [];
             // Convert to correct object format and remove the specified collection
             collections = collections
-                .map(function (c /* FIXME */) { return ({ id: c.id }); })
-                .filter(function (c /* FIXME */) { return c.id !== collectionID; });
-            return _this.update(folderID, { collections: collections });
+                .map((c /* FIXME */) => ({ id: c.id }))
+                .filter((c /* FIXME */) => c.id !== collectionID);
+            return this.update(folderID, { collections });
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Move a folder into a new parent folder.
      *
@@ -30176,7 +30749,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated folder information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the updated folder object
      */
-    Folders.prototype.move = function (folderID, newParentID, callback) {
+    move(folderID, newParentID, callback) {
         var params = {
             body: {
                 parent: {
@@ -30186,7 +30759,7 @@ var Folders = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a given folder.
      *
@@ -30199,7 +30772,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Folders.prototype.delete = function (folderID, options, callback) {
+    delete(folderID, options, callback) {
         var params = {
             qs: options,
         };
@@ -30211,7 +30784,7 @@ var Folders = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Retrieves all metadata associated with a folder.
      *
@@ -30222,10 +30795,10 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - called with an array of metadata when successful
      * @returns {Promise<Object>} A promise resolving to the collection of metadata on the folder
      */
-    Folders.prototype.getAllMetadata = function (folderID, callback) {
+    getAllMetadata(folderID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, 'metadata');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Retrieve a single metadata template instance for a folder.
      *
@@ -30238,10 +30811,10 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the metadata template if successful
      * @returns {Promise<Object>} A promise resolving to the metadata template
      */
-    Folders.prototype.getMetadata = function (folderID, scope, template, callback) {
+    getMetadata(folderID, scope, template, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, 'metadata', scope, template);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Adds metadata to a folder.  Metadata must either match a template schema or
      * be placed into the unstructured "properties" template in global scope.
@@ -30256,12 +30829,12 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Called with error if unsuccessful
      * @returns {Promise<Object>} A promise resolving to the created metadata
      */
-    Folders.prototype.addMetadata = function (folderID, scope, template, data, callback) {
+    addMetadata(folderID, scope, template, data, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, 'metadata', scope, template), params = {
             body: data,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Updates a metadata template instance with JSON Patch-formatted data.
      *
@@ -30275,7 +30848,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Called with updated metadata if successful
      * @returns {Promise<Object>} A promise resolving to the updated metadata
      */
-    Folders.prototype.updateMetadata = function (folderID, scope, template, patch, callback) {
+    updateMetadata(folderID, scope, template, patch, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, 'metadata', scope, template), params = {
             body: patch,
             headers: {
@@ -30283,7 +30856,7 @@ var Folders = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Sets metadata on a folder, overwriting any metadata that exists for the provided keys.
      *
@@ -30294,23 +30867,22 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Called with updated metadata if successful
      * @returns {Promise<Object>} A promise resolving to the updated metadata
      */
-    Folders.prototype.setMetadata = function (folderID, scope, template, metadata, callback) {
-        var _this = this;
+    setMetadata(folderID, scope, template, metadata, callback) {
         return this.addMetadata(folderID, scope, template, metadata)
-            .catch(function (err /* FIXME */) {
+            .catch((err /* FIXME */) => {
             if (err.statusCode !== 409) {
                 throw err;
             }
             // Metadata already exists on the file; update instead
-            var updates = Object.keys(metadata).map(function (key) { return ({
+            var updates = Object.keys(metadata).map((key) => ({
                 op: 'add',
-                path: "/".concat(key),
+                path: `/${key}`,
                 value: metadata[key],
-            }); });
-            return _this.updateMetadata(folderID, scope, template, updates);
+            }));
+            return this.updateMetadata(folderID, scope, template, updates);
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Deletes a metadata template from a folder.
      *
@@ -30323,10 +30895,10 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Called with nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Folders.prototype.deleteMetadata = function (folderID, scope, template, callback) {
+    deleteMetadata(folderID, scope, template, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, 'metadata', scope, template);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Retrieves a folder that has been moved to the trash
      *
@@ -30338,13 +30910,13 @@ var Folders = /** @class */ (function () {
      * @param  {Function} [callback]  - Passed the folder information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the trashed folder object
      */
-    Folders.prototype.getTrashedFolder = function (folderID, options, callback) {
+    getTrashedFolder(folderID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, 'trash');
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Restores an item that has been moved to the trash. Default behavior is to restore the item
      * to the folder it was in before it was moved to the trash. If that parent folder no longer
@@ -30361,7 +30933,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Called with folder information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the restored folder object
      */
-    Folders.prototype.restoreFromTrash = function (folderID, options, callback) {
+    restoreFromTrash(folderID, options, callback) {
         // Set up the parent_id parameter
         if (options && options.parent_id) {
             options.parent = {
@@ -30373,7 +30945,7 @@ var Folders = /** @class */ (function () {
             body: options || {},
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Permanently deletes an folder that is in the trash. The item will no longer exist in Box. This action cannot be undone
      *
@@ -30386,7 +30958,7 @@ var Folders = /** @class */ (function () {
      * @param  {Function} [callback] Called with nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Folders.prototype.deletePermanently = function (folderID, options, callback) {
+    deletePermanently(folderID, options, callback) {
         // Switch around arguments if necessary for backwards compatibility
         if (typeof options === 'function') {
             callback = options;
@@ -30400,7 +30972,7 @@ var Folders = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, '/trash');
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to retrieve the watermark for a corresponding Box folder.
      *
@@ -30412,20 +30984,20 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the watermark information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the watermark info
      */
-    Folders.prototype.getWatermark = function (folderID, options, callback) {
+    getWatermark(folderID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, WATERMARK_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== 200) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
             return response.body.watermark;
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Used to apply or update the watermark for a corresponding Box folder.
      *
@@ -30437,7 +31009,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the watermark information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the watermark info
      */
-    Folders.prototype.applyWatermark = function (folderID, options, callback) {
+    applyWatermark(folderID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, WATERMARK_SUBRESOURCE), params = {
             body: {
                 watermark: {
@@ -30447,7 +31019,7 @@ var Folders = /** @class */ (function () {
         };
         Object.assign(params.body.watermark, options);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to remove the watermark for a corresponding Box folder.
      *
@@ -30458,10 +31030,10 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Folders.prototype.removeWatermark = function (folderID, callback) {
+    removeWatermark(folderID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, folderID, WATERMARK_SUBRESOURCE);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Used to lock a Box folder.
      *
@@ -30472,7 +31044,7 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed the folder lock object if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to a folder lock object
      */
-    Folders.prototype.lock = function (folderID, callback) {
+    lock(folderID, callback) {
         var params = {
             body: {
                 folder: {
@@ -30486,7 +31058,7 @@ var Folders = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(FOLDER_LOCK, params, callback);
-    };
+    }
     /**
      * Used to get all locks on a folder.
      *
@@ -30497,14 +31069,14 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Passed a collection of folder lock objects if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to a collection of folder lock objects
      */
-    Folders.prototype.getLocks = function (folderID, callback) {
+    getLocks(folderID, callback) {
         var params = {
             qs: {
                 folder_id: folderID,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(FOLDER_LOCK, params, callback);
-    };
+    }
     /**
      * Used to delete a lock on a folder.
      *
@@ -30515,18 +31087,17 @@ var Folders = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Folders.prototype.deleteLock = function (folderLockID, callback) {
+    deleteLock(folderLockID, callback) {
         var apiPath = (0, url_path_1.default)(FOLDER_LOCK, folderLockID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    return Folders;
-}());
+    }
+}
 module.exports = Folders;
 //# sourceMappingURL=folders.js.map
 
 /***/ }),
 
-/***/ 70524:
+/***/ 41526:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -30538,7 +31109,7 @@ module.exports = Folders;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -30565,7 +31136,7 @@ var GroupUserRole;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var BASE_PATH = '/groups', MEMBERSHIPS_PATH = '/group_memberships', MEMBERSHIPS_SUBRESOURCE = 'memberships', COLLABORATIONS_SUBRESOURCE = 'collaborations';
+const BASE_PATH = '/groups', MEMBERSHIPS_PATH = '/group_memberships', MEMBERSHIPS_SUBRESOURCE = 'memberships', COLLABORATIONS_SUBRESOURCE = 'collaborations';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -30576,8 +31147,8 @@ var BASE_PATH = '/groups', MEMBERSHIPS_PATH = '/group_memberships', MEMBERSHIPS_
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Groups = /** @class */ (function () {
-    function Groups(client) {
+class Groups {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -30596,13 +31167,13 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new group object if it was created successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the new group object
      */
-    Groups.prototype.create = function (name, options, callback) {
+    create(name, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             body: options || {},
         };
         params.body.name = name;
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to fetch information about a group
      *
@@ -30614,12 +31185,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed the group object if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the group object
      */
-    Groups.prototype.get = function (groupID, options, callback) {
+    get(groupID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, groupID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to update or modify a group object
      *
@@ -30631,12 +31202,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated group object if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated group object
      */
-    Groups.prototype.update = function (groupID, updates, callback) {
+    update(groupID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, groupID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a group
      *
@@ -30647,10 +31218,10 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Groups.prototype.delete = function (groupID, callback) {
+    delete(groupID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, groupID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Add a user to a group, which creates a membership record for the user
      *
@@ -30664,7 +31235,7 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed the membership record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the new membership object
      */
-    Groups.prototype.addUser = function (groupID, userID, options, callback) {
+    addUser(groupID, userID, options, callback) {
         var apiPath = (0, url_path_1.default)(MEMBERSHIPS_PATH), params = {
             body: {
                 user: {
@@ -30677,7 +31248,7 @@ var Groups = /** @class */ (function () {
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetch a specific membership record, which shows that a given user is a member
      * of some group.
@@ -30690,12 +31261,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed the membership record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the membership object
      */
-    Groups.prototype.getMembership = function (membershipID, options, callback) {
+    getMembership(membershipID, options, callback) {
         var apiPath = (0, url_path_1.default)(MEMBERSHIPS_PATH, membershipID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to update or modify a group object
      *
@@ -30707,12 +31278,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated membership object if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated membership object
      */
-    Groups.prototype.updateMembership = function (membershipID, options, callback) {
+    updateMembership(membershipID, options, callback) {
         var apiPath = (0, url_path_1.default)(MEMBERSHIPS_PATH, membershipID), params = {
             body: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Used to remove a group membership
      *
@@ -30723,10 +31294,10 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Groups.prototype.removeMembership = function (membershipID, callback) {
+    removeMembership(membershipID, callback) {
         var apiPath = (0, url_path_1.default)(MEMBERSHIPS_PATH, membershipID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Retreieve a list of memberships for the group, which show which users
      * belong to the group
@@ -30741,12 +31312,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of memberships if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of memberships
      */
-    Groups.prototype.getMemberships = function (groupID, options, callback) {
+    getMemberships(groupID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, groupID, MEMBERSHIPS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Retreieve a list of groups in the caller's enterprise.  This ability is
      * restricted to certain users with permission to view groups.
@@ -30761,12 +31332,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of groups if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of groups
      */
-    Groups.prototype.getAll = function (options, callback) {
+    getAll(options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Retreieve a list of collaborations for the group, which show which items the
      * group has access to.
@@ -30781,12 +31352,12 @@ var Groups = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of collaborations if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of collaborations for the group
      */
-    Groups.prototype.getCollaborations = function (groupID, options, callback) {
+    getCollaborations(groupID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, groupID, COLLABORATIONS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Validates the roles and permissions of the group,
      * and creates asynchronous jobs to terminate the group's sessions.
@@ -30797,16 +31368,15 @@ var Groups = /** @class */ (function () {
      * @param {string[]} groupIDs A list of group IDs
      * @returns {Promise<Object>} A promise resolving a message about the request status.
      */
-    Groups.prototype.terminateSession = function (groupIDs, callback) {
+    terminateSession(groupIDs, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, 'terminate_sessions'), params = {
             body: {
                 group_ids: groupIDs,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
-    return Groups;
-}());
+    }
+}
 /**
  * Enum of valid access levels for groups, which are used to specify who can
  * perform certain actions on the group.
@@ -30823,33 +31393,22 @@ module.exports = Groups;
 
 /***/ }),
 
-/***/ 85402:
+/***/ 48348:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var IntegrationMappingsManager = /** @class */ (function () {
+class IntegrationMappingsManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function IntegrationMappingsManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -30870,12 +31429,12 @@ var IntegrationMappingsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.IntegrationMappings>} A promise resolving to the result or rejecting with an error
      */
-    IntegrationMappingsManager.prototype.getSlackIntegrationMappings = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('integration_mappings', 'slack'), params = {
+    getSlackIntegrationMappings(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('integration_mappings', 'slack'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create Slack integration mapping
      *
@@ -30889,13 +31448,13 @@ var IntegrationMappingsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.IntegrationMapping>} A promise resolving to the result or rejecting with an error
      */
-    IntegrationMappingsManager.prototype.createSlackIntegrationMapping = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('integration_mappings', 'slack'), params = {
+    createSlackIntegrationMapping(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('integration_mappings', 'slack'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Update Slack integration mapping
      *
@@ -30910,13 +31469,13 @@ var IntegrationMappingsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.IntegrationMapping>} A promise resolving to the result or rejecting with an error
      */
-    IntegrationMappingsManager.prototype.updateSlackIntegrationMapping = function (body, options, callback) {
-        var integrationMappingId = options.integration_mapping_id, queryParams = __rest(options, ["integration_mapping_id"]), apiPath = (0, url_path_1.default)('integration_mappings', 'slack', integrationMappingId), params = {
+    updateSlackIntegrationMapping(body, options, callback) {
+        const { integration_mapping_id: integrationMappingId, ...queryParams } = options, apiPath = (0, url_path_1.default)('integration_mappings', 'slack', integrationMappingId), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete Slack integration mapping
      *
@@ -30930,20 +31489,19 @@ var IntegrationMappingsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to the result or rejecting with an error
      */
-    IntegrationMappingsManager.prototype.deleteSlackIntegrationMappingById = function (options, callback) {
-        var integrationMappingId = options.integration_mapping_id, queryParams = __rest(options, ["integration_mapping_id"]), apiPath = (0, url_path_1.default)('integration_mappings', 'slack', integrationMappingId), params = {
+    deleteSlackIntegrationMappingById(options, callback) {
+        const { integration_mapping_id: integrationMappingId, ...queryParams } = options, apiPath = (0, url_path_1.default)('integration_mappings', 'slack', integrationMappingId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
-    return IntegrationMappingsManager;
-}());
+    }
+}
 module.exports = IntegrationMappingsManager;
 //# sourceMappingURL=integration-mappings.js.map
 
 /***/ }),
 
-/***/ 57212:
+/***/ 86086:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -30954,7 +31512,7 @@ module.exports = IntegrationMappingsManager;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -30973,7 +31531,7 @@ var LegalHoldPolicyAssignmentType;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var BASE_PATH = '/legal_hold_policies', ASSIGNMENTS_PATH = '/legal_hold_policy_assignments', FILE_VERSION_LEGAL_HOLDS_PATH = '/file_version_legal_holds';
+const BASE_PATH = '/legal_hold_policies', ASSIGNMENTS_PATH = '/legal_hold_policy_assignments', FILE_VERSION_LEGAL_HOLDS_PATH = '/file_version_legal_holds';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -30984,8 +31542,8 @@ var BASE_PATH = '/legal_hold_policies', ASSIGNMENTS_PATH = '/legal_hold_policy_a
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var LegalHoldPolicies = /** @class */ (function () {
-    function LegalHoldPolicies(client) {
+class LegalHoldPolicies {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -31003,13 +31561,13 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new policy information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created policy
      */
-    LegalHoldPolicies.prototype.create = function (name, options, callback) {
+    create(name, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             body: options || {},
         };
         params.body.policy_name = name;
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetches details about a specific legal hold policy
      *
@@ -31021,12 +31579,12 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the policy information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the policy object
      */
-    LegalHoldPolicies.prototype.get = function (policyID, options, callback) {
+    get(policyID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, policyID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Update or modify a legal hold policy.
      *
@@ -31041,12 +31599,12 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated policy information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated policy
      */
-    LegalHoldPolicies.prototype.update = function (policyID, updates, callback) {
+    update(policyID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, policyID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetches a list of legal hold policies for the enterprise
      *
@@ -31060,12 +31618,12 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the policy objects if they were acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of policies
      */
-    LegalHoldPolicies.prototype.getAll = function (options, callback) {
+    getAll(options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Sends request to delete an existing legal hold policy. Note that this is an
      * asynchronous process - the policy will not be fully deleted yet when the
@@ -31078,10 +31636,10 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    LegalHoldPolicies.prototype.delete = function (policyID, callback) {
+    delete(policyID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, policyID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Fetch a list of assignments for a given legal hold policy
      *
@@ -31095,12 +31653,12 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the assignment objects if they were acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of policy assignments
      */
-    LegalHoldPolicies.prototype.getAssignments = function (policyID, options, callback) {
+    getAssignments(policyID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH), params = {
             qs: Object.assign({ policy_id: policyID }, options),
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Assign a lehal hold policy to an object
      *
@@ -31113,7 +31671,7 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new assignment object if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created assignment object
      */
-    LegalHoldPolicies.prototype.assign = function (policyID, assignType, assignID, callback) {
+    assign(policyID, assignType, assignID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH), params = {
             body: {
                 policy_id: policyID,
@@ -31124,7 +31682,7 @@ var LegalHoldPolicies = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetch a specific policy assignment
      *
@@ -31136,12 +31694,12 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the assignment object if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the assignment object
      */
-    LegalHoldPolicies.prototype.getAssignment = function (assignmentID, options, callback) {
+    getAssignment(assignmentID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Sends request to delete an existing legal hold policy. Note that this is an
      * asynchronous process - the policy will not be fully deleted yet when the
@@ -31154,10 +31712,10 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    LegalHoldPolicies.prototype.deleteAssignment = function (assignmentID, callback) {
+    deleteAssignment(assignmentID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Get the specific legal hold record for a held file version.
      *
@@ -31169,12 +31727,12 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Pass the file version legal hold record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the legal hold record
      */
-    LegalHoldPolicies.prototype.getFileVersionLegalHold = function (legalHoldID, options, callback) {
+    getFileVersionLegalHold(legalHoldID, options, callback) {
         var apiPath = (0, url_path_1.default)(FILE_VERSION_LEGAL_HOLDS_PATH, legalHoldID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get a list of legal hold records for held file versions in an enterprise.
      *
@@ -31186,14 +31744,13 @@ var LegalHoldPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Pass the file version legal holds records if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of all file version legal holds
      */
-    LegalHoldPolicies.prototype.getAllFileVersionLegalHolds = function (policyID, options, callback) {
+    getAllFileVersionLegalHolds(policyID, options, callback) {
         var apiPath = (0, url_path_1.default)(FILE_VERSION_LEGAL_HOLDS_PATH), params = {
             qs: Object.assign({ policy_id: policyID }, options),
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return LegalHoldPolicies;
-}());
+    }
+}
 /**
  * Enum of valid policy assignment types, which specify what object the policy applies to
  * @readonly
@@ -31205,7 +31762,7 @@ module.exports = LegalHoldPolicies;
 
 /***/ }),
 
-/***/ 49925:
+/***/ 75815:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -31216,8 +31773,8 @@ module.exports = LegalHoldPolicies;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
-var merge = __nccwpck_require__(50551);
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
+const merge = __nccwpck_require__(50551);
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -31237,7 +31794,7 @@ var MetadataFieldType;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var PROPERTIES_TEMPLATE = 'properties', BASE_PATH = '/metadata_templates', SCHEMA_SUBRESOURCE = 'schema', ENTERPRISE_SCOPE = 'enterprise', GLOBAL_SCOPE = 'global', CASCADE_POLICIES_PATH = '/metadata_cascade_policies', QUERY_PATH = '/metadata_queries/execute_read';
+const PROPERTIES_TEMPLATE = 'properties', BASE_PATH = '/metadata_templates', SCHEMA_SUBRESOURCE = 'schema', ENTERPRISE_SCOPE = 'enterprise', GLOBAL_SCOPE = 'global', CASCADE_POLICIES_PATH = '/metadata_cascade_policies', QUERY_PATH = '/metadata_queries/execute_read';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -31248,8 +31805,8 @@ var PROPERTIES_TEMPLATE = 'properties', BASE_PATH = '/metadata_templates', SCHEM
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Metadata = /** @class */ (function () {
-    function Metadata(client) {
+class Metadata {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -31263,10 +31820,10 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] - Called with the template schema if successful
      * @returns {Promise<Object>} A promise resolving to the template schema
      */
-    Metadata.prototype.getTemplateSchema = function (scope, template, callback) {
+    getTemplateSchema(scope, template, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, scope, template, SCHEMA_SUBRESOURCE);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Retrieve the schema definition for a metadata template by ID
      *
@@ -31277,10 +31834,10 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] - Called with the template schema if successful
      * @returns {Promise<Object>} A promise resolving to the template schema
      */
-    Metadata.prototype.getTemplateByID = function (templateID, callback) {
+    getTemplateByID(templateID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, templateID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Get all templates in a given scope
      *
@@ -31291,10 +31848,10 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] - Called with an array of templates when successful
      * @returns {Promise<Object>} A promise resolving to the collection of templates
      */
-    Metadata.prototype.getTemplates = function (scope, callback) {
+    getTemplates(scope, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, scope);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Create a new metadata template
      *
@@ -31311,17 +31868,17 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] - Passed the template if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created template
      */
-    Metadata.prototype.createTemplate = function (templateName, fields, options, callback) {
+    createTemplate(templateName, fields, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, SCHEMA_SUBRESOURCE), params = {
             body: {
                 scope: ENTERPRISE_SCOPE,
                 displayName: templateName,
-                fields: fields,
+                fields,
             },
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Update a metadata template via one or more non-breaking operations.  Each
      * operation is a an object descrbing one change to the template or its
@@ -31337,12 +31894,12 @@ var Metadata = /** @class */ (function () {
      * @returns {Promise<Object>} A promise resolving to the updated template
      * @see {@link https://developer.box.com/en/reference/put-metadata-templates-id-id-schema/}
      */
-    Metadata.prototype.updateTemplate = function (scope, template, operations, callback) {
+    updateTemplate(scope, template, operations, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, scope, template, SCHEMA_SUBRESOURCE), params = {
             body: operations,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a metadata template from an enterprise.
      *
@@ -31355,10 +31912,10 @@ var Metadata = /** @class */ (function () {
      * @returns {Promise<void>} A promise resolving to nothing
      * @see {@link https://developer.box.com/en/reference/delete-metadata-templates-id-id-schema/}
      */
-    Metadata.prototype.deleteTemplate = function (scope, template, callback) {
+    deleteTemplate(scope, template, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, scope, template, SCHEMA_SUBRESOURCE);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Get the cascade policies associated with a given folder.
      *
@@ -31371,12 +31928,12 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] Passed the collection of policies if successful
      * @returns {Promise<Object>} Promise resolving to the collection of policies
      */
-    Metadata.prototype.getCascadePolicies = function (folderID, options, callback) {
+    getCascadePolicies(folderID, options, callback) {
         var apiPath = (0, url_path_1.default)(CASCADE_POLICIES_PATH), params = {
             qs: Object.assign({ folder_id: folderID }, options),
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get a metadata cascade policy object by ID
      *
@@ -31387,10 +31944,10 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] Passed the cascade policy if successful
      * @returns {Promise<Object>} Promise resolving to the cascade policy
      */
-    Metadata.prototype.getCascadePolicy = function (policyID, callback) {
+    getCascadePolicy(policyID, callback) {
         var apiPath = (0, url_path_1.default)(CASCADE_POLICIES_PATH, policyID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Add a new cascade policy to a folder/metadata template, causing the
      * metadata template to be applied to all items and subfolders inside the
@@ -31405,16 +31962,16 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] Passed the cascade policy if successful
      * @returns {Promise<Object>} Promise resolving to the cascade policy
      */
-    Metadata.prototype.createCascadePolicy = function (scope, templateKey, folderID, callback) {
+    createCascadePolicy(scope, templateKey, folderID, callback) {
         var apiPath = (0, url_path_1.default)(CASCADE_POLICIES_PATH), params = {
             body: {
                 folder_id: folderID,
-                scope: scope,
-                templateKey: templateKey,
+                scope,
+                templateKey,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete the metadata cascade policy with the given ID
      *
@@ -31425,10 +31982,10 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] Passed nothing if successful
      * @returns {Promise<void>} Promise resolving to nothing
      */
-    Metadata.prototype.deleteCascadePolicy = function (policyID, callback) {
+    deleteCascadePolicy(policyID, callback) {
         var apiPath = (0, url_path_1.default)(CASCADE_POLICIES_PATH, policyID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * If a policy already exists on a folder, this will apply that policy to all existing files and
      * sub-folders within the target folder.
@@ -31441,14 +31998,14 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] Passed nothing if successful
      * @returns {Promise<void>} Promise resolving to nothing
      */
-    Metadata.prototype.forceApplyCascadePolicy = function (policyID, resolutionMethod, callback) {
+    forceApplyCascadePolicy(policyID, resolutionMethod, callback) {
         var apiPath = (0, url_path_1.default)(CASCADE_POLICIES_PATH, policyID, 'apply'), params = {
             body: {
                 conflict_resolution: resolutionMethod,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Query Box items by their metadata.
      *
@@ -31467,18 +32024,17 @@ var Metadata = /** @class */ (function () {
      * @param {Function} [callback] - Passed a collection of items and their associated metadata
      * @returns {Promise<void>} Promise resolving to a collection of items and their associated metadata
      */
-    Metadata.prototype.query = function (from, ancestorFolderId, options, callback) {
+    query(from, ancestorFolderId, options, callback) {
         var body = {
-            from: from,
+            from,
             ancestor_folder_id: ancestorFolderId,
         };
         var params = {
             body: merge(body, options || {}),
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(QUERY_PATH, params, callback);
-    };
-    return Metadata;
-}());
+    }
+}
 Metadata.prototype.templates = {
     PROPERTIES: PROPERTIES_TEMPLATE,
 };
@@ -31501,7 +32057,7 @@ module.exports = Metadata;
 
 /***/ }),
 
-/***/ 44366:
+/***/ 52648:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -31512,11 +32068,11 @@ module.exports = Metadata;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/recent_items';
+const BASE_PATH = '/recent_items';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -31527,8 +32083,8 @@ var BASE_PATH = '/recent_items';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var RecentItems = /** @class */ (function () {
-    function RecentItems(client) {
+class RecentItems {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -31544,21 +32100,20 @@ var RecentItems = /** @class */ (function () {
      * @param {Function} [callback] - Passed the items information if they were acquired successfully
      * @returns {Promise<Object>} A promise resolving to the collection of items in the collection
      */
-    RecentItems.prototype.get = function (options, callback) {
+    get(options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return RecentItems;
-}());
+    }
+}
 module.exports = RecentItems;
 //# sourceMappingURL=recent-items.js.map
 
 /***/ }),
 
-/***/ 26635:
+/***/ 69897:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -31569,7 +32124,7 @@ module.exports = RecentItems;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -31630,7 +32185,7 @@ var RetentionPolicyAssignmentType;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var BASE_PATH = '/retention_policies', ASSIGNMENTS_PATH = '/retention_policy_assignments', FILE_VERSION_RETENTIONS_PATH = '/file_version_retentions', ASSIGNMENTS_SUBRESOURCE = 'assignments', FILES_UNDER_RETENTION_SUBRESOURCE = 'files_under_retention', FILES_VERSIONS_UNDER_RETENTION_SUBRESOURCE = 'file_versions_under_retention';
+const BASE_PATH = '/retention_policies', ASSIGNMENTS_PATH = '/retention_policy_assignments', FILE_VERSION_RETENTIONS_PATH = '/file_version_retentions', ASSIGNMENTS_SUBRESOURCE = 'assignments', FILES_UNDER_RETENTION_SUBRESOURCE = 'files_under_retention', FILES_VERSIONS_UNDER_RETENTION_SUBRESOURCE = 'file_versions_under_retention';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -31641,8 +32196,8 @@ var BASE_PATH = '/retention_policies', ASSIGNMENTS_PATH = '/retention_policy_ass
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var RetentionPolicies = /** @class */ (function () {
-    function RetentionPolicies(client) {
+class RetentionPolicies {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -31664,7 +32219,7 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new policy information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the new policy object
      */
-    RetentionPolicies.prototype.create = function (name, type, action, options, callback) {
+    create(name, type, action, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             body: {
                 policy_name: name,
@@ -31674,7 +32229,7 @@ var RetentionPolicies = /** @class */ (function () {
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetches details about a specific retention policy
      *
@@ -31686,12 +32241,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the policy information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the policy object
      */
-    RetentionPolicies.prototype.get = function (policyID, options, callback) {
+    get(policyID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, policyID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Update or modify a retention policy.
      *
@@ -31712,12 +32267,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated policy information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated policy object
      */
-    RetentionPolicies.prototype.update = function (policyID, updates, callback) {
+    update(policyID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, policyID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetches a list of retention policies for the enterprise
      *
@@ -31731,12 +32286,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the policy objects if they were acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of policies
      */
-    RetentionPolicies.prototype.getAll = function (options, callback) {
+    getAll(options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetch a list of assignments for a given retention policy
      *
@@ -31749,12 +32304,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the assignment objects if they were acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of policy assignments
      */
-    RetentionPolicies.prototype.getAssignments = function (policyID, options, callback) {
+    getAssignments(policyID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, policyID, ASSIGNMENTS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Assign a retention policy to a folder or the entire enterprise.
      *
@@ -31770,7 +32325,7 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new assignment object if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created assignment object
      */
-    RetentionPolicies.prototype.assign = function (policyID, assignType, assignID, options, callback) {
+    assign(policyID, assignType, assignID, options, callback) {
         // Shuffle optional arguments
         if (typeof options === 'function') {
             callback = options;
@@ -31787,7 +32342,7 @@ var RetentionPolicies = /** @class */ (function () {
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetch a specific policy assignment
      *
@@ -31799,12 +32354,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Passed the assignment object if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the assignment object
      */
-    RetentionPolicies.prototype.getAssignment = function (assignmentID, options, callback) {
+    getAssignment(assignmentID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a specific policy assignment.
      *
@@ -31815,10 +32370,10 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    RetentionPolicies.prototype.deleteAssignment = function (assignmentID, callback) {
+    deleteAssignment(assignmentID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Get the specific retention record for a retained file version. To use this feature,
      * you must have the manage retention policies scope enabled for your API key
@@ -31832,12 +32387,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Pass the file version retention record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the retention record
      */
-    RetentionPolicies.prototype.getFileVersionRetention = function (retentionID, options, callback) {
+    getFileVersionRetention(retentionID, options, callback) {
         var apiPath = (0, url_path_1.default)(FILE_VERSION_RETENTIONS_PATH, retentionID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get a list of retention records for a retained file versions in an enterprise.
      * To use this feature, you must have the manage retention policies scope enabled
@@ -31858,12 +32413,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Pass the file version retention record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of retention records
      */
-    RetentionPolicies.prototype.getAllFileVersionRetentions = function (options, callback) {
+    getAllFileVersionRetentions(options, callback) {
         var apiPath = (0, url_path_1.default)(FILE_VERSION_RETENTIONS_PATH), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get files under retention by each assignment
      * To use this feature, you must have the manage retention policies scope enabled
@@ -31879,12 +32434,12 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Pass the file version retention record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of retention records
      */
-    RetentionPolicies.prototype.getFilesUnderRetentionForAssignment = function (assignmentID, options, callback) {
+    getFilesUnderRetentionForAssignment(assignmentID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID, FILES_UNDER_RETENTION_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get file versions under retention by each assignment
      * To use this feature, you must have the manage retention policies scope enabled
@@ -31900,14 +32455,13 @@ var RetentionPolicies = /** @class */ (function () {
      * @param {Function} [callback] - Pass the file version retention record if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of retention records
      */
-    RetentionPolicies.prototype.getFileVersionsUnderRetentionForAssignment = function (assignmentID, options, callback) {
+    getFileVersionsUnderRetentionForAssignment(assignmentID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID, FILES_VERSIONS_UNDER_RETENTION_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return RetentionPolicies;
-}());
+    }
+}
 /**
  * Enum of valid retention policy types, which specify how long the policy should
  * remain in effect.
@@ -31940,7 +32494,7 @@ module.exports = RetentionPolicies;
 
 /***/ }),
 
-/***/ 69292:
+/***/ 12778:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -31954,8 +32508,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // -----------------------------------------------------------------------------
 // Requirements
 // -----------------------------------------------------------------------------
-var bluebird_1 = __nccwpck_require__(94366);
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const bluebird_1 = __nccwpck_require__(94366);
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  * Valid search scopes
  * @readonly
@@ -31980,8 +32534,8 @@ var API_PATHS_SEARCH = '/search';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Search = /** @class */ (function () {
-    function Search(client) {
+class Search {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32009,7 +32563,7 @@ var Search = /** @class */ (function () {
      * @param {APIRequest~Callback} [callback] - passed the new comment data if it was posted successfully
      * @returns {Promise<Object>} A promise resolving to the collection of search results
      */
-    Search.prototype.query = function (searchString, options, callback) {
+    query(searchString, options, callback) {
         var apiPath = (0, url_path_1.default)(API_PATHS_SEARCH), qs = options || {};
         qs.query = searchString;
         if (qs.mdfilters) {
@@ -32021,12 +32575,11 @@ var Search = /** @class */ (function () {
             }
         }
         var params = {
-            qs: qs,
+            qs,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return Search;
-}());
+    }
+}
 /**
  * Valid search scopes
  * @readonly
@@ -32038,7 +32591,7 @@ module.exports = Search;
 
 /***/ }),
 
-/***/ 63736:
+/***/ 20478:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -32052,12 +32605,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/shared_items';
+const BASE_PATH = '/shared_items';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -32068,8 +32621,8 @@ var BASE_PATH = '/shared_items';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var SharedItems = /** @class */ (function () {
-    function SharedItems(client) {
+class SharedItems {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32084,7 +32637,7 @@ var SharedItems = /** @class */ (function () {
      * @param {Function} [callback] - passed the shared item if it was successfully acquired
      * @returns {Promise<Object>} A promise resolving to the shared item object
      */
-    SharedItems.prototype.get = function (url, password, options, callback) {
+    get(url, password, options, callback) {
         var params = {
             qs: options,
             headers: {
@@ -32094,7 +32647,7 @@ var SharedItems = /** @class */ (function () {
         // Handle the Special API Response
         return this.client
             .get(BASE_PATH, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             switch (response.statusCode) {
                 // 200 - Shared Item Recieved
                 case http_status_1.default.OK:
@@ -32112,41 +32665,29 @@ var SharedItems = /** @class */ (function () {
             }
         })
             .asCallback(callback);
-    };
-    return SharedItems;
-}());
+    }
+}
 module.exports = SharedItems;
 //# sourceMappingURL=shared-items.js.map
 
 /***/ }),
 
-/***/ 90345:
+/***/ 26695:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var ShieldInformationBarrierReportsManager = /** @class */ (function () {
+class ShieldInformationBarrierReportsManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function ShieldInformationBarrierReportsManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32158,12 +32699,12 @@ var ShieldInformationBarrierReportsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierReport>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierReportsManager.prototype.getById = function (options, callback) {
-        var shieldInformationBarrierReportId = options.shield_information_barrier_report_id, queryParams = __rest(options, ["shield_information_barrier_report_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_reports', shieldInformationBarrierReportId), params = {
+    getById(options, callback) {
+        const { shield_information_barrier_report_id: shieldInformationBarrierReportId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_reports', shieldInformationBarrierReportId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List shield information barrier reports
      *
@@ -32175,12 +32716,12 @@ var ShieldInformationBarrierReportsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierReports>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierReportsManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_reports'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_reports'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create shield information barrier report
      *
@@ -32190,47 +32731,35 @@ var ShieldInformationBarrierReportsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierReport>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierReportsManager.prototype.create = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_reports'), params = {
+    create(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_reports'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
-    return ShieldInformationBarrierReportsManager;
-}());
+    }
+}
 module.exports = ShieldInformationBarrierReportsManager;
 //# sourceMappingURL=shield-information-barrier-reports.generated.js.map
 
 /***/ }),
 
-/***/ 6885:
+/***/ 94883:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var ShieldInformationBarrierSegmentMembersManager = /** @class */ (function () {
+class ShieldInformationBarrierSegmentMembersManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function ShieldInformationBarrierSegmentMembersManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32243,12 +32772,12 @@ var ShieldInformationBarrierSegmentMembersManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegmentMember>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentMembersManager.prototype.getById = function (options, callback) {
-        var shieldInformationBarrierSegmentMemberId = options.shield_information_barrier_segment_member_id, queryParams = __rest(options, ["shield_information_barrier_segment_member_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members', shieldInformationBarrierSegmentMemberId), params = {
+    getById(options, callback) {
+        const { shield_information_barrier_segment_member_id: shieldInformationBarrierSegmentMemberId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members', shieldInformationBarrierSegmentMemberId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List shield information barrier segment members
      *
@@ -32261,12 +32790,12 @@ var ShieldInformationBarrierSegmentMembersManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegmentMembers>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentMembersManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create shield information barrier segment member
      *
@@ -32276,13 +32805,13 @@ var ShieldInformationBarrierSegmentMembersManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegmentMember>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentMembersManager.prototype.create = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members'), params = {
+    create(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete shield information barrier segment member by ID
      *
@@ -32293,46 +32822,34 @@ var ShieldInformationBarrierSegmentMembersManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentMembersManager.prototype.deleteById = function (options, callback) {
-        var shieldInformationBarrierSegmentMemberId = options.shield_information_barrier_segment_member_id, queryParams = __rest(options, ["shield_information_barrier_segment_member_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members', shieldInformationBarrierSegmentMemberId), params = {
+    deleteById(options, callback) {
+        const { shield_information_barrier_segment_member_id: shieldInformationBarrierSegmentMemberId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_members', shieldInformationBarrierSegmentMemberId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
-    return ShieldInformationBarrierSegmentMembersManager;
-}());
+    }
+}
 module.exports = ShieldInformationBarrierSegmentMembersManager;
 //# sourceMappingURL=shield-information-barrier-segment-members.generated.js.map
 
 /***/ }),
 
-/***/ 67453:
+/***/ 98079:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var ShieldInformationBarrierSegmentRestrictionsManager = /** @class */ (function () {
+class ShieldInformationBarrierSegmentRestrictionsManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function ShieldInformationBarrierSegmentRestrictionsManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32345,12 +32862,12 @@ var ShieldInformationBarrierSegmentRestrictionsManager = /** @class */ (function
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegmentRestriction>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentRestrictionsManager.prototype.getById = function (options, callback) {
-        var shieldInformationBarrierSegmentRestrictionId = options.shield_information_barrier_segment_restriction_id, queryParams = __rest(options, ["shield_information_barrier_segment_restriction_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions', shieldInformationBarrierSegmentRestrictionId), params = {
+    getById(options, callback) {
+        const { shield_information_barrier_segment_restriction_id: shieldInformationBarrierSegmentRestrictionId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions', shieldInformationBarrierSegmentRestrictionId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List shield information barrier segment restrictions
      *
@@ -32363,12 +32880,12 @@ var ShieldInformationBarrierSegmentRestrictionsManager = /** @class */ (function
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegmentRestrictions>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentRestrictionsManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create shield information barrier segment restriction
      *
@@ -32379,13 +32896,13 @@ var ShieldInformationBarrierSegmentRestrictionsManager = /** @class */ (function
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegmentRestriction>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentRestrictionsManager.prototype.create = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions'), params = {
+    create(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete shield information barrier segment restriction by ID
      *
@@ -32396,46 +32913,34 @@ var ShieldInformationBarrierSegmentRestrictionsManager = /** @class */ (function
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentRestrictionsManager.prototype.deleteById = function (options, callback) {
-        var shieldInformationBarrierSegmentRestrictionId = options.shield_information_barrier_segment_restriction_id, queryParams = __rest(options, ["shield_information_barrier_segment_restriction_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions', shieldInformationBarrierSegmentRestrictionId), params = {
+    deleteById(options, callback) {
+        const { shield_information_barrier_segment_restriction_id: shieldInformationBarrierSegmentRestrictionId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segment_restrictions', shieldInformationBarrierSegmentRestrictionId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
-    return ShieldInformationBarrierSegmentRestrictionsManager;
-}());
+    }
+}
 module.exports = ShieldInformationBarrierSegmentRestrictionsManager;
 //# sourceMappingURL=shield-information-barrier-segment-restrictions.generated.js.map
 
 /***/ }),
 
-/***/ 78028:
+/***/ 990:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var ShieldInformationBarrierSegmentsManager = /** @class */ (function () {
+class ShieldInformationBarrierSegmentsManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function ShieldInformationBarrierSegmentsManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32447,12 +32952,12 @@ var ShieldInformationBarrierSegmentsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegment>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentsManager.prototype.getById = function (options, callback) {
-        var shieldInformationBarrierSegmentId = options.shield_information_barrier_segment_id, queryParams = __rest(options, ["shield_information_barrier_segment_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segments', shieldInformationBarrierSegmentId), params = {
+    getById(options, callback) {
+        const { shield_information_barrier_segment_id: shieldInformationBarrierSegmentId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segments', shieldInformationBarrierSegmentId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List shield information barrier segments
      *
@@ -32465,12 +32970,12 @@ var ShieldInformationBarrierSegmentsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegments>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentsManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_segments'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segments'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create shield information barrier segment
      *
@@ -32480,13 +32985,13 @@ var ShieldInformationBarrierSegmentsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegment>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentsManager.prototype.create = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barrier_segments'), params = {
+    create(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segments'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Update shield information barrier segment with specified ID
      *
@@ -32497,13 +33002,13 @@ var ShieldInformationBarrierSegmentsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrierSegment>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentsManager.prototype.update = function (body, options, callback) {
-        var shieldInformationBarrierSegmentId = options.shield_information_barrier_segment_id, queryParams = __rest(options, ["shield_information_barrier_segment_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segments', shieldInformationBarrierSegmentId), params = {
+    update(body, options, callback) {
+        const { shield_information_barrier_segment_id: shieldInformationBarrierSegmentId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segments', shieldInformationBarrierSegmentId), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete shield information barrier segment
      *
@@ -32514,46 +33019,34 @@ var ShieldInformationBarrierSegmentsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierSegmentsManager.prototype.deleteById = function (options, callback) {
-        var shieldInformationBarrierSegmentId = options.shield_information_barrier_segment_id, queryParams = __rest(options, ["shield_information_barrier_segment_id"]), apiPath = (0, url_path_1.default)('shield_information_barrier_segments', shieldInformationBarrierSegmentId), params = {
+    deleteById(options, callback) {
+        const { shield_information_barrier_segment_id: shieldInformationBarrierSegmentId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barrier_segments', shieldInformationBarrierSegmentId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
-    return ShieldInformationBarrierSegmentsManager;
-}());
+    }
+}
 module.exports = ShieldInformationBarrierSegmentsManager;
 //# sourceMappingURL=shield-information-barrier-segments.generated.js.map
 
 /***/ }),
 
-/***/ 53476:
+/***/ 40058:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  */
-var ShieldInformationBarrierManager = /** @class */ (function () {
+class ShieldInformationBarrierManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function ShieldInformationBarrierManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32565,12 +33058,12 @@ var ShieldInformationBarrierManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrier>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierManager.prototype.getById = function (options, callback) {
-        var shieldInformationBarrierId = options.shield_information_barrier_id, queryParams = __rest(options, ["shield_information_barrier_id"]), apiPath = (0, url_path_1.default)('shield_information_barriers', shieldInformationBarrierId), params = {
+    getById(options, callback) {
+        const { shield_information_barrier_id: shieldInformationBarrierId, ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barriers', shieldInformationBarrierId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List shield information barriers
      *
@@ -32582,12 +33075,12 @@ var ShieldInformationBarrierManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarriers>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barriers'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barriers'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create shield information barrier
      *
@@ -32599,13 +33092,13 @@ var ShieldInformationBarrierManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrier>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierManager.prototype.create = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barriers'), params = {
+    create(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barriers'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Add changed status of shield information barrier with specified ID
      *
@@ -32615,48 +33108,36 @@ var ShieldInformationBarrierManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.ShieldInformationBarrier>} A promise resolving to the result or rejecting with an error
      */
-    ShieldInformationBarrierManager.prototype.changeStatusById = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('shield_information_barriers', 'change_status'), params = {
+    changeStatusById(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('shield_information_barriers', 'change_status'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
-    return ShieldInformationBarrierManager;
-}());
+    }
+}
 module.exports = ShieldInformationBarrierManager;
 //# sourceMappingURL=shield-information-barriers.generated.js.map
 
 /***/ }),
 
-/***/ 20891:
+/***/ 1561:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  * Simple manager for interacting with all Sign Requests endpoints and actions.
  */
-var SignRequestsManager = /** @class */ (function () {
+class SignRequestsManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function SignRequestsManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32668,12 +33149,12 @@ var SignRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.SignRequest>} A promise resolving to the result or rejecting with an error
      */
-    SignRequestsManager.prototype.getById = function (options, callback) {
-        var signRequestId = options.sign_request_id, queryParams = __rest(options, ["sign_request_id"]), apiPath = (0, url_path_1.default)('sign_requests', signRequestId), params = {
+    getById(options, callback) {
+        const { sign_request_id: signRequestId, ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_requests', signRequestId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List Box Sign requests
      *
@@ -32685,12 +33166,12 @@ var SignRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.SignRequests>} A promise resolving to the result or rejecting with an error
      */
-    SignRequestsManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('sign_requests'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_requests'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Create Box Sign request
      *
@@ -32701,13 +33182,13 @@ var SignRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.SignRequest>} A promise resolving to the result or rejecting with an error
      */
-    SignRequestsManager.prototype.create = function (body, options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('sign_requests'), params = {
+    create(body, options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_requests'), params = {
             qs: queryParams,
             body: body,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Cancel Box Sign request
      *
@@ -32717,12 +33198,12 @@ var SignRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.SignRequest>} A promise resolving to the result or rejecting with an error
      */
-    SignRequestsManager.prototype.cancelById = function (options, callback) {
-        var signRequestId = options.sign_request_id, queryParams = __rest(options, ["sign_request_id"]), apiPath = (0, url_path_1.default)('sign_requests', signRequestId, 'cancel'), params = {
+    cancelById(options, callback) {
+        const { sign_request_id: signRequestId, ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_requests', signRequestId, 'cancel'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Resend Box Sign request
      *
@@ -32732,47 +33213,35 @@ var SignRequestsManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to the result or rejecting with an error
      */
-    SignRequestsManager.prototype.resendById = function (options, callback) {
-        var signRequestId = options.sign_request_id, queryParams = __rest(options, ["sign_request_id"]), apiPath = (0, url_path_1.default)('sign_requests', signRequestId, 'resend'), params = {
+    resendById(options, callback) {
+        const { sign_request_id: signRequestId, ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_requests', signRequestId, 'resend'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
-    return SignRequestsManager;
-}());
+    }
+}
 module.exports = SignRequestsManager;
 //# sourceMappingURL=sign-requests.generated.js.map
 
 /***/ }),
 
-/***/ 90136:
+/***/ 19186:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 /**
  * Simple manager for interacting with all Sign Templates endpoints and actions.
  */
-var SignTemplatesManager = /** @class */ (function () {
+class SignTemplatesManager {
     /**
      * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
      */
-    function SignTemplatesManager(client) {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32784,12 +33253,12 @@ var SignTemplatesManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.SignTemplate>} A promise resolving to the result or rejecting with an error
      */
-    SignTemplatesManager.prototype.getById = function (options, callback) {
-        var templateId = options.template_id, queryParams = __rest(options, ["template_id"]), apiPath = (0, url_path_1.default)('sign_templates', templateId), params = {
+    getById(options, callback) {
+        const { template_id: templateId, ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_templates', templateId), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * List Box Sign templates
      *
@@ -32800,20 +33269,19 @@ var SignTemplatesManager = /** @class */ (function () {
      * @param {Function} [callback] Passed the result if successful, error otherwise
      * @returns {Promise<schemas.SignTemplates>} A promise resolving to the result or rejecting with an error
      */
-    SignTemplatesManager.prototype.getAll = function (options, callback) {
-        var queryParams = __rest(options, []), apiPath = (0, url_path_1.default)('sign_templates'), params = {
+    getAll(options, callback) {
+        const { ...queryParams } = options, apiPath = (0, url_path_1.default)('sign_templates'), params = {
             qs: queryParams,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return SignTemplatesManager;
-}());
+    }
+}
 module.exports = SignTemplatesManager;
 //# sourceMappingURL=sign-templates.generated.js.map
 
 /***/ }),
 
-/***/ 34354:
+/***/ 73120:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -32827,13 +33295,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // -----------------------------------------------------------------------------
 // Requirements
 // -----------------------------------------------------------------------------
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var BASE_PATH = '/storage_policies', ASSIGNMENTS_PATH = '/storage_policy_assignments';
+const BASE_PATH = '/storage_policies', ASSIGNMENTS_PATH = '/storage_policy_assignments';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -32844,8 +33312,8 @@ var BASE_PATH = '/storage_policies', ASSIGNMENTS_PATH = '/storage_policy_assignm
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var StoragePolicies = /** @class */ (function () {
-    function StoragePolicies(client) {
+class StoragePolicies {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -32856,12 +33324,12 @@ var StoragePolicies = /** @class */ (function () {
      * @param {Function} [callback] Passed the storage policy object if successful
      * @returns {Promise<Object>} Promise resolving to the storage policy object
      */
-    StoragePolicies.prototype.get = function (storagePolicyID, options, callback) {
+    get(storagePolicyID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, storagePolicyID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get all available storage policies for the enterprise
      * @param {Object} [options] Optional parameters
@@ -32869,12 +33337,12 @@ var StoragePolicies = /** @class */ (function () {
      * @param {Function} [callback] Passed a collection of storage policies if successful
      * @returns {Promise<Object>} Promise resolving to the collection of storage policies
      */
-    StoragePolicies.prototype.getAll = function (options, callback) {
+    getAll(options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Assign a storage policy to a user
      * @param {string} storagePolicyID The ID of the storage policy to assign
@@ -32882,10 +33350,9 @@ var StoragePolicies = /** @class */ (function () {
      * @param {Function} [callback] Passed the assignment object if successful
      * @returns {Promise<Object>} Promise resolving to the assignment object
      */
-    StoragePolicies.prototype.assign = function (storagePolicyID, userID, callback) {
-        var _this = this;
+    assign(storagePolicyID, userID, callback) {
         return this.getAssignmentForTarget(userID)
-            .then(function (assignment /* FIXME */) {
+            .then((assignment /* FIXME */) => {
             // Check if the assignment is already correct
             if (assignment.storage_policy.id === storagePolicyID) {
                 return assignment;
@@ -32893,7 +33360,7 @@ var StoragePolicies = /** @class */ (function () {
             // If the assignment is to an enterprise, we need to create a new
             // assignment for the user
             if (assignment.assigned_to.type === 'enterprise') {
-                return _this.createAssignment(storagePolicyID, userID);
+                return this.createAssignment(storagePolicyID, userID);
             }
             // Update the user's existing assignment
             var update = {
@@ -32902,20 +33369,20 @@ var StoragePolicies = /** @class */ (function () {
                     id: storagePolicyID,
                 },
             };
-            return _this.updateAssignment(assignment.id, update);
+            return this.updateAssignment(assignment.id, update);
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Get information about a specific storage policy asisgnment by ID
      * @param {string} assignmentID The ID of the assignment
      * @param {Function} [callback] Passed the assignment object if successful
      * @returns {Promise<Object>} Promise resolving to the assignment object
      */
-    StoragePolicies.prototype.getAssignment = function (assignmentID, callback) {
+    getAssignment(assignmentID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Gets the storage policy assignment for a specific user
      * @param {string} targetID The ID of the target
@@ -32924,7 +33391,7 @@ var StoragePolicies = /** @class */ (function () {
      * @param {Function} [callback] Passed the assignment object if successful
      * @returns {Promise<Object>} Promise resolving to the assignment object
      */
-    StoragePolicies.prototype.getAssignmentForTarget = function (targetID, options, callback) {
+    getAssignmentForTarget(targetID, options, callback) {
         options = Object.assign({ targetType: 'user' }, options);
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH), params = {
             qs: {
@@ -32934,7 +33401,7 @@ var StoragePolicies = /** @class */ (function () {
         };
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             if (response.statusCode !== http_status_1.default.OK) {
                 // Unexpected status code, throw an error
                 throw errors_1.default.buildUnexpectedResponseError(response);
@@ -32943,7 +33410,7 @@ var StoragePolicies = /** @class */ (function () {
             return response.body.entries[0];
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Create a new storage policy assignment to a user
      * @param {string} storagePolicyID The ID of the storage policy to assign
@@ -32951,7 +33418,7 @@ var StoragePolicies = /** @class */ (function () {
      * @param {Function} [callback] Passed the assignment object if successful
      * @returns {Promise<Object>} Promise resolving to the assignment object
      */
-    StoragePolicies.prototype.createAssignment = function (storagePolicyID, userID, callback) {
+    createAssignment(storagePolicyID, userID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH), params = {
             body: {
                 storage_policy: {
@@ -32965,7 +33432,7 @@ var StoragePolicies = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Update a storage policy assignment
      * @param {string} assignmentID The ID of the storage policy assignment to update
@@ -32973,30 +33440,29 @@ var StoragePolicies = /** @class */ (function () {
      * @param {Function} [callback] Passed the updated assignment object if successful
      * @returns {Promise<Object>} Promise resolving to the updated assignment object
      */
-    StoragePolicies.prototype.updateAssignment = function (assignmentID, updates, callback) {
+    updateAssignment(assignmentID, updates, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Remove a storage policy assignment, returning the user to the default policy
      * @param {string} assignmentID The ID of the assignment to remove
      * @param {Function} [callback] Passed nothing if successful
      * @returns {Promise<void>} Promise resolving if the removal succeeds
      */
-    StoragePolicies.prototype.removeAssignment = function (assignmentID, callback) {
+    removeAssignment(assignmentID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    return StoragePolicies;
-}());
+    }
+}
 module.exports = StoragePolicies;
 //# sourceMappingURL=storage-policies.js.map
 
 /***/ }),
 
-/***/ 5076:
+/***/ 19710:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -33007,7 +33473,7 @@ module.exports = StoragePolicies;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -33026,7 +33492,7 @@ var TaskResolutionState;
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var BASE_PATH = '/tasks', ASSIGNMENTS_SUBRESOURCE = 'assignments', ASSIGNMENTS_PATH = '/task_assignments', REVIEW_ACTION = 'review';
+const BASE_PATH = '/tasks', ASSIGNMENTS_SUBRESOURCE = 'assignments', ASSIGNMENTS_PATH = '/task_assignments', REVIEW_ACTION = 'review';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -33037,8 +33503,8 @@ var BASE_PATH = '/tasks', ASSIGNMENTS_SUBRESOURCE = 'assignments', ASSIGNMENTS_P
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Tasks = /** @class */ (function () {
-    function Tasks(client) {
+class Tasks {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -33054,7 +33520,7 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new task information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created task object
      */
-    Tasks.prototype.create = function (fileID, options, callback) {
+    create(fileID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             body: {
                 item: {
@@ -33066,7 +33532,7 @@ var Tasks = /** @class */ (function () {
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Fetches a specific task.
      *
@@ -33078,12 +33544,12 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the task information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the task object
      */
-    Tasks.prototype.get = function (taskID, options, callback) {
+    get(taskID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, taskID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Updates a specific task.
      *
@@ -33097,12 +33563,12 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated task information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated task object
      */
-    Tasks.prototype.update = function (taskID, updates, callback) {
+    update(taskID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, taskID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Permanently deletes a specific task.
      *
@@ -33113,10 +33579,10 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Empty body passed if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Tasks.prototype.delete = function (taskID, callback) {
+    delete(taskID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, taskID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Get a list of assignments for a given task
      *
@@ -33128,12 +33594,12 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the list of assignments if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of assignment objects
      */
-    Tasks.prototype.getAssignments = function (taskID, options, callback) {
+    getAssignments(taskID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, taskID, ASSIGNMENTS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get a specific task assignment
      *
@@ -33145,12 +33611,12 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the task assignment if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the assignment object
      */
-    Tasks.prototype.getAssignment = function (assignmentID, options, callback) {
+    getAssignment(assignmentID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Assign a task to a specific user by ID
      *
@@ -33162,7 +33628,7 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the task assignment if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the new assignment object
      */
-    Tasks.prototype.assignByUserID = function (taskID, userID, callback) {
+    assignByUserID(taskID, userID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH), params = {
             body: {
                 task: {
@@ -33175,7 +33641,7 @@ var Tasks = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Assign a task to a specific user by email address
      *
@@ -33187,7 +33653,7 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the task assignment if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the new assignment object
      */
-    Tasks.prototype.assignByEmail = function (taskID, email, callback) {
+    assignByEmail(taskID, email, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH), params = {
             body: {
                 task: {
@@ -33200,7 +33666,7 @@ var Tasks = /** @class */ (function () {
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Update a task assignment.  This is used to resolve or complete a task.
      *
@@ -33214,12 +33680,12 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated task assignment if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated assignment object
      */
-    Tasks.prototype.updateAssignment = function (assignmentID, options, callback) {
+    updateAssignment(assignmentID, options, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID), params = {
             body: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a task assignment.  This unassigns a user from the related task.
      *
@@ -33230,12 +33696,11 @@ var Tasks = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Tasks.prototype.deleteAssignment = function (assignmentID, callback) {
+    deleteAssignment(assignmentID, callback) {
         var apiPath = (0, url_path_1.default)(ASSIGNMENTS_PATH, assignmentID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    return Tasks;
-}());
+    }
+}
 /**
  * Enum of valid task resolution states
  * @readonly
@@ -33247,7 +33712,7 @@ module.exports = Tasks;
 
 /***/ }),
 
-/***/ 88101:
+/***/ 14479:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -33261,9 +33726,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // -----------------------------------------------------------------------------
 // Requirements
 // -----------------------------------------------------------------------------
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -33293,7 +33758,7 @@ var TermsOfServicesStatus;
 // Private
 // -----------------------------------------------------------------------------
 // Base path for all terms of service endpoints
-var BASE_PATH = '/terms_of_services', USER_STATUSES_PATH = '/terms_of_service_user_statuses';
+const BASE_PATH = '/terms_of_services', USER_STATUSES_PATH = '/terms_of_service_user_statuses';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -33303,8 +33768,8 @@ var BASE_PATH = '/terms_of_services', USER_STATUSES_PATH = '/terms_of_service_us
  * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
  * @constructor
  */
-var TermsOfService = /** @class */ (function () {
-    function TermsOfService(client) {
+class TermsOfService {
+    constructor(client) {
         // Attach the client, for making API calls
         this.client = client;
     }
@@ -33320,7 +33785,7 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of services information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of services object
      */
-    TermsOfService.prototype.create = function (termsOfServicesType, termsOfServicesStatus, termsOfServicesText, callback) {
+    create(termsOfServicesType, termsOfServicesStatus, termsOfServicesText, callback) {
         var params = {
             body: {
                 status: termsOfServicesStatus,
@@ -33330,7 +33795,7 @@ var TermsOfService = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Updates a custom terms of services with new specified values
      *
@@ -33344,13 +33809,13 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of services updated information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of services object
      */
-    TermsOfService.prototype.update = function (termsOfServicesID, updates, callback) {
+    update(termsOfServicesID, updates, callback) {
         var params = {
             body: updates,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, termsOfServicesID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Gets a specific custom terms of services with specified ID
      *
@@ -33363,13 +33828,13 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of services information with specified ID if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of services object
      */
-    TermsOfService.prototype.get = function (termsOfServicesID, options, callback) {
+    get(termsOfServicesID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, termsOfServicesID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Gets custom terms of services for the user's enterprise
      *
@@ -33382,13 +33847,13 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of services information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of services object
      */
-    TermsOfService.prototype.getAll = function (options, callback) {
+    getAll(options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Accepts/rejects custom terms of services for the user
      *
@@ -33402,7 +33867,7 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of service user status information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of service user status
      */
-    TermsOfService.prototype.createUserStatus = function (termsOfServicesID, isAccepted, options, callback) {
+    createUserStatus(termsOfServicesID, isAccepted, options, callback) {
         var params = {
             body: {
                 tos: {
@@ -33417,7 +33882,7 @@ var TermsOfService = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(USER_STATUSES_PATH);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Gets a terms os service status given the terms of services id
      *
@@ -33430,7 +33895,7 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of service user status information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of service user status
      */
-    TermsOfService.prototype.getUserStatus = function (termsOfServicesID, options, callback) {
+    getUserStatus(termsOfServicesID, options, callback) {
         var params = {
             qs: {
                 tos_id: termsOfServicesID,
@@ -33442,15 +33907,14 @@ var TermsOfService = /** @class */ (function () {
         var apiPath = (0, url_path_1.default)(USER_STATUSES_PATH);
         return this.client
             .get(apiPath, params)
-            .then(function (response /* FIXME */) {
-            var _a;
+            .then((response /* FIXME */) => {
             if (response.statusCode !== 200) {
                 throw errors_1.default.buildUnexpectedResponseError(response);
             }
-            return (_a = response.body.entries[0]) !== null && _a !== void 0 ? _a : {};
+            return response.body.entries[0] ?? {};
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Accepts/rejects custom terms of services for the user
      *
@@ -33462,7 +33926,7 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of service user status updated information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated terms of service user status
      */
-    TermsOfService.prototype.updateUserStatus = function (termsOfServiceUserStatusID, isAccepted, callback) {
+    updateUserStatus(termsOfServiceUserStatusID, isAccepted, callback) {
         var params = {
             body: {
                 is_accepted: isAccepted,
@@ -33470,7 +33934,7 @@ var TermsOfService = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(USER_STATUSES_PATH, termsOfServiceUserStatusID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Creates a user status for terms of service, if already exists then update existing user status for terms of service
      *
@@ -33484,8 +33948,7 @@ var TermsOfService = /** @class */ (function () {
      * @param {Function} [callback] - Passed the terms of service user status information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the terms of service user status
      */
-    TermsOfService.prototype.setUserStatus = function (termsOfServicesID, isAccepted, options, callback) {
-        var _this = this;
+    setUserStatus(termsOfServicesID, isAccepted, options, callback) {
         var params = {
             body: {
                 tos: {
@@ -33501,7 +33964,7 @@ var TermsOfService = /** @class */ (function () {
         var apiPath = (0, url_path_1.default)(USER_STATUSES_PATH);
         return this.client
             .post(apiPath, params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             switch (response.statusCode) {
                 // 200/201 - A user status has been successfully updated/created on terms of service
                 // return the terms of service user status object
@@ -33512,17 +33975,14 @@ var TermsOfService = /** @class */ (function () {
                 // Terms of Service already exists. Update the existing terms of service object
                 case http_status_1.default.CONFLICT:
                     var getOptions = Object.assign({ fields: 'id' }, options);
-                    return _this.getUserStatus(termsOfServicesID, getOptions).then(function (userStatus /* FIXME */) {
-                        return _this.updateUserStatus(userStatus.id, isAccepted);
-                    });
+                    return this.getUserStatus(termsOfServicesID, getOptions).then((userStatus /* FIXME */) => this.updateUserStatus(userStatus.id, isAccepted));
                 default:
                     throw errors_1.default.buildUnexpectedResponseError(response);
             }
         })
             .asCallback(callback);
-    };
-    return TermsOfService;
-}());
+    }
+}
 /**
  * Enum value of scope of the custom terms of services set to either managed by an enterprise or enternal to an enterprise
  *
@@ -33542,7 +34002,7 @@ module.exports = TermsOfService;
 
 /***/ }),
 
-/***/ 70520:
+/***/ 87782:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -33553,12 +34013,12 @@ module.exports = TermsOfService;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
 // Trash is technically a folder, so it uses the folders endpoint
-var BASE_PATH = '/folders', TRASH_ID = 'trash', ITEMS_SUBRESOURCE = 'items';
+const BASE_PATH = '/folders', TRASH_ID = 'trash', ITEMS_SUBRESOURCE = 'items';
 // -----------------------------------------------------------------------------
 // Public
 // -----------------------------------------------------------------------------
@@ -33569,8 +34029,8 @@ var BASE_PATH = '/folders', TRASH_ID = 'trash', ITEMS_SUBRESOURCE = 'items';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Trash = /** @class */ (function () {
-    function Trash(client) {
+class Trash {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -33584,20 +34044,19 @@ var Trash = /** @class */ (function () {
      * @param {Function} [callback] - Passed the list of trashed items if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of trashed items
      */
-    Trash.prototype.get = function (options, callback) {
+    get(options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, TRASH_ID, ITEMS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
-    return Trash;
-}());
+    }
+}
 module.exports = Trash;
 //# sourceMappingURL=trash.js.map
 
 /***/ }),
 
-/***/ 51390:
+/***/ 28112:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -33608,11 +34067,11 @@ module.exports = Trash;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/users', EMAIL_ALIASES_SUBRESOURCE = 'email_aliases', GROUP_MEMBERSHIPS_SUBRESOURCE = 'memberships', CURRENT_USER_ID = 'me';
+const BASE_PATH = '/users', EMAIL_ALIASES_SUBRESOURCE = 'email_aliases', GROUP_MEMBERSHIPS_SUBRESOURCE = 'memberships', CURRENT_USER_ID = 'me';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -33623,8 +34082,8 @@ var BASE_PATH = '/users', EMAIL_ALIASES_SUBRESOURCE = 'email_aliases', GROUP_MEM
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var Users = /** @class */ (function () {
-    function Users(client) {
+class Users {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -33638,12 +34097,12 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - passed the user info if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the user object
      */
-    Users.prototype.get = function (userID, options, callback) {
+    get(userID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Update some information about a user.
      *
@@ -33655,12 +34114,12 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated user information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the updated user object
      */
-    Users.prototype.update = function (userID, updates, callback) {
+    update(userID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Deletes a user in an enterprise account.
      *
@@ -33674,12 +34133,12 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful, error otherwise
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Users.prototype.delete = function (userID, options, callback) {
+    delete(userID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     // @NOTE(mwiller) 2014-06-10: This does not include their primary email address!
     /**
      * Get all linked email addresses for a user.
@@ -33691,10 +34150,10 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - Passed the email aliases if successful
      * @returns {Promise<Object>} A promise resolving to the collection of email aliases
      */
-    Users.prototype.getEmailAliases = function (userID, callback) {
+    getEmailAliases(userID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, EMAIL_ALIASES_SUBRESOURCE);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, null, callback);
-    };
+    }
     /**
      * Add a linked email address to a user's account.
      *
@@ -33708,7 +34167,7 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new alias if successful
      * @returns {Promise<Object>} A promise resolving to the new email alias
      */
-    Users.prototype.addEmailAlias = function (userID, email, options, callback) {
+    addEmailAlias(userID, email, options, callback) {
         options = options || {};
         if (typeof options === 'function') {
             callback = options;
@@ -33716,13 +34175,13 @@ var Users = /** @class */ (function () {
         }
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, EMAIL_ALIASES_SUBRESOURCE), params = {
             body: {
-                email: email,
+                email,
                 is_confirmed: false, // don't attempt to autoconfirm aliases for admins by default
             },
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Remove a linked email address from the current user by alias ID.
      *
@@ -33734,10 +34193,10 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - Passed nothing on success
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Users.prototype.removeEmailAlias = function (userID, aliasID, callback) {
+    removeEmailAlias(userID, aliasID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, EMAIL_ALIASES_SUBRESOURCE, aliasID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Retrieve a list of group memberships for the user, which show which groups
      * the user belongs to.  This ability is restricted to group admins.
@@ -33752,12 +34211,12 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] - Passed a list of memberships if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of group memberships
      */
-    Users.prototype.getGroupMemberships = function (userID, options, callback) {
+    getGroupMemberships(userID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, GROUP_MEMBERSHIPS_SUBRESOURCE), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Retrieve the user's avatar image.
      *
@@ -33768,12 +34227,12 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] Passed a stream over the bytes of the avatar image if successful
      * @returns {Promise<Readable>} A promise resolving to the image stream
      */
-    Users.prototype.getAvatar = function (userID, callback) {
+    getAvatar(userID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, 'avatar'), params = {
             streaming: true,
         };
         return this.client.get(apiPath, params).asCallback(callback);
-    };
+    }
     /**
      * Set the user's avatar image.
      *
@@ -33786,14 +34245,14 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] Passed dictionary of picture urls if successful
      * @returns {Promise<Object>} A promise resolving to the picture urls
      */
-    Users.prototype.setAvatar = function (userID, avatar, callback) {
+    setAvatar(userID, avatar, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, 'avatar'), params = {
             formData: {
                 pic: avatar,
             },
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete the user's avatar image.
      *
@@ -33804,10 +34263,10 @@ var Users = /** @class */ (function () {
      * @param {Function} [callback] Passed nothing if successful
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Users.prototype.deleteAvatar = function (userID, callback) {
+    deleteAvatar(userID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, userID, 'avatar'), params = {};
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, params, callback);
-    };
+    }
     /**
      * Validates the roles and permissions of the user,
      * and creates asynchronous jobs to terminate the user's sessions.
@@ -33820,14 +34279,13 @@ var Users = /** @class */ (function () {
      * @param {string[]} [options.userLogins] - The user logins to terminate sessions
      * @returns {Promise<Object>} A promise resolving a message about the request status.
      */
-    Users.prototype.terminateSession = function (options, callback) {
+    terminateSession(options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, 'terminate_sessions'), params = {
             body: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
-    return Users;
-}());
+    }
+}
 /** @const {string} */
 Users.prototype.CURRENT_USER_ID = CURRENT_USER_ID;
 module.exports = Users;
@@ -33835,7 +34293,7 @@ module.exports = Users;
 
 /***/ }),
 
-/***/ 5404:
+/***/ 22054:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -33846,11 +34304,11 @@ module.exports = Users;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var BASE_PATH = '/web_links';
+const BASE_PATH = '/web_links';
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -33861,8 +34319,8 @@ var BASE_PATH = '/web_links';
  * @param {BoxClient} client - The Box API Client that is responsible for making calls to the API
  * @returns {void}
  */
-var WebLinks = /** @class */ (function () {
-    function WebLinks(client) {
+class WebLinks {
+    constructor(client) {
         this.client = client;
     }
     /**
@@ -33879,10 +34337,10 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new web link information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the created weblink object
      */
-    WebLinks.prototype.create = function (url, parentID, options, callback) {
+    create(url, parentID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH), params = {
             body: {
-                url: url,
+                url,
                 parent: {
                     id: parentID,
                 },
@@ -33890,7 +34348,7 @@ var WebLinks = /** @class */ (function () {
         };
         Object.assign(params.body, options);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Use to get information about the web link.
      *
@@ -33902,12 +34360,12 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the web-link information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the weblink object
      */
-    WebLinks.prototype.get = function (weblinkID, options, callback) {
+    get(weblinkID, options, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, weblinkID), params = {
             qs: options,
         };
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Updates information for a web link.
      *
@@ -33921,12 +34379,12 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated web link information if it was acquired successfully, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated web link object
      */
-    WebLinks.prototype.update = function (weblinkID, updates, callback) {
+    update(weblinkID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, weblinkID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Deletes a web link and moves it to the trash
      *
@@ -33937,10 +34395,10 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Empty body passed if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to nothing
      */
-    WebLinks.prototype.delete = function (weblinkID, callback) {
+    delete(weblinkID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, weblinkID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
+    }
     /**
      * Move a web link into a new parent folder.
      *
@@ -33952,7 +34410,7 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated web link information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the updated web link object
      */
-    WebLinks.prototype.move = function (webLinkID, newParentID, callback) {
+    move(webLinkID, newParentID, callback) {
         var params = {
             body: {
                 parent: {
@@ -33962,7 +34420,7 @@ var WebLinks = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, webLinkID);
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Copy a web link into a new, different folder
      *
@@ -33976,7 +34434,7 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - passed the new web link info if call was successful
      * @returns {Promise<Object>} A promise resolving to the new web link object
      */
-    WebLinks.prototype.copy = function (webLinkID, newParentID, options, callback) {
+    copy(webLinkID, newParentID, options, callback) {
         options = options || {};
         options.parent = {
             id: newParentID,
@@ -33986,7 +34444,7 @@ var WebLinks = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, webLinkID, '/copy');
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Add a web link to a given collection
      *
@@ -33998,22 +34456,21 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated web link if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated web link object
      */
-    WebLinks.prototype.addToCollection = function (webLinkID, collectionID, callback) {
-        var _this = this;
+    addToCollection(webLinkID, collectionID, callback) {
         return this.get(webLinkID, { fields: 'collections' })
-            .then(function (data /* FIXME */) {
+            .then((data /* FIXME */) => {
             var collections = data.collections || [];
             // Convert to correct format
-            collections = collections.map(function (c /* FIXME */) { return ({
+            collections = collections.map((c /* FIXME */) => ({
                 id: c.id,
-            }); });
-            if (!collections.find(function (c /* FIXME */) { return c.id === collectionID; })) {
+            }));
+            if (!collections.find((c /* FIXME */) => c.id === collectionID)) {
                 collections.push({ id: collectionID });
             }
-            return _this.update(webLinkID, { collections: collections });
+            return this.update(webLinkID, { collections });
         })
             .asCallback(callback);
-    };
+    }
     /**
      * Remove a web link from a given collection
      *
@@ -34025,27 +34482,25 @@ var WebLinks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated web link if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated web link object
      */
-    WebLinks.prototype.removeFromCollection = function (webLinkID, collectionID, callback) {
-        var _this = this;
+    removeFromCollection(webLinkID, collectionID, callback) {
         return this.get(webLinkID, { fields: 'collections' })
-            .then(function (data /* FIXME */) {
+            .then((data /* FIXME */) => {
             var collections = data.collections || [];
             // Convert to correct object format and remove the specified collection
             collections = collections
-                .map(function (c /* FIXME */) { return ({ id: c.id }); })
-                .filter(function (c /* FIXME */) { return c.id !== collectionID; });
-            return _this.update(webLinkID, { collections: collections });
+                .map((c /* FIXME */) => ({ id: c.id }))
+                .filter((c /* FIXME */) => c.id !== collectionID);
+            return this.update(webLinkID, { collections });
         })
             .asCallback(callback);
-    };
-    return WebLinks;
-}());
+    }
+}
 module.exports = WebLinks;
 //# sourceMappingURL=web-links.js.map
 
 /***/ }),
 
-/***/ 27666:
+/***/ 67356:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -34059,8 +34514,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // -----------------------------------------------------------------------------
 // Requirements
 // -----------------------------------------------------------------------------
-var url_path_1 = __importDefault(__nccwpck_require__(25159));
-var crypto_1 = __importDefault(__nccwpck_require__(76982));
+const url_path_1 = __importDefault(__nccwpck_require__(72813));
+const crypto_1 = __importDefault(__nccwpck_require__(76982));
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -34114,9 +34569,9 @@ var WebhookTriggerType;
 // Private
 // -----------------------------------------------------------------------------
 // Base path for all webhooks endpoints
-var BASE_PATH = '/webhooks';
+const BASE_PATH = '/webhooks';
 // This prevents replay attacks
-var MAX_MESSAGE_AGE = 10 * 60; // 10 minutes
+const MAX_MESSAGE_AGE = 10 * 60; // 10 minutes
 /**
  * Compute the message signature
  * @see {@Link https://developer.box.com/en/guides/webhooks/handle/setup-signatures/}
@@ -34137,10 +34592,10 @@ function computeSignature(body, headers, signatureKey) {
     if (headers['box-signature-algorithm'] !== 'HmacSHA256') {
         return null;
     }
-    var hmac = crypto_1.default.createHmac('sha256', signatureKey);
+    let hmac = crypto_1.default.createHmac('sha256', signatureKey);
     hmac.update(body);
     hmac.update(headers['box-delivery-timestamp']);
-    var signature = hmac.digest('base64');
+    const signature = hmac.digest('base64');
     return signature;
 }
 /**
@@ -34157,12 +34612,12 @@ function computeSignature(body, headers, signatureKey) {
 function validateSignature(body, headers, primarySignatureKey, secondarySignatureKey) {
     // Either the primary or secondary signature must match the corresponding signature from Box
     // (The use of two signatures allows the signing keys to be rotated one at a time)
-    var primarySignature = computeSignature(body, headers, primarySignatureKey);
+    const primarySignature = computeSignature(body, headers, primarySignatureKey);
     if (primarySignature &&
         compareSignatures(primarySignature, headers['box-signature-primary'])) {
         return true;
     }
-    var secondarySignature = computeSignature(body, headers, secondarySignatureKey);
+    const secondarySignature = computeSignature(body, headers, secondarySignatureKey);
     if (secondarySignature &&
         compareSignatures(secondarySignature, headers['box-signature-secondary'])) {
         return true;
@@ -34175,8 +34630,8 @@ function validateSignature(body, headers, primarySignatureKey, secondarySignatur
  * @param receivedSignature Received signature in base64 format
  */
 function compareSignatures(expectedSignature, receivedSignature) {
-    var expectedBuffer = Buffer.from(expectedSignature, 'base64');
-    var receivedBuffer = Buffer.from(receivedSignature, 'base64');
+    const expectedBuffer = Buffer.from(expectedSignature, 'base64');
+    const receivedBuffer = Buffer.from(receivedSignature, 'base64');
     return crypto_1.default.timingSafeEqual(expectedBuffer, receivedBuffer);
 }
 /**
@@ -34188,9 +34643,9 @@ function compareSignatures(expectedSignature, receivedSignature) {
  * @private
  */
 function validateDeliveryTimestamp(headers, maxMessageAge) {
-    var deliveryTime = Date.parse(headers['box-delivery-timestamp']);
-    var currentTime = Date.now();
-    var messageAge = (currentTime - deliveryTime) / 1000;
+    const deliveryTime = Date.parse(headers['box-delivery-timestamp']);
+    const currentTime = Date.now();
+    const messageAge = (currentTime - deliveryTime) / 1000;
     if (messageAge > maxMessageAge) {
         return false;
     }
@@ -34204,7 +34659,7 @@ function validateDeliveryTimestamp(headers, maxMessageAge) {
  * @private
  */
 function jsonStringifyWithEscapedUnicode(body) {
-    return JSON.stringify(body).replace(/[\u007f-\uffff]/g, function (char) { return "\\u".concat("0000".concat(char.charCodeAt(0).toString(16)).slice(-4)); });
+    return JSON.stringify(body).replace(/[\u007f-\uffff]/g, (char) => `\\u${`0000${char.charCodeAt(0).toString(16)}`.slice(-4)}`);
 }
 // -----------------------------------------------------------------------------
 // Public
@@ -34215,11 +34670,7 @@ function jsonStringifyWithEscapedUnicode(body) {
  * @param {BoxClient} client The Box API Client that is responsible for making calls to the API
  * @constructor
  */
-var Webhooks = /** @class */ (function () {
-    function Webhooks(client) {
-        // Attach the client, for making API calls
-        this.client = client;
-    }
+class Webhooks {
     /**
      * Sets primary and secondary signatures that are used to verify the Webhooks messages
      *
@@ -34227,12 +34678,12 @@ var Webhooks = /** @class */ (function () {
      * @param {string} [secondaryKey] - The secondary signature to verify the message with
      * @returns {void}
      */
-    Webhooks.setSignatureKeys = function (primaryKey, secondaryKey) {
+    static setSignatureKeys(primaryKey, secondaryKey) {
         Webhooks.primarySignatureKey = primaryKey;
         if (typeof secondaryKey === 'string') {
             Webhooks.secondarySignatureKey = secondaryKey;
         }
-    };
+    }
     /**
        * Validate a webhook message by verifying the signature and the delivery timestamp
        *
@@ -34245,7 +34696,7 @@ var Webhooks = /** @class */ (function () {
       * @param {int} [maxMessageAge] - The maximum message age (in seconds).  Defaults to 10 minutes
       * @returns {boolean} - True or false
       */
-    Webhooks.validateMessage = function (body, headers, primaryKey, secondaryKey, maxMessageAge) {
+    static validateMessage(body, headers, primaryKey, secondaryKey, maxMessageAge) {
         if (!primaryKey && Webhooks.primarySignatureKey) {
             primaryKey = Webhooks.primarySignatureKey;
         }
@@ -34268,7 +34719,11 @@ var Webhooks = /** @class */ (function () {
             return false;
         }
         return true;
-    };
+    }
+    constructor(client) {
+        // Attach the client, for making API calls
+        this.client = client;
+    }
     /**
      * Create a new webhook on a given Box object, specified by type and ID.
      *
@@ -34282,7 +34737,7 @@ var Webhooks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the new webhook information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the new webhook object
      */
-    Webhooks.prototype.create = function (targetID, targetType, notificationURL, triggerTypes, callback) {
+    create(targetID, targetType, notificationURL, triggerTypes, callback) {
         var params = {
             body: {
                 target: {
@@ -34295,7 +34750,7 @@ var Webhooks = /** @class */ (function () {
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.post)(apiPath, params, callback);
-    };
+    }
     /**
      * Returns a webhook object with the specified Webhook ID
      *
@@ -34307,13 +34762,13 @@ var Webhooks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the webhook information if it was acquired successfully
      * @returns {Promise<Object>} A promise resolving to the webhook object
      */
-    Webhooks.prototype.get = function (webhookID, options, callback) {
+    get(webhookID, options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH, webhookID);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Get a list of webhooks that are active for the current application and user.
      *
@@ -34326,13 +34781,13 @@ var Webhooks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the list of webhooks if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the collection of webhooks
      */
-    Webhooks.prototype.getAll = function (options, callback) {
+    getAll(options, callback) {
         var params = {
             qs: options,
         };
         var apiPath = (0, url_path_1.default)(BASE_PATH);
         return this.client.wrapWithDefaultHandler(this.client.get)(apiPath, params, callback);
-    };
+    }
     /**
      * Update a webhook
      *
@@ -34346,12 +34801,12 @@ var Webhooks = /** @class */ (function () {
      * @param {Function} [callback] - Passed the updated webhook information if successful, error otherwise
      * @returns {Promise<Object>} A promise resolving to the updated webhook object
      */
-    Webhooks.prototype.update = function (webhookID, updates, callback) {
+    update(webhookID, updates, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, webhookID), params = {
             body: updates,
         };
         return this.client.wrapWithDefaultHandler(this.client.put)(apiPath, params, callback);
-    };
+    }
     /**
      * Delete a specified webhook by ID
      *
@@ -34362,24 +34817,23 @@ var Webhooks = /** @class */ (function () {
      * @param {Function} [callback] - Empty response body passed if successful.
      * @returns {Promise<void>} A promise resolving to nothing
      */
-    Webhooks.prototype.delete = function (webhookID, callback) {
+    delete(webhookID, callback) {
         var apiPath = (0, url_path_1.default)(BASE_PATH, webhookID);
         return this.client.wrapWithDefaultHandler(this.client.del)(apiPath, null, callback);
-    };
-    /**
-     * Primary signature key to protect webhooks against attacks.
-     * @static
-     * @type {?string}
-     */
-    Webhooks.primarySignatureKey = null;
-    /**
-     * Secondary signature key to protect webhooks against attacks.
-     * @static
-     * @type {?string}
-     */
-    Webhooks.secondarySignatureKey = null;
-    return Webhooks;
-}());
+    }
+}
+/**
+ * Primary signature key to protect webhooks against attacks.
+ * @static
+ * @type {?string}
+ */
+Webhooks.primarySignatureKey = null;
+/**
+ * Secondary signature key to protect webhooks against attacks.
+ * @static
+ * @type {?string}
+ */
+Webhooks.secondarySignatureKey = null;
 /**
  * Enum of valid webhooks event triggers
  *
@@ -34451,7 +34905,7 @@ module.exports = Webhooks;
 
 /***/ }),
 
-/***/ 8910:
+/***/ 55180:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -34465,9 +34919,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var assert_1 = __importDefault(__nccwpck_require__(42613));
-var bluebird_1 = __nccwpck_require__(94366);
-var errors_1 = __importDefault(__nccwpck_require__(55051));
+const assert_1 = __importDefault(__nccwpck_require__(42613));
+const bluebird_1 = __nccwpck_require__(94366);
+const errors_1 = __importDefault(__nccwpck_require__(21145));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -34504,8 +34958,8 @@ function isObjectValidTokenStore(obj) {
  * @param {TokenStore} [tokenStore] The token store instance to use for caching token info
  * @constructor
  */
-var AppAuthSession = /** @class */ (function () {
-    function AppAuthSession(type, id, config, tokenManager, tokenStore) {
+class AppAuthSession {
+    constructor(type, id, config, tokenManager, tokenStore) {
         this._type = type;
         this._id = id;
         this._config = config;
@@ -34528,29 +34982,28 @@ var AppAuthSession = /** @class */ (function () {
      * @returns {Promise<string>} Promise resolving to the access token
      * @private
      */
-    AppAuthSession.prototype._refreshAppAuthAccessToken = function (options) {
-        var _this = this;
+    _refreshAppAuthAccessToken(options) {
         // If tokens aren't already being refreshed, start the refresh
         if (!this._refreshPromise) {
             this._refreshPromise = this._tokenManager
                 .getTokensJWTGrant(this._type, this._id, options)
-                .then(function (tokenInfo) {
+                .then((tokenInfo) => {
                 // Set new token info and propagate the new access token
-                _this._tokenInfo = tokenInfo;
-                if (_this._tokenStore) {
-                    return _this._tokenStore
+                this._tokenInfo = tokenInfo;
+                if (this._tokenStore) {
+                    return this._tokenStore
                         .writeAsync(tokenInfo)
-                        .then(function () { return tokenInfo.accessToken; });
+                        .then(() => tokenInfo.accessToken);
                 }
                 return tokenInfo.accessToken;
             })
-                .finally(function () {
+                .finally(() => {
                 // Refresh complete, clear promise
-                _this._refreshPromise = null;
+                this._refreshPromise = null;
             });
         }
         return this._refreshPromise;
-    };
+    }
     /**
      * Produces a valid, app auth access token.
      * Performs a refresh before returning if the current token is expired. If the current
@@ -34560,17 +35013,16 @@ var AppAuthSession = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<string>} Promise resolving to the access token
      */
-    AppAuthSession.prototype.getAccessToken = function (options) {
-        var _this = this;
+    getAccessToken(options) {
         var expirationBuffer = this._config.expiredBufferMS;
         // If we're initializing the client and have a token store, try reading from it
         if (!this._tokenInfo && this._tokenStore) {
-            return this._tokenStore.readAsync().then(function (tokenInfo) {
-                if (!_this._tokenManager.isAccessTokenValid(tokenInfo, expirationBuffer)) {
+            return this._tokenStore.readAsync().then((tokenInfo) => {
+                if (!this._tokenManager.isAccessTokenValid(tokenInfo, expirationBuffer)) {
                     // Token store contains expired tokens, refresh
-                    return _this._refreshAppAuthAccessToken(options);
+                    return this._refreshAppAuthAccessToken(options);
                 }
-                _this._tokenInfo = tokenInfo;
+                this._tokenInfo = tokenInfo;
                 return tokenInfo.accessToken;
             });
         }
@@ -34582,19 +35034,19 @@ var AppAuthSession = /** @class */ (function () {
         }
         // Your token is not currently stale! Return the current access token.
         return bluebird_1.Promise.resolve(this._tokenInfo.accessToken);
-    };
+    }
     /**
      * Revokes the app auth token used by this session, and clears the saved tokenInfo.
      *
      * @param {TokenRequestOptions} [options]- Sets optional behavior for the token grant
      * @returns {Promise} Promise resolving if the revoke succeeds
      */
-    AppAuthSession.prototype.revokeTokens = function (options) {
+    revokeTokens(options) {
         // The current app auth token is revoked (but a new one will be created automatically as needed).
         var tokenInfo = this._tokenInfo || {}, accessToken = tokenInfo.accessToken;
         this._tokenInfo = null;
         return this._tokenManager.revokeTokens(accessToken, options);
-    };
+    }
     /**
      * Exchange the client access token for one with lower scope
      * @param {string|string[]} scopes The scope(s) requested for the new token
@@ -34604,12 +35056,9 @@ var AppAuthSession = /** @class */ (function () {
      * @param {ActorParams} [options.actor] - Optional actor parameters for creating annotator tokens
      * @returns {Promise<TokenInfo>} Promise resolving to the new token info
      */
-    AppAuthSession.prototype.exchangeToken = function (scopes, resource, options) {
-        var _this = this;
-        return this.getAccessToken(options).then(function (accessToken) {
-            return _this._tokenManager.exchangeToken(accessToken, scopes, resource, options);
-        });
-    };
+    exchangeToken(scopes, resource, options) {
+        return this.getAccessToken(options).then((accessToken) => this._tokenManager.exchangeToken(accessToken, scopes, resource, options));
+    }
     /**
      * Handle an an "Expired Tokens" Error. If our tokens are expired, we need to clear the token
      * store (if present) before continuing.
@@ -34620,7 +35069,7 @@ var AppAuthSession = /** @class */ (function () {
      *  usually be the original response error, but could an error from trying to access the
      *  token store as well.
      */
-    AppAuthSession.prototype.handleExpiredTokensError = function (err /* FIXME */) {
+    handleExpiredTokensError(err /* FIXME */) {
         if (!this._tokenStore) {
             return bluebird_1.Promise.resolve(err);
         }
@@ -34628,19 +35077,18 @@ var AppAuthSession = /** @class */ (function () {
         // eslint-disable-next-line promise/no-promise-in-callback
         return this._tokenStore
             .clearAsync()
-            .catch(function (e) { return errors_1.default.unwrapAndThrow(e); })
-            .then(function () {
+            .catch((e) => errors_1.default.unwrapAndThrow(e))
+            .then(() => {
             throw err;
         });
-    };
-    return AppAuthSession;
-}());
+    }
+}
 module.exports = AppAuthSession;
 //# sourceMappingURL=app-auth-session.js.map
 
 /***/ }),
 
-/***/ 26932:
+/***/ 10178:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -34651,7 +35099,7 @@ module.exports = AppAuthSession;
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __nccwpck_require__(94366);
+const bluebird_1 = __nccwpck_require__(94366);
 // ------------------------------------------------------------------------------
 // Public
 // ------------------------------------------------------------------------------
@@ -34668,8 +35116,8 @@ var bluebird_1 = __nccwpck_require__(94366);
  * @param {TokenManager} tokenManager The token manager
  * @constructor
  */
-var BasicSession = /** @class */ (function () {
-    function BasicSession(accessToken, tokenManager) {
+class BasicSession {
+    constructor(accessToken, tokenManager) {
         this._accessToken = accessToken;
         this._tokenManager = tokenManager;
     }
@@ -34679,18 +35127,18 @@ var BasicSession = /** @class */ (function () {
      *
      * @returns {Promise<string>} Promise resolving to the access token
      */
-    BasicSession.prototype.getAccessToken = function () {
+    getAccessToken() {
         return bluebird_1.Promise.resolve(this._accessToken);
-    };
+    }
     /**
      * Revokes the session's access token.
      *
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise} Promise resolving if the revoke succeeds
      */
-    BasicSession.prototype.revokeTokens = function (options) {
+    revokeTokens(options) {
         return this._tokenManager.revokeTokens(this._accessToken, options);
-    };
+    }
     /**
      * Exchange the client access token for one with lower scope
      * @param {string|string[]} scopes The scope(s) requested for the new token
@@ -34700,17 +35148,16 @@ var BasicSession = /** @class */ (function () {
      * @param {ActorParams} [options.actor] - Optional actor parameters for creating annotator tokens
      * @returns {Promise<TokenInfo>} Promise resolving to the new token info
      */
-    BasicSession.prototype.exchangeToken = function (scopes, resource, options) {
+    exchangeToken(scopes, resource, options) {
         return this._tokenManager.exchangeToken(this._accessToken, scopes, resource, options);
-    };
-    return BasicSession;
-}());
+    }
+}
 module.exports = BasicSession;
 //# sourceMappingURL=basic-session.js.map
 
 /***/ }),
 
-/***/ 54525:
+/***/ 40211:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -34721,7 +35168,7 @@ module.exports = BasicSession;
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __nccwpck_require__(94366);
+const bluebird_1 = __nccwpck_require__(94366);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -34743,8 +35190,8 @@ var bluebird_1 = __nccwpck_require__(94366);
  * @param {TokenManager} tokenManager The TokenManager
  * @constructor
  */
-var CCGSession = /** @class */ (function () {
-    function CCGSession(config, tokenManager) {
+class CCGSession {
+    constructor(config, tokenManager) {
         this._config = config;
         this._tokenManager = tokenManager;
         // The TokenInfo object for this anonymous session
@@ -34759,25 +35206,24 @@ var CCGSession = /** @class */ (function () {
      * @returns {Promise<string>} Promise resolving to the access token
      * @private
      */
-    CCGSession.prototype._refreshAccessToken = function (options) {
-        var _this = this;
+    _refreshAccessToken(options) {
         // If tokens aren't already being refreshed, start the refresh
         if (!this._refreshPromise) {
             // Initiate a refresh
             this._refreshPromise = this._tokenManager
                 .getTokensClientCredentialsGrant(options)
-                .then(function (tokenInfo) {
+                .then((tokenInfo) => {
                 // Set new token info and propagate the new access token
-                _this._tokenInfo = tokenInfo;
+                this._tokenInfo = tokenInfo;
                 return tokenInfo.accessToken;
             })
-                .finally(function () {
+                .finally(() => {
                 // Refresh complete, clear promise
-                _this._refreshPromise = null;
+                this._refreshPromise = null;
             });
         }
         return this._refreshPromise;
-    };
+    }
     /**
      * Produces a valid, anonymous access token.
      * Performs a refresh before returning if the current token is expired. If the current
@@ -34787,7 +35233,7 @@ var CCGSession = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<string>} Promise resolving to the access token
      */
-    CCGSession.prototype.getAccessToken = function (options) {
+    getAccessToken(options) {
         // If the current token is no longer fresh, get a new token. All incoming
         // requests will be held until a fresh token is retrieved.
         var expirationBuffer = this._config.expiredBufferMS;
@@ -34797,19 +35243,19 @@ var CCGSession = /** @class */ (function () {
         }
         // Your token is not currently stale! Return the current access token.
         return bluebird_1.Promise.resolve(this._tokenInfo.accessToken);
-    };
+    }
     /**
      * Revokes the anonymous token used by this anonymous session, and clears the saved tokenInfo.
      *
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise} Promise resolving if the revoke succeeds
      */
-    CCGSession.prototype.revokeTokens = function (options) {
+    revokeTokens(options) {
         // The current anonymous token is revoked (but a new one will be created automatically as needed).
         var tokenInfo = this._tokenInfo || {}, accessToken = tokenInfo.accessToken;
         this._tokenInfo = null;
         return this._tokenManager.revokeTokens(accessToken, options);
-    };
+    }
     /**
      * Exchange the client access token for one with lower scope
      *
@@ -34819,21 +35265,17 @@ var CCGSession = /** @class */ (function () {
      * @param {TokenRequestOptions} [options.tokenRequestOptions] - Sets optional behavior for the token grant
      * @returns {void}
      */
-    CCGSession.prototype.exchangeToken = function (scopes, resource, options) {
-        var _this = this;
+    exchangeToken(scopes, resource, options) {
         // We need to get the access token, in case it hasn't been generated yet
-        return this.getAccessToken(options).then(function (accessToken) {
-            return _this._tokenManager.exchangeToken(accessToken, scopes, resource, options);
-        });
-    };
-    return CCGSession;
-}());
+        return this.getAccessToken(options).then((accessToken) => this._tokenManager.exchangeToken(accessToken, scopes, resource, options));
+    }
+}
 module.exports = CCGSession;
 //# sourceMappingURL=ccg-session.js.map
 
 /***/ }),
 
-/***/ 36919:
+/***/ 97893:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -34847,10 +35289,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var assert_1 = __importDefault(__nccwpck_require__(42613));
-var bluebird_1 = __nccwpck_require__(94366);
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var errors_1 = __importDefault(__nccwpck_require__(55051));
+const assert_1 = __importDefault(__nccwpck_require__(42613));
+const bluebird_1 = __nccwpck_require__(94366);
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const errors_1 = __importDefault(__nccwpck_require__(21145));
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -34898,8 +35340,8 @@ function isObjectValidTokenStore(obj) {
  * @param {TokenManager} tokenManager The token manager
  * @constructor
  */
-var PersistentSession = /** @class */ (function () {
-    function PersistentSession(tokenInfo, tokenStore, config, tokenManager) {
+class PersistentSession {
+    constructor(tokenInfo, tokenStore, config, tokenManager) {
         this._config = config;
         this._tokenManager = tokenManager;
         // Keeps track of if tokens are currently being refreshed
@@ -34920,14 +35362,14 @@ var PersistentSession = /** @class */ (function () {
      * @returns {void}
      * @private
      */
-    PersistentSession.prototype._setTokenInfo = function (tokenInfo) {
+    _setTokenInfo(tokenInfo) {
         this._tokenInfo = {
             accessToken: tokenInfo.accessToken,
             refreshToken: tokenInfo.refreshToken,
             accessTokenTTLMS: tokenInfo.accessTokenTTLMS,
             acquiredAtMS: tokenInfo.acquiredAtMS,
         };
-    };
+    }
     /**
      * Attempts to refresh tokens for the client.
      * Will use the Box refresh token grant to complete the refresh. On refresh failure, we'll
@@ -34938,14 +35380,13 @@ var PersistentSession = /** @class */ (function () {
      * @returns {Promise<string>} Promise resolving to the access token
      * @private
      */
-    PersistentSession.prototype._refreshTokens = function (options) {
-        var _this = this;
+    _refreshTokens(options) {
         // If not already refreshing, kick off a token refresh request and set a lock so that additional
         // client requests don't try as well
         if (!this._refreshPromise) {
             this._refreshPromise = this._tokenManager
                 .getTokensRefreshGrant(this._tokenInfo.refreshToken, options)
-                .catch(function (err) {
+                .catch((err) => {
                 // If we got an error response from Box API, but it was 400 invalid_grant, it indicates we may have just
                 // made the request with an invalidated refresh token. Since only a max of 2 refresh tokens can be valid
                 // at any point in time, and a horizontally scaled app could have multiple Node instances running in parallel,
@@ -34954,20 +35395,20 @@ var PersistentSession = /** @class */ (function () {
                 // we'll need to check the central data store for the latest valid tokens that some other server in the app
                 // cluster would have received. So, instead pull tokens from the central store and attempt to use them.
                 if (err.statusCode === http_status_1.default.BAD_REQUEST &&
-                    _this._tokenStore) {
+                    this._tokenStore) {
                     var invalidGrantError = err;
                     // Check the tokenStore to see if tokens have been updated recently. If they have, then another
                     // instance of the session may have already refreshed the user tokens, which would explain why
                     // we couldn't refresh.
-                    return _this._tokenStore
+                    return this._tokenStore
                         .readAsync()
-                        .catch(function (e) { return errors_1.default.unwrapAndThrow(e); })
-                        .then(function (storeTokenInfo) {
+                        .catch((e) => errors_1.default.unwrapAndThrow(e))
+                        .then((storeTokenInfo) => {
                         // if the tokens we got from the central store are the same as the tokens we made the failed request with
                         // already, then we can be sure that no other servers have valid tokens for this server either.
                         // Thus, this user truly has an expired refresh token. So, propagate an "Expired Tokens" error.
                         if (!storeTokenInfo ||
-                            storeTokenInfo.refreshToken === _this._tokenInfo.refreshToken) {
+                            storeTokenInfo.refreshToken === this._tokenInfo.refreshToken) {
                             throw errors_1.default.buildAuthError(invalidGrantError.response);
                         }
                         // Propagate the fresh tokens that we found in the session
@@ -34978,31 +35419,31 @@ var PersistentSession = /** @class */ (function () {
                 // We have no usable tokens for the user and no way to refresh them - propagate a permanent error.
                 throw err;
             })
-                .then(function (tokenInfo) {
+                .then((tokenInfo) => {
                 // Success! We got back a TokenInfo object from the API.
                 // If we have a token store, we'll write it there now before finishing up the request.
-                if (_this._tokenStore) {
-                    return _this._tokenStore
+                if (this._tokenStore) {
+                    return this._tokenStore
                         .writeAsync(tokenInfo)
-                        .catch(function (e) { return errors_1.default.unwrapAndThrow(e); })
-                        .then(function () { return tokenInfo; });
+                        .catch((e) => errors_1.default.unwrapAndThrow(e))
+                        .then(() => tokenInfo);
                 }
                 // If no token store, Set and propagate the access token immediately
                 return tokenInfo;
             })
-                .then(function (tokenInfo) {
+                .then((tokenInfo) => {
                 // Set and propagate the new access token
-                _this._setTokenInfo(tokenInfo);
+                this._setTokenInfo(tokenInfo);
                 return tokenInfo.accessToken;
             })
-                .catch(function (err) { return _this.handleExpiredTokensError(err); })
-                .finally(function () {
+                .catch((err) => this.handleExpiredTokensError(err))
+                .finally(() => {
                 // Refresh complete, clear promise
-                _this._refreshPromise = null;
+                this._refreshPromise = null;
             });
         }
         return this._refreshPromise;
-    };
+    }
     // ------------------------------------------------------------------------------
     // Public Instance
     // ------------------------------------------------------------------------------
@@ -35015,15 +35456,15 @@ var PersistentSession = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<string>} Promise resolving to the access token
      */
-    PersistentSession.prototype.getAccessToken = function (options) {
+    getAccessToken(options) {
         // If our tokens are not fresh, we need to refresh them
-        var expirationBuffer = this._config.expiredBufferMS;
+        const expirationBuffer = this._config.expiredBufferMS;
         if (!this._tokenManager.isAccessTokenValid(this._tokenInfo, expirationBuffer)) {
             return this._refreshTokens(options);
         }
         // Current access token is still valid. Return it.
         return bluebird_1.Promise.resolve(this._tokenInfo.accessToken);
-    };
+    }
     /**
      * Revokes the session's tokens. If the session has a refresh token we'll use that,
      * since it is more likely to be up to date. Otherwise, we'll revoke the accessToken.
@@ -35032,9 +35473,9 @@ var PersistentSession = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise} Promise that resolves when the revoke succeeds
      */
-    PersistentSession.prototype.revokeTokens = function (options) {
+    revokeTokens(options) {
         return this._tokenManager.revokeTokens(this._tokenInfo.refreshToken, options);
-    };
+    }
     /**
      * Exchange the client access token for one with lower scope
      * @param {string|string[]} scopes The scope(s) requested for the new token
@@ -35043,12 +35484,9 @@ var PersistentSession = /** @class */ (function () {
      * @param {TokenRequestOptions} [options.tokenRequestOptions] - Sets optional behavior for the token grant
      * @returns {void}
      */
-    PersistentSession.prototype.exchangeToken = function (scopes, resource, options) {
-        var _this = this;
-        return this.getAccessToken(options).then(function (accessToken) {
-            return _this._tokenManager.exchangeToken(accessToken, scopes, resource, options);
-        });
-    };
+    exchangeToken(scopes, resource, options) {
+        return this.getAccessToken(options).then((accessToken) => this._tokenManager.exchangeToken(accessToken, scopes, resource, options));
+    }
     /**
      * Handle an an "Expired Tokens" Error. If our tokens are expired, we need to clear the token
      * store (if present) before continuing.
@@ -35059,7 +35497,7 @@ var PersistentSession = /** @class */ (function () {
      *  usually be the original response error, but could an error from trying to access the
      *  token store as well.
      */
-    PersistentSession.prototype.handleExpiredTokensError = function (err /* FIXME */) {
+    handleExpiredTokensError(err /* FIXME */) {
         if (!this._tokenStore) {
             return bluebird_1.Promise.resolve(err);
         }
@@ -35067,19 +35505,18 @@ var PersistentSession = /** @class */ (function () {
         // eslint-disable-next-line promise/no-promise-in-callback
         return this._tokenStore
             .clearAsync()
-            .catch(function (e) { return errors_1.default.unwrapAndThrow(e); })
-            .then(function () {
+            .catch((e) => errors_1.default.unwrapAndThrow(e))
+            .then(() => {
             throw err;
         });
-    };
-    return PersistentSession;
-}());
+    }
+}
 module.exports = PersistentSession;
 //# sourceMappingURL=persistent-session.js.map
 
 /***/ }),
 
-/***/ 49498:
+/***/ 35184:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -35093,12 +35530,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var bluebird_1 = __importDefault(__nccwpck_require__(94366));
-var http_status_1 = __importDefault(__nccwpck_require__(97165));
-var jsonwebtoken_1 = __importDefault(__nccwpck_require__(69653));
-var uuid_1 = __nccwpck_require__(3691);
-var errors_1 = __importDefault(__nccwpck_require__(55051));
-var exponential_backoff_1 = __importDefault(__nccwpck_require__(65924));
+const bluebird_1 = __importDefault(__nccwpck_require__(94366));
+const http_status_1 = __importDefault(__nccwpck_require__(97165));
+const jsonwebtoken_1 = __importDefault(__nccwpck_require__(69653));
+const uuid_1 = __nccwpck_require__(12048);
+const errors_1 = __importDefault(__nccwpck_require__(21145));
+const exponential_backoff_1 = __importDefault(__nccwpck_require__(25974));
 /**
  *	Determines whether a JWT auth error can be retried
  * @param {Error} err The JWT auth error
@@ -35147,10 +35584,10 @@ var tokenPaths;
 // Timer used to track elapsed time starting with executing an async request and ending with emitting the response.
 var asyncRequestTimer /* FIXME */;
 // The XFF header label - Used to give the API better information for uploads, rate-limiting, etc.
-var HEADER_XFF = 'X-Forwarded-For';
-var ACCESS_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
-var ACTOR_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:id_token';
-var BOX_JWT_AUDIENCE = 'https://api.box.com/oauth2/token';
+const HEADER_XFF = 'X-Forwarded-For';
+const ACCESS_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
+const ACTOR_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:id_token';
+const BOX_JWT_AUDIENCE = 'https://api.box.com/oauth2/token';
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
@@ -35214,8 +35651,8 @@ function isValidTokenResponse(grantType, responseBody /* FIXME */) {
  * @param {APIRequestManager} requestManager The API Request Manager
  * @constructor
  */
-var TokenManager = /** @class */ (function () {
-    function TokenManager(config, requestManager) {
+class TokenManager {
+    constructor(config, requestManager) {
         this.config = config;
         this.oauthBaseURL = config.apiRootURL + tokenPaths.ROOT;
         this.requestManager = requestManager;
@@ -35230,7 +35667,7 @@ var TokenManager = /** @class */ (function () {
      * we'll call a token invalid.
      * @returns {boolean} True if token is valid outside of buffer, otherwise false
      */
-    TokenManager.prototype.isAccessTokenValid = function (tokenInfo, bufferMS) {
+    isAccessTokenValid(tokenInfo, bufferMS) {
         if (typeof tokenInfo.acquiredAtMS === 'undefined' ||
             typeof tokenInfo.accessTokenTTLMS === 'undefined') {
             return false;
@@ -35238,7 +35675,7 @@ var TokenManager = /** @class */ (function () {
         bufferMS = bufferMS || 0;
         var expireTime = tokenInfo.acquiredAtMS + tokenInfo.accessTokenTTLMS - bufferMS;
         return expireTime > Date.now();
-    };
+    }
     /**
      * Acquires OAuth2 tokens using a grant type (authorization_code, password, refresh_token)
      *
@@ -35247,7 +35684,7 @@ var TokenManager = /** @class */ (function () {
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      * @private
      */
-    TokenManager.prototype.getTokens = function (formParams, options) {
+    getTokens(formParams, options) {
         var params = {
             method: 'POST',
             url: this.oauthBaseURL + tokenPaths.GET,
@@ -35263,7 +35700,7 @@ var TokenManager = /** @class */ (function () {
         }
         return this.requestManager
             .makeRequest(params)
-            .then(function (response /* FIXME */) {
+            .then((response /* FIXME */) => {
             // Response Error: The API is telling us that we attempted an invalid token grant. This
             // means that our refresh token or auth code has exipred, so propagate an "Expired Tokens"
             // error.
@@ -35272,7 +35709,7 @@ var TokenManager = /** @class */ (function () {
                 response.body.error === 'invalid_grant') {
                 var errDescription = response.body.error_description;
                 var message = errDescription
-                    ? "Auth Error: ".concat(errDescription)
+                    ? `Auth Error: ${errDescription}`
                     : undefined;
                 throw errors_1.default.buildAuthError(response, message);
             }
@@ -35290,7 +35727,7 @@ var TokenManager = /** @class */ (function () {
             // Got valid token response. Parse out the TokenInfo and propagate it back.
             return getTokensFromGrantResponse(response.body);
         });
-    };
+    }
     /**
      * Acquires token info using an authorization code
      *
@@ -35298,7 +35735,7 @@ var TokenManager = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    TokenManager.prototype.getTokensAuthorizationCodeGrant = function (authorizationCode, options) {
+    getTokensAuthorizationCodeGrant(authorizationCode, options) {
         if (!isValidCodeOrToken(authorizationCode)) {
             return bluebird_1.default.reject(new Error('Invalid authorization code.'));
         }
@@ -35307,21 +35744,21 @@ var TokenManager = /** @class */ (function () {
             code: authorizationCode,
         };
         return this.getTokens(params, options);
-    };
+    }
     /**
      * Acquires token info using the client credentials grant.
      *
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    TokenManager.prototype.getTokensClientCredentialsGrant = function (options) {
+    getTokensClientCredentialsGrant(options) {
         var params = {
             grant_type: grantTypes.CLIENT_CREDENTIALS,
             box_subject_type: this.config.boxSubjectType,
             box_subject_id: this.config.boxSubjectId,
         };
         return this.getTokens(params, options);
-    };
+    }
     /**
      * Refreshes the access and refresh tokens for a given refresh token.
      *
@@ -35329,7 +35766,7 @@ var TokenManager = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    TokenManager.prototype.getTokensRefreshGrant = function (refreshToken, options) {
+    getTokensRefreshGrant(refreshToken, options) {
         if (!isValidCodeOrToken(refreshToken)) {
             return bluebird_1.default.reject(new Error('Invalid refresh token.'));
         }
@@ -35338,7 +35775,7 @@ var TokenManager = /** @class */ (function () {
             refresh_token: refreshToken,
         };
         return this.getTokens(params, options);
-    };
+    }
     /**
      * Gets tokens for enterprise administration of app users
      * @param {string} type The type of token to create, "user" or "enterprise"
@@ -35346,8 +35783,7 @@ var TokenManager = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
-    TokenManager.prototype.getTokensJWTGrant = function (type, id, options) {
-        var _this = this;
+    getTokensJWTGrant(type, id, options) {
         if (!this.config.appAuth || !this.config.appAuth.keyID) {
             return bluebird_1.default.reject(new Error('Must provide app auth configuration to use JWT Grant'));
         }
@@ -35377,14 +35813,12 @@ var TokenManager = /** @class */ (function () {
         }
         var params = {
             grant_type: grantTypes.JWT,
-            assertion: assertion,
+            assertion,
         };
         // Start the request timer immediately before executing the async request
         asyncRequestTimer = process.hrtime();
-        return this.getTokens(params, options).catch(function (err) {
-            return _this.retryJWTGrant(claims, jwtOptions, keyParams, params, options, err, 0);
-        });
-    };
+        return this.getTokens(params, options).catch((err) => this.retryJWTGrant(claims, jwtOptions, keyParams, params, options, err, 0));
+    }
     /**
      * Attempt a retry if possible and create a new JTI claim. If the request hasn't exceeded it's maximum number of retries,
      * re-execute the request (after the retry interval). Otherwise, propagate a new error.
@@ -35399,8 +35833,7 @@ var TokenManager = /** @class */ (function () {
      * @returns {Promise<TokenInfo>} Promise resolving to the token info
      */
     // eslint-disable-next-line max-params
-    TokenManager.prototype.retryJWTGrant = function (claims /* FIXME */, jwtOptions /* FIXME */, keyParams /* FIXME */, params /* FIXME */, options, error /* FIXME */, numRetries) {
-        var _this = this;
+    retryJWTGrant(claims /* FIXME */, jwtOptions /* FIXME */, keyParams /* FIXME */, params /* FIXME */, options, error /* FIXME */, numRetries) {
         if (numRetries < this.config.numMaxRetries &&
             isJWTAuthErrorRetryable(error)) {
             var retryTimeoutinSeconds;
@@ -35412,11 +35845,11 @@ var TokenManager = /** @class */ (function () {
                 var totalElapsedTime = process.hrtime(asyncRequestTimer);
                 var totalElapsedTimeMS = totalElapsedTime[0] * 1000 + totalElapsedTime[1] / 1000000;
                 var retryOptions = {
-                    error: error,
+                    error,
                     numRetryAttempts: numRetries,
                     numMaxRetries: this.config.numMaxRetries,
                     retryIntervalMS: this.config.retryIntervalMS,
-                    totalElapsedTimeMS: totalElapsedTimeMS,
+                    totalElapsedTimeMS,
                 };
                 retryTimeoutinSeconds = this.config.retryStrategy(retryOptions);
                 // If the retry strategy doesn't return a number/time in ms, then propagate the response error to the user.
@@ -35449,19 +35882,17 @@ var TokenManager = /** @class */ (function () {
             catch (jwtErr) {
                 throw jwtErr;
             }
-            return bluebird_1.default.delay(retryTimeoutinSeconds).then(function () {
+            return bluebird_1.default.delay(retryTimeoutinSeconds).then(() => {
                 // Start the request timer immediately before executing the async request
                 asyncRequestTimer = process.hrtime();
-                return _this.getTokens(params, options).catch(function (err) {
-                    return _this.retryJWTGrant(claims, jwtOptions, keyParams, params, options, err, numRetries);
-                });
+                return this.getTokens(params, options).catch((err) => this.retryJWTGrant(claims, jwtOptions, keyParams, params, options, err, numRetries));
             });
         }
         else if (numRetries >= this.config.numMaxRetries) {
             error.maxRetriesExceeded = true;
         }
         throw error;
-    };
+    }
     /**
      * Exchange a valid access token for one with a lower scope, or delegated to
      * an external user identifier.
@@ -35475,7 +35906,7 @@ var TokenManager = /** @class */ (function () {
      * @param {SharedLinkParams} [options.sharedLink] - Optional shared link parameters for creating tokens using shared links
      * @returns {Promise<TokenInfo>} Promise resolving to the new token info
      */
-    TokenManager.prototype.exchangeToken = function (accessToken, scopes, resource, options) {
+    exchangeToken(accessToken, scopes, resource, options) {
         var params = {
             grant_type: grantTypes.TOKEN_EXCHANGE,
             subject_token_type: ACCESS_TOKEN_TYPE,
@@ -35515,7 +35946,7 @@ var TokenManager = /** @class */ (function () {
         return this.getTokens(params, options && options.tokenRequestOptions
             ? options.tokenRequestOptions
             : null);
-    };
+    }
     /**
      * Revokes a token pair associated with a given access or refresh token.
      *
@@ -35523,12 +35954,12 @@ var TokenManager = /** @class */ (function () {
      * @param {TokenRequestOptions} [options] - Sets optional behavior for the token grant
      * @returns {Promise} Promise resolving if the revoke succeeds
      */
-    TokenManager.prototype.revokeTokens = function (token, options) {
+    revokeTokens(token, options) {
         var params = {
             method: 'POST',
             url: this.oauthBaseURL + tokenPaths.REVOKE,
             form: {
-                token: token,
+                token,
                 client_id: this.config.clientID,
                 client_secret: this.config.clientSecret,
             },
@@ -35538,15 +35969,14 @@ var TokenManager = /** @class */ (function () {
             params.headers[HEADER_XFF] = options.ip;
         }
         return this.requestManager.makeRequest(params);
-    };
-    return TokenManager;
-}());
+    }
+}
 module.exports = TokenManager;
 //# sourceMappingURL=token-manager.js.map
 
 /***/ }),
 
-/***/ 95790:
+/***/ 652:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -35587,17 +36017,17 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var assert = __nccwpck_require__(42613);
-var https = __importStar(__nccwpck_require__(65692));
-var stream_1 = __nccwpck_require__(2203);
+const assert = __nccwpck_require__(42613);
+const https = __importStar(__nccwpck_require__(65692));
+const stream_1 = __nccwpck_require__(2203);
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var merge = __nccwpck_require__(50551), sdkVersion = (__nccwpck_require__(45991).version);
+const merge = __nccwpck_require__(50551), sdkVersion = (__nccwpck_require__(45991).version);
 // ------------------------------------------------------------------------------
 // Private
 // ------------------------------------------------------------------------------
-var nodeVersion = process.version;
+const nodeVersion = process.version;
 var defaults = {
     clientID: null,
     clientSecret: null,
@@ -35636,7 +36066,7 @@ var defaults = {
         followRedirect: false,
         // By default, we attach a version-specific user-agent string to SDK requests
         headers: {
-            'User-Agent': "Box Node.js SDK v".concat(sdkVersion, " (Node ").concat(nodeVersion, ")"),
+            'User-Agent': `Box Node.js SDK v${sdkVersion} (Node ${nodeVersion})`,
         },
     },
 };
@@ -35671,7 +36101,7 @@ function validateAppAuthParams(appAuth) {
     assert(typeof appAuth.passphrase === 'string' && appAuth.passphrase.length > 0, 'Passphrase must be provided in app auth params');
     var validAlgorithms = ['RS256', 'RS384', 'RS512'];
     if (typeof appAuth.algorithm !== 'undefined') {
-        assert(validAlgorithms.indexOf(appAuth.algorithm) > -1, "Algorithm in app auth params must be one of: ".concat(validAlgorithms.join(', ')));
+        assert(validAlgorithms.indexOf(appAuth.algorithm) > -1, `Algorithm in app auth params must be one of: ${validAlgorithms.join(', ')}`);
     }
     if (typeof appAuth.expirationTime !== 'undefined') {
         assert(Number.isInteger(appAuth.expirationTime) &&
@@ -35687,14 +36117,14 @@ function validateAppAuthParams(appAuth) {
  */
 function updateRequestAgent(params) {
     if (params.proxy.url) {
-        var proxyUrl_1 = params.proxy.url;
+        let proxyUrl = params.proxy.url;
         if (params.proxy.username && params.proxy.password) {
-            proxyUrl_1 = proxyUrl_1.replace('://', "://".concat(params.proxy.username, ":").concat(params.proxy.password, "@"));
+            proxyUrl = proxyUrl.replace('://', `://${params.proxy.username}:${params.proxy.password}@`);
         }
-        var ProxyAgent = (__nccwpck_require__(75273).ProxyAgent);
+        const ProxyAgent = (__nccwpck_require__(75273).ProxyAgent);
         params.request.agentClass = ProxyAgent;
         params.request.agentOptions = Object.assign({}, params.request.agentOptions, {
-            getProxyForUrl: function (url) { return proxyUrl_1; },
+            getProxyForUrl: (url) => proxyUrl,
         });
     }
 }
@@ -35707,7 +36137,7 @@ function updateRequestAgent(params) {
 function deepFreezeWithRequest(obj) {
     Object.freeze(obj);
     Object.getOwnPropertyNames(obj).forEach(function (name) {
-        var prop = obj[name];
+        const prop = obj[name];
         if (prop !== null &&
             typeof prop === 'object' &&
             obj.hasOwnProperty(name) &&
@@ -35731,8 +36161,8 @@ function deepFreezeWithRequest(obj) {
  * @param {UserConfigurationOptions} params - The config options set by the user
  * @constructor
  */
-var Config = /** @class */ (function () {
-    function Config(params) {
+class Config {
+    constructor(params) {
         validateBasicParams(params);
         if (typeof params.appAuth === 'object') {
             validateAppAuthParams(params.appAuth);
@@ -35753,20 +36183,19 @@ var Config = /** @class */ (function () {
      * @param {UserConfigurationOptions} params The override options
      * @returns {Config} The extended configuration
      */
-    Config.prototype.extend = function (params) {
+    extend(params) {
         var newParams = merge({}, this._params, params);
         delete newParams.extend;
         delete newParams._params;
         return new Config(newParams);
-    };
-    return Config;
-}());
+    }
+}
 module.exports = Config;
 //# sourceMappingURL=config.js.map
 
 /***/ }),
 
-/***/ 55051:
+/***/ 21145:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -35807,12 +36236,12 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var qs = __importStar(__nccwpck_require__(83480));
+const qs = __importStar(__nccwpck_require__(83480));
 // ------------------------------------------------------------------------------
 // Requirements
 // ------------------------------------------------------------------------------
-var httpStatusCodes = __nccwpck_require__(97165);
-var TRACE_ID_HEADER_NAME = 'box-request-id';
+const httpStatusCodes = __nccwpck_require__(97165);
+const TRACE_ID_HEADER_NAME = 'box-request-id';
 // ------------------------------------------------------------------------------
 // Typedefs and Callbacks
 // ------------------------------------------------------------------------------
@@ -35834,8 +36263,8 @@ var TRACE_ID_HEADER_NAME = 'box-request-id';
  * @constructor
  * @private
  */
-var Request = /** @class */ (function () {
-    function Request(req /* FIXME */) {
+class Request {
+    constructor(req /* FIXME */) {
         this.method = req.method;
         if (req.uri) {
             this.url = {
@@ -35853,8 +36282,7 @@ var Request = /** @class */ (function () {
         this.headers = req.headers;
         this.body = req.body;
     }
-    return Request;
-}());
+}
 module.exports = {
     /**
      * Build a response error with the given message, and attaching meta data from the
@@ -35864,7 +36292,7 @@ module.exports = {
      * @param {string} message - the response error message
      * @returns {Errors~ResponseError} an error describing the response error
      */
-    buildResponseError: function (response /* FIXME */, message) {
+    buildResponseError(response /* FIXME */, message) {
         response = response || {};
         message = message || 'API Response Error';
         var statusCode = response.statusCode;
@@ -35874,7 +36302,7 @@ module.exports = {
         var errorDescription;
         if (response.headers && response.headers[TRACE_ID_HEADER_NAME]) {
             // Append trace ID with dot separator — if not present, the dot should be omitted
-            debugID += ".".concat(response.headers[TRACE_ID_HEADER_NAME]);
+            debugID += `.${response.headers[TRACE_ID_HEADER_NAME]}`;
         }
         if (response.body) {
             if (response.body.request_id) {
@@ -35887,16 +36315,16 @@ module.exports = {
         }
         var errorMessage;
         if (debugID) {
-            errorMessage = "".concat(message, " [").concat(statusCode, " ").concat(statusMessage, " | ").concat(debugID, "]");
+            errorMessage = `${message} [${statusCode} ${statusMessage} | ${debugID}]`;
         }
         else {
-            errorMessage = "".concat(message, " [").concat(statusCode, " ").concat(statusMessage, "]");
+            errorMessage = `${message} [${statusCode} ${statusMessage}]`;
         }
         if (errorCode) {
-            errorMessage += " ".concat(errorCode);
+            errorMessage += ` ${errorCode}`;
         }
         if (errorDescription) {
-            errorMessage += " - ".concat(errorDescription);
+            errorMessage += ` - ${errorDescription}`;
         }
         var responseError /* FIXME */ = new Error(errorMessage);
         responseError.statusCode = response.statusCode;
@@ -35913,7 +36341,7 @@ module.exports = {
      * @param {string} [message] - Optional message for the error
      * @returns {Errors~AuthError} A properly formatted authentication error
      */
-    buildAuthError: function (response /* FIXME */, message) {
+    buildAuthError(response /* FIXME */, message) {
         message = message || 'Expired Auth: Auth code or refresh token has expired';
         var responseError = this.buildResponseError(response, message);
         responseError.authExpired = true;
@@ -35928,7 +36356,7 @@ module.exports = {
      * @param {?APIRequest~ResponseObject} response - The response returned by an APIRequestManager request
      * @returns {Errors~ResponseError} an error describing the response error
      */
-    buildUnexpectedResponseError: function (response /* FIXME */) {
+    buildUnexpectedResponseError(response /* FIXME */) {
         return this.buildResponseError(response, 'Unexpected API Response');
     },
     /**
@@ -35939,7 +36367,7 @@ module.exports = {
      * @returns {void}
      * @throws {Error} The unwrapped error
      */
-    unwrapAndThrow: function (error /* FIXME */) {
+    unwrapAndThrow(error /* FIXME */) {
         if (error.cause) {
             throw error.cause;
         }
@@ -35950,7 +36378,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 65924:
+/***/ 25974:
 /***/ ((module) => {
 
 "use strict";
@@ -35962,7 +36390,7 @@ module.exports = {
 // Private
 // ------------------------------------------------------------------------------
 // Retry intervals are between 50% and 150% of the exponentially increasing base amount
-var RETRY_RANDOMIZATION_FACTOR = 0.5;
+const RETRY_RANDOMIZATION_FACTOR = 0.5;
 module.exports = function getRetryTimeout(numRetries, baseInterval) {
     var minRandomization = 1 - RETRY_RANDOMIZATION_FACTOR;
     var maxRandomization = 1 + RETRY_RANDOMIZATION_FACTOR;
@@ -35974,7 +36402,7 @@ module.exports = function getRetryTimeout(numRetries, baseInterval) {
 
 /***/ }),
 
-/***/ 6483:
+/***/ 93033:
 /***/ (function(module, __unused_webpack_exports, __nccwpck_require__) {
 
 "use strict";
@@ -36015,9 +36443,9 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var qs = __importStar(__nccwpck_require__(83480));
-var bluebird_1 = __nccwpck_require__(94366);
-var PromiseQueue = __nccwpck_require__(76699);
+const qs = __importStar(__nccwpck_require__(83480));
+const bluebird_1 = __nccwpck_require__(94366);
+const PromiseQueue = __nccwpck_require__(76699);
 // -----------------------------------------------------------------------------
 // Typedefs
 // -----------------------------------------------------------------------------
@@ -36037,12 +36465,12 @@ var PromiseQueue = __nccwpck_require__(76699);
 // -----------------------------------------------------------------------------
 // Requirements
 // -----------------------------------------------------------------------------
-var errors = __nccwpck_require__(55051);
+const errors = __nccwpck_require__(21145);
 PromiseQueue.configure(bluebird_1.Promise);
 // -----------------------------------------------------------------------------
 // Private
 // -----------------------------------------------------------------------------
-var PAGING_MODES = Object.freeze({
+const PAGING_MODES = Object.freeze({
     MARKER: 'marker',
     OFFSET: 'offset',
 });
@@ -36052,7 +36480,23 @@ var PAGING_MODES = Object.freeze({
 /**
  * Asynchronous iterator for paged collections
  */
-var PagingIterator = /** @class */ (function () {
+class PagingIterator {
+    /**
+     * Determine if a response is iterable
+     * @param {Object} response - The API response
+     * @returns {boolean} Whether the response is iterable
+     */
+    static isIterable(response /* FIXME */) {
+        // POST responses for uploading a file are explicitly excluded here because, while the response is iterable,
+        // it always contains only a single entry and historically has not been handled as iterable in the SDK.
+        // This behavior is being preserved here to avoid a breaking change.
+        let UPLOAD_PATTERN = /.*upload\.box\.com.*\/content/;
+        var isGetOrPostRequest = response.request &&
+            (response.request.method === 'GET' ||
+                (response.request.method === 'POST' &&
+                    !UPLOAD_PATTERN.test(response.request.uri.href))), hasEntries = response.body && Array.isArray(response.body.entries), notEventStream = response.body && !response.body.next_stream_position;
+        return Boolean(isGetOrPostRequest && hasEntries && notEventStream);
+    }
     /**
      * @constructor
      * @param {Object} response - The original API response
@@ -36060,7 +36504,7 @@ var PagingIterator = /** @class */ (function () {
      * @returns {void}
      * @throws {Error} Will throw when collection cannot be paged
      */
-    function PagingIterator(response /* FIXME */, client /* FIXME */) {
+    constructor(response /* FIXME */, client /* FIXME */) {
         if (!PagingIterator.isIterable(response)) {
             throw new Error('Cannot create paging iterator for non-paged response!');
         }
@@ -36114,28 +36558,12 @@ var PagingIterator = /** @class */ (function () {
         this._updatePaging(response);
     }
     /**
-     * Determine if a response is iterable
-     * @param {Object} response - The API response
-     * @returns {boolean} Whether the response is iterable
-     */
-    PagingIterator.isIterable = function (response /* FIXME */) {
-        // POST responses for uploading a file are explicitly excluded here because, while the response is iterable,
-        // it always contains only a single entry and historically has not been handled as iterable in the SDK.
-        // This behavior is being preserved here to avoid a breaking change.
-        var UPLOAD_PATTERN = /.*upload\.box\.com.*\/content/;
-        var isGetOrPostRequest = response.request &&
-            (response.request.method === 'GET' ||
-                (response.request.method === 'POST' &&
-                    !UPLOAD_PATTERN.test(response.request.uri.href))), hasEntries = response.body && Array.isArray(response.body.entries), notEventStream = response.body && !response.body.next_stream_position;
-        return Boolean(isGetOrPostRequest && hasEntries && notEventStream);
-    };
-    /**
      * Update the paging parameters for the iterator
      * @private
      * @param {Object} response - The latest API response
      * @returns {void}
      */
-    PagingIterator.prototype._updatePaging = function (response /* FIXME */) {
+    _updatePaging(response /* FIXME */) {
         var data = response.body;
         if (this.nextField === PAGING_MODES.OFFSET) {
             this.nextValue += this.limit;
@@ -36163,24 +36591,23 @@ var PagingIterator = /** @class */ (function () {
                 this.options.body = {};
             }
             this.options.body[this.nextField] = this.nextValue;
-            var bodyString = JSON.stringify(this.options.body);
+            let bodyString = JSON.stringify(this.options.body);
             this.options.headers['content-length'] = bodyString.length;
         }
-    };
+    }
     /**
      * Fetch the next page of results
      * @returns {Promise} Promise resolving to iterator state
      */
-    PagingIterator.prototype._getData = function () {
-        var _this = this;
-        return this.fetch(this.options).then(function (response /* FIXME */) {
+    _getData() {
+        return this.fetch(this.options).then((response /* FIXME */) => {
             if (response.statusCode !== 200) {
                 throw errors.buildUnexpectedResponseError(response);
             }
-            _this._updatePaging(response);
-            _this.buffer = _this.buffer.concat(response.body.entries);
-            if (_this.buffer.length === 0) {
-                if (_this.done) {
+            this._updatePaging(response);
+            this.buffer = this.buffer.concat(response.body.entries);
+            if (this.buffer.length === 0) {
+                if (this.done) {
                     return {
                         value: undefined,
                         done: true,
@@ -36189,19 +36616,19 @@ var PagingIterator = /** @class */ (function () {
                 // If we didn't get any data in this page, but the paging
                 // parameters indicate that there is more data, attempt
                 // to fetch more.  This occurs in multiple places in the API
-                return _this._getData();
+                return this._getData();
             }
             return {
-                value: _this.buffer.shift(),
+                value: this.buffer.shift(),
                 done: false,
             };
         });
-    };
+    }
     /**
      * Fetch the next page of the collection
      * @returns {Promise} Promise resolving to iterator state
      */
-    PagingIterator.prototype.next = function () {
+    next() {
         if (this.buffer.length > 0) {
             return bluebird_1.Promise.resolve({
                 value: this.buffer.shift(),
@@ -36215,22 +36642,21 @@ var PagingIterator = /** @class */ (function () {
             });
         }
         return this.queue.add(this._getData.bind(this));
-    };
+    }
     /**
      * Fetch the next marker
      * @returns {string|int} String that is the next marker or int that is the next offset
      */
-    PagingIterator.prototype.getNextMarker = function () {
+    getNextMarker() {
         return this.nextValue;
-    };
-    return PagingIterator;
-}());
+    }
+}
 module.exports = PagingIterator;
 //# sourceMappingURL=paging-iterator.js.map
 
 /***/ }),
 
-/***/ 25159:
+/***/ 72813:
 /***/ ((module) => {
 
 "use strict";
@@ -36242,7 +36668,7 @@ module.exports = PagingIterator;
 // Private
 // ------------------------------------------------------------------------------
 // Pattern to check for relative paths
-var PATTERN = /\/\.+/;
+const PATTERN = /\/\.+/;
 /**
  * remove leading & trailing slashes from some string. This is useful for
  * removing slashes from the path segments that are actually a part of the
@@ -36255,706 +36681,21 @@ var PATTERN = /\/\.+/;
 function trimSlashes(segment) {
     return segment.replace(/^\/|\/$/g, '');
 }
-module.exports = function urlPath() {
-    var args = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        args[_i] = arguments[_i];
-    }
-    var path = args
-        .map(function (x) { return String(x); })
-        .map(function (x) {
+module.exports = function urlPath(...args) {
+    const path = args
+        .map((x) => String(x))
+        .map((x) => {
         var trimmedX = trimSlashes(x);
         if (PATTERN.test(trimmedX)) {
-            throw new Error("An invalid path parameter exists in ".concat(trimmedX, ". Relative path parameters cannot be passed."));
+            throw new Error(`An invalid path parameter exists in ${trimmedX}. Relative path parameters cannot be passed.`);
         }
         return trimmedX;
     })
-        .map(function (x) { return encodeURIComponent(x); })
+        .map((x) => encodeURIComponent(x))
         .join('/');
-    return "/".concat(path);
+    return `/${path}`;
 };
 //# sourceMappingURL=url-path.js.map
-
-/***/ }),
-
-/***/ 3691:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-Object.defineProperty(exports, "NIL", ({
-  enumerable: true,
-  get: function () {
-    return _nil.default;
-  }
-}));
-Object.defineProperty(exports, "parse", ({
-  enumerable: true,
-  get: function () {
-    return _parse.default;
-  }
-}));
-Object.defineProperty(exports, "stringify", ({
-  enumerable: true,
-  get: function () {
-    return _stringify.default;
-  }
-}));
-Object.defineProperty(exports, "v1", ({
-  enumerable: true,
-  get: function () {
-    return _v.default;
-  }
-}));
-Object.defineProperty(exports, "v3", ({
-  enumerable: true,
-  get: function () {
-    return _v2.default;
-  }
-}));
-Object.defineProperty(exports, "v4", ({
-  enumerable: true,
-  get: function () {
-    return _v3.default;
-  }
-}));
-Object.defineProperty(exports, "v5", ({
-  enumerable: true,
-  get: function () {
-    return _v4.default;
-  }
-}));
-Object.defineProperty(exports, "validate", ({
-  enumerable: true,
-  get: function () {
-    return _validate.default;
-  }
-}));
-Object.defineProperty(exports, "version", ({
-  enumerable: true,
-  get: function () {
-    return _version.default;
-  }
-}));
-
-var _v = _interopRequireDefault(__nccwpck_require__(5954));
-
-var _v2 = _interopRequireDefault(__nccwpck_require__(75864));
-
-var _v3 = _interopRequireDefault(__nccwpck_require__(91597));
-
-var _v4 = _interopRequireDefault(__nccwpck_require__(42286));
-
-var _nil = _interopRequireDefault(__nccwpck_require__(4908));
-
-var _version = _interopRequireDefault(__nccwpck_require__(69443));
-
-var _validate = _interopRequireDefault(__nccwpck_require__(9249));
-
-var _stringify = _interopRequireDefault(__nccwpck_require__(67530));
-
-var _parse = _interopRequireDefault(__nccwpck_require__(80852));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/***/ }),
-
-/***/ 99555:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function md5(bytes) {
-  if (Array.isArray(bytes)) {
-    bytes = Buffer.from(bytes);
-  } else if (typeof bytes === 'string') {
-    bytes = Buffer.from(bytes, 'utf8');
-  }
-
-  return _crypto.default.createHash('md5').update(bytes).digest();
-}
-
-var _default = md5;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 67928:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var _default = {
-  randomUUID: _crypto.default.randomUUID
-};
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 4908:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _default = '00000000-0000-0000-0000-000000000000';
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 80852:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _validate = _interopRequireDefault(__nccwpck_require__(9249));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function parse(uuid) {
-  if (!(0, _validate.default)(uuid)) {
-    throw TypeError('Invalid UUID');
-  }
-
-  let v;
-  const arr = new Uint8Array(16); // Parse ########-....-....-....-............
-
-  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
-  arr[1] = v >>> 16 & 0xff;
-  arr[2] = v >>> 8 & 0xff;
-  arr[3] = v & 0xff; // Parse ........-####-....-....-............
-
-  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
-  arr[5] = v & 0xff; // Parse ........-....-####-....-............
-
-  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
-  arr[7] = v & 0xff; // Parse ........-....-....-####-............
-
-  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
-  arr[9] = v & 0xff; // Parse ........-....-....-....-############
-  // (Use "/" to avoid 32-bit truncation when bit-shifting high-order bytes)
-
-  arr[10] = (v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000 & 0xff;
-  arr[11] = v / 0x100000000 & 0xff;
-  arr[12] = v >>> 24 & 0xff;
-  arr[13] = v >>> 16 & 0xff;
-  arr[14] = v >>> 8 & 0xff;
-  arr[15] = v & 0xff;
-  return arr;
-}
-
-var _default = parse;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 19972:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _default = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 4526:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = rng;
-
-var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const rnds8Pool = new Uint8Array(256); // # of random values to pre-allocate
-
-let poolPtr = rnds8Pool.length;
-
-function rng() {
-  if (poolPtr > rnds8Pool.length - 16) {
-    _crypto.default.randomFillSync(rnds8Pool);
-
-    poolPtr = 0;
-  }
-
-  return rnds8Pool.slice(poolPtr, poolPtr += 16);
-}
-
-/***/ }),
-
-/***/ 20782:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function sha1(bytes) {
-  if (Array.isArray(bytes)) {
-    bytes = Buffer.from(bytes);
-  } else if (typeof bytes === 'string') {
-    bytes = Buffer.from(bytes, 'utf8');
-  }
-
-  return _crypto.default.createHash('sha1').update(bytes).digest();
-}
-
-var _default = sha1;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 67530:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-exports.unsafeStringify = unsafeStringify;
-
-var _validate = _interopRequireDefault(__nccwpck_require__(9249));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
- */
-const byteToHex = [];
-
-for (let i = 0; i < 256; ++i) {
-  byteToHex.push((i + 0x100).toString(16).slice(1));
-}
-
-function unsafeStringify(arr, offset = 0) {
-  // Note: Be careful editing this code!  It's been tuned for performance
-  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
-  return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
-}
-
-function stringify(arr, offset = 0) {
-  const uuid = unsafeStringify(arr, offset); // Consistency check for valid UUID.  If this throws, it's likely due to one
-  // of the following:
-  // - One or more input array values don't map to a hex octet (leading to
-  // "undefined" in the uuid)
-  // - Invalid input values for the RFC `version` or `variant` fields
-
-  if (!(0, _validate.default)(uuid)) {
-    throw TypeError('Stringified UUID is invalid');
-  }
-
-  return uuid;
-}
-
-var _default = stringify;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 5954:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _rng = _interopRequireDefault(__nccwpck_require__(4526));
-
-var _stringify = __nccwpck_require__(67530);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// **`v1()` - Generate time-based UUID**
-//
-// Inspired by https://github.com/LiosK/UUID.js
-// and http://docs.python.org/library/uuid.html
-let _nodeId;
-
-let _clockseq; // Previous uuid creation time
-
-
-let _lastMSecs = 0;
-let _lastNSecs = 0; // See https://github.com/uuidjs/uuid for API details
-
-function v1(options, buf, offset) {
-  let i = buf && offset || 0;
-  const b = buf || new Array(16);
-  options = options || {};
-  let node = options.node || _nodeId;
-  let clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq; // node and clockseq need to be initialized to random values if they're not
-  // specified.  We do this lazily to minimize issues related to insufficient
-  // system entropy.  See #189
-
-  if (node == null || clockseq == null) {
-    const seedBytes = options.random || (options.rng || _rng.default)();
-
-    if (node == null) {
-      // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
-      node = _nodeId = [seedBytes[0] | 0x01, seedBytes[1], seedBytes[2], seedBytes[3], seedBytes[4], seedBytes[5]];
-    }
-
-    if (clockseq == null) {
-      // Per 4.2.2, randomize (14 bit) clockseq
-      clockseq = _clockseq = (seedBytes[6] << 8 | seedBytes[7]) & 0x3fff;
-    }
-  } // UUID timestamps are 100 nano-second units since the Gregorian epoch,
-  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
-  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
-  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
-
-
-  let msecs = options.msecs !== undefined ? options.msecs : Date.now(); // Per 4.2.1.2, use count of uuid's generated during the current clock
-  // cycle to simulate higher resolution clock
-
-  let nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1; // Time since last uuid creation (in msecs)
-
-  const dt = msecs - _lastMSecs + (nsecs - _lastNSecs) / 10000; // Per 4.2.1.2, Bump clockseq on clock regression
-
-  if (dt < 0 && options.clockseq === undefined) {
-    clockseq = clockseq + 1 & 0x3fff;
-  } // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
-  // time interval
-
-
-  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
-    nsecs = 0;
-  } // Per 4.2.1.2 Throw error if too many uuids are requested
-
-
-  if (nsecs >= 10000) {
-    throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");
-  }
-
-  _lastMSecs = msecs;
-  _lastNSecs = nsecs;
-  _clockseq = clockseq; // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
-
-  msecs += 12219292800000; // `time_low`
-
-  const tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
-  b[i++] = tl >>> 24 & 0xff;
-  b[i++] = tl >>> 16 & 0xff;
-  b[i++] = tl >>> 8 & 0xff;
-  b[i++] = tl & 0xff; // `time_mid`
-
-  const tmh = msecs / 0x100000000 * 10000 & 0xfffffff;
-  b[i++] = tmh >>> 8 & 0xff;
-  b[i++] = tmh & 0xff; // `time_high_and_version`
-
-  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
-
-  b[i++] = tmh >>> 16 & 0xff; // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
-
-  b[i++] = clockseq >>> 8 | 0x80; // `clock_seq_low`
-
-  b[i++] = clockseq & 0xff; // `node`
-
-  for (let n = 0; n < 6; ++n) {
-    b[i + n] = node[n];
-  }
-
-  return buf || (0, _stringify.unsafeStringify)(b);
-}
-
-var _default = v1;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 75864:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _v = _interopRequireDefault(__nccwpck_require__(26661));
-
-var _md = _interopRequireDefault(__nccwpck_require__(99555));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const v3 = (0, _v.default)('v3', 0x30, _md.default);
-var _default = v3;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 26661:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.URL = exports.DNS = void 0;
-exports["default"] = v35;
-
-var _stringify = __nccwpck_require__(67530);
-
-var _parse = _interopRequireDefault(__nccwpck_require__(80852));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function stringToBytes(str) {
-  str = unescape(encodeURIComponent(str)); // UTF8 escape
-
-  const bytes = [];
-
-  for (let i = 0; i < str.length; ++i) {
-    bytes.push(str.charCodeAt(i));
-  }
-
-  return bytes;
-}
-
-const DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-exports.DNS = DNS;
-const URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
-exports.URL = URL;
-
-function v35(name, version, hashfunc) {
-  function generateUUID(value, namespace, buf, offset) {
-    var _namespace;
-
-    if (typeof value === 'string') {
-      value = stringToBytes(value);
-    }
-
-    if (typeof namespace === 'string') {
-      namespace = (0, _parse.default)(namespace);
-    }
-
-    if (((_namespace = namespace) === null || _namespace === void 0 ? void 0 : _namespace.length) !== 16) {
-      throw TypeError('Namespace must be array-like (16 iterable integer values, 0-255)');
-    } // Compute hash of namespace and value, Per 4.3
-    // Future: Use spread syntax when supported on all platforms, e.g. `bytes =
-    // hashfunc([...namespace, ... value])`
-
-
-    let bytes = new Uint8Array(16 + value.length);
-    bytes.set(namespace);
-    bytes.set(value, namespace.length);
-    bytes = hashfunc(bytes);
-    bytes[6] = bytes[6] & 0x0f | version;
-    bytes[8] = bytes[8] & 0x3f | 0x80;
-
-    if (buf) {
-      offset = offset || 0;
-
-      for (let i = 0; i < 16; ++i) {
-        buf[offset + i] = bytes[i];
-      }
-
-      return buf;
-    }
-
-    return (0, _stringify.unsafeStringify)(bytes);
-  } // Function#name is not settable on some platforms (#270)
-
-
-  try {
-    generateUUID.name = name; // eslint-disable-next-line no-empty
-  } catch (err) {} // For CommonJS default export support
-
-
-  generateUUID.DNS = DNS;
-  generateUUID.URL = URL;
-  return generateUUID;
-}
-
-/***/ }),
-
-/***/ 91597:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _native = _interopRequireDefault(__nccwpck_require__(67928));
-
-var _rng = _interopRequireDefault(__nccwpck_require__(4526));
-
-var _stringify = __nccwpck_require__(67530);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function v4(options, buf, offset) {
-  if (_native.default.randomUUID && !buf && !options) {
-    return _native.default.randomUUID();
-  }
-
-  options = options || {};
-
-  const rnds = options.random || (options.rng || _rng.default)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-
-
-  rnds[6] = rnds[6] & 0x0f | 0x40;
-  rnds[8] = rnds[8] & 0x3f | 0x80; // Copy bytes to buffer, if provided
-
-  if (buf) {
-    offset = offset || 0;
-
-    for (let i = 0; i < 16; ++i) {
-      buf[offset + i] = rnds[i];
-    }
-
-    return buf;
-  }
-
-  return (0, _stringify.unsafeStringify)(rnds);
-}
-
-var _default = v4;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 42286:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _v = _interopRequireDefault(__nccwpck_require__(26661));
-
-var _sha = _interopRequireDefault(__nccwpck_require__(20782));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const v5 = (0, _v.default)('v5', 0x50, _sha.default);
-var _default = v5;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 9249:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _regex = _interopRequireDefault(__nccwpck_require__(19972));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function validate(uuid) {
-  return typeof uuid === 'string' && _regex.default.test(uuid);
-}
-
-var _default = validate;
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ 69443:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-
-var _validate = _interopRequireDefault(__nccwpck_require__(9249));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function version(uuid) {
-  if (!(0, _validate.default)(uuid)) {
-    throw TypeError('Invalid UUID');
-  }
-
-  return parseInt(uuid.slice(14, 15), 16);
-}
-
-var _default = version;
-exports["default"] = _default;
 
 /***/ }),
 
@@ -37609,175 +37350,6 @@ exports.dataUriToBuffer = (0, common_1.makeDataUriToBuffer)({ stringToBuffer, ba
 
 /***/ }),
 
-/***/ 66867:
-/***/ ((module) => {
-
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var w = d * 7;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} [options]
- * @throws {Error} throw an error if val is not a non-empty string or a number
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options) {
-  options = options || {};
-  var type = typeof val;
-  if (type === 'string' && val.length > 0) {
-    return parse(val);
-  } else if (type === 'number' && isFinite(val)) {
-    return options.long ? fmtLong(val) : fmtShort(val);
-  }
-  throw new Error(
-    'val is not a non-empty string or a valid number. val=' +
-      JSON.stringify(val)
-  );
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  str = String(str);
-  if (str.length > 100) {
-    return;
-  }
-  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-    str
-  );
-  if (!match) {
-    return;
-  }
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'weeks':
-    case 'week':
-    case 'w':
-      return n * w;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-    default:
-      return undefined;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtShort(ms) {
-  var msAbs = Math.abs(ms);
-  if (msAbs >= d) {
-    return Math.round(ms / d) + 'd';
-  }
-  if (msAbs >= h) {
-    return Math.round(ms / h) + 'h';
-  }
-  if (msAbs >= m) {
-    return Math.round(ms / m) + 'm';
-  }
-  if (msAbs >= s) {
-    return Math.round(ms / s) + 's';
-  }
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtLong(ms) {
-  var msAbs = Math.abs(ms);
-  if (msAbs >= d) {
-    return plural(ms, msAbs, d, 'day');
-  }
-  if (msAbs >= h) {
-    return plural(ms, msAbs, h, 'hour');
-  }
-  if (msAbs >= m) {
-    return plural(ms, msAbs, m, 'minute');
-  }
-  if (msAbs >= s) {
-    return plural(ms, msAbs, s, 'second');
-  }
-  return ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, msAbs, n, name) {
-  var isPlural = msAbs >= n * 1.5;
-  return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
-}
-
-
-/***/ }),
-
 /***/ 6110:
 /***/ ((module, exports, __nccwpck_require__) => {
 
@@ -37908,14 +37480,17 @@ function useColors() {
 		return false;
 	}
 
+	let m;
+
 	// Is webkit? http://stackoverflow.com/a/16459606/376773
 	// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+	// eslint-disable-next-line no-return-assign
 	return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
 		// Is firebug? http://stackoverflow.com/a/398120/376773
 		(typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
 		// Is firefox >= v31?
 		// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31) ||
+		(typeof navigator !== 'undefined' && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31) ||
 		// Double check webkit in userAgent just in case we are in a worker
 		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
 }
@@ -37999,7 +37574,7 @@ function save(namespaces) {
 function load() {
 	let r;
 	try {
-		r = exports.storage.getItem('debug');
+		r = exports.storage.getItem('debug') || exports.storage.getItem('DEBUG') ;
 	} catch (error) {
 		// Swallow
 		// XXX (@Qix-) should we be logging these?
@@ -38070,7 +37645,7 @@ function setup(env) {
 	createDebug.disable = disable;
 	createDebug.enable = enable;
 	createDebug.enabled = enabled;
-	createDebug.humanize = __nccwpck_require__(66867);
+	createDebug.humanize = __nccwpck_require__(70744);
 	createDebug.destroy = destroy;
 
 	Object.keys(env).forEach(key => {
@@ -38225,24 +37800,62 @@ function setup(env) {
 		createDebug.names = [];
 		createDebug.skips = [];
 
-		let i;
-		const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-		const len = split.length;
+		const split = (typeof namespaces === 'string' ? namespaces : '')
+			.trim()
+			.replace(/\s+/g, ',')
+			.split(',')
+			.filter(Boolean);
 
-		for (i = 0; i < len; i++) {
-			if (!split[i]) {
-				// ignore empty strings
-				continue;
-			}
-
-			namespaces = split[i].replace(/\*/g, '.*?');
-
-			if (namespaces[0] === '-') {
-				createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
+		for (const ns of split) {
+			if (ns[0] === '-') {
+				createDebug.skips.push(ns.slice(1));
 			} else {
-				createDebug.names.push(new RegExp('^' + namespaces + '$'));
+				createDebug.names.push(ns);
 			}
 		}
+	}
+
+	/**
+	 * Checks if the given string matches a namespace template, honoring
+	 * asterisks as wildcards.
+	 *
+	 * @param {String} search
+	 * @param {String} template
+	 * @return {Boolean}
+	 */
+	function matchesTemplate(search, template) {
+		let searchIndex = 0;
+		let templateIndex = 0;
+		let starIndex = -1;
+		let matchIndex = 0;
+
+		while (searchIndex < search.length) {
+			if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === '*')) {
+				// Match character or proceed with wildcard
+				if (template[templateIndex] === '*') {
+					starIndex = templateIndex;
+					matchIndex = searchIndex;
+					templateIndex++; // Skip the '*'
+				} else {
+					searchIndex++;
+					templateIndex++;
+				}
+			} else if (starIndex !== -1) { // eslint-disable-line no-negated-condition
+				// Backtrack to the last '*' and try to match more characters
+				templateIndex = starIndex + 1;
+				matchIndex++;
+				searchIndex = matchIndex;
+			} else {
+				return false; // No match
+			}
+		}
+
+		// Handle trailing '*' in template
+		while (templateIndex < template.length && template[templateIndex] === '*') {
+			templateIndex++;
+		}
+
+		return templateIndex === template.length;
 	}
 
 	/**
@@ -38253,8 +37866,8 @@ function setup(env) {
 	*/
 	function disable() {
 		const namespaces = [
-			...createDebug.names.map(toNamespace),
-			...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)
+			...createDebug.names,
+			...createDebug.skips.map(namespace => '-' + namespace)
 		].join(',');
 		createDebug.enable('');
 		return namespaces;
@@ -38268,39 +37881,19 @@ function setup(env) {
 	* @api public
 	*/
 	function enabled(name) {
-		if (name[name.length - 1] === '*') {
-			return true;
-		}
-
-		let i;
-		let len;
-
-		for (i = 0, len = createDebug.skips.length; i < len; i++) {
-			if (createDebug.skips[i].test(name)) {
+		for (const skip of createDebug.skips) {
+			if (matchesTemplate(name, skip)) {
 				return false;
 			}
 		}
 
-		for (i = 0, len = createDebug.names.length; i < len; i++) {
-			if (createDebug.names[i].test(name)) {
+		for (const ns of createDebug.names) {
+			if (matchesTemplate(name, ns)) {
 				return true;
 			}
 		}
 
 		return false;
-	}
-
-	/**
-	* Convert regexp to namespace
-	*
-	* @param {RegExp} regxep
-	* @return {String} namespace
-	* @api private
-	*/
-	function toNamespace(regexp) {
-		return regexp.toString()
-			.substring(2, regexp.toString().length - 2)
-			.replace(/\.\*\?$/, '*');
 	}
 
 	/**
@@ -38544,11 +38137,11 @@ function getDate() {
 }
 
 /**
- * Invokes `util.format()` with the specified arguments and writes to stderr.
+ * Invokes `util.formatWithOptions()` with the specified arguments and writes to stderr.
  */
 
 function log(...args) {
-	return process.stderr.write(util.format(...args) + '\n');
+	return process.stderr.write(util.formatWithOptions(exports.inspectOpts, ...args) + '\n');
 }
 
 /**
@@ -39081,7 +38674,7 @@ module.exports = desc && typeof desc.get === 'function'
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 var crypto = __nccwpck_require__(76982);
-var BigInteger = (__nccwpck_require__(94448).BigInteger);
+var BigInteger = (__nccwpck_require__(95947).BigInteger);
 var ECPointFp = (__nccwpck_require__(98051).ECPointFp);
 var Buffer = (__nccwpck_require__(12803).Buffer);
 exports.ECCurves = __nccwpck_require__(10070);
@@ -39150,7 +38743,7 @@ exports.ECKey = function(curve, key, isPublic)
 // Only Fp curves implemented for now
 
 // Requires jsbn.js and jsbn2.js
-var BigInteger = (__nccwpck_require__(94448).BigInteger)
+var BigInteger = (__nccwpck_require__(95947).BigInteger)
 var Barrett = BigInteger.prototype.Barrett
 
 // ----------------
@@ -39716,7 +39309,7 @@ module.exports = exports
 // Named EC curves
 
 // Requires ec.js, jsbn.js, and jsbn2.js
-var BigInteger = (__nccwpck_require__(94448).BigInteger)
+var BigInteger = (__nccwpck_require__(95947).BigInteger)
 var ECCurveFp = (__nccwpck_require__(98051).ECCurveFp)
 
 
@@ -39883,1367 +39476,6 @@ module.exports = {
   "secp224r1":secp224r1,
   "secp256r1":secp256r1
 }
-
-
-/***/ }),
-
-/***/ 94448:
-/***/ (function(module, exports) {
-
-(function(){
-
-    // Copyright (c) 2005  Tom Wu
-    // All Rights Reserved.
-    // See "LICENSE" for details.
-
-    // Basic JavaScript BN library - subset useful for RSA encryption.
-
-    // Bits per digit
-    var dbits;
-
-    // JavaScript engine analysis
-    var canary = 0xdeadbeefcafe;
-    var j_lm = ((canary&0xffffff)==0xefcafe);
-
-    // (public) Constructor
-    function BigInteger(a,b,c) {
-      if(a != null)
-        if("number" == typeof a) this.fromNumber(a,b,c);
-        else if(b == null && "string" != typeof a) this.fromString(a,256);
-        else this.fromString(a,b);
-    }
-
-    // return new, unset BigInteger
-    function nbi() { return new BigInteger(null); }
-
-    // am: Compute w_j += (x*this_i), propagate carries,
-    // c is initial carry, returns final carry.
-    // c < 3*dvalue, x < 2*dvalue, this_i < dvalue
-    // We need to select the fastest one that works in this environment.
-
-    // am1: use a single mult and divide to get the high bits,
-    // max digit bits should be 26 because
-    // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
-    function am1(i,x,w,j,c,n) {
-      while(--n >= 0) {
-        var v = x*this[i++]+w[j]+c;
-        c = Math.floor(v/0x4000000);
-        w[j++] = v&0x3ffffff;
-      }
-      return c;
-    }
-    // am2 avoids a big mult-and-extract completely.
-    // Max digit bits should be <= 30 because we do bitwise ops
-    // on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
-    function am2(i,x,w,j,c,n) {
-      var xl = x&0x7fff, xh = x>>15;
-      while(--n >= 0) {
-        var l = this[i]&0x7fff;
-        var h = this[i++]>>15;
-        var m = xh*l+h*xl;
-        l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
-        c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
-        w[j++] = l&0x3fffffff;
-      }
-      return c;
-    }
-    // Alternately, set max digit bits to 28 since some
-    // browsers slow down when dealing with 32-bit numbers.
-    function am3(i,x,w,j,c,n) {
-      var xl = x&0x3fff, xh = x>>14;
-      while(--n >= 0) {
-        var l = this[i]&0x3fff;
-        var h = this[i++]>>14;
-        var m = xh*l+h*xl;
-        l = xl*l+((m&0x3fff)<<14)+w[j]+c;
-        c = (l>>28)+(m>>14)+xh*h;
-        w[j++] = l&0xfffffff;
-      }
-      return c;
-    }
-    var inBrowser = typeof navigator !== "undefined";
-    if(inBrowser && j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
-      BigInteger.prototype.am = am2;
-      dbits = 30;
-    }
-    else if(inBrowser && j_lm && (navigator.appName != "Netscape")) {
-      BigInteger.prototype.am = am1;
-      dbits = 26;
-    }
-    else { // Mozilla/Netscape seems to prefer am3
-      BigInteger.prototype.am = am3;
-      dbits = 28;
-    }
-
-    BigInteger.prototype.DB = dbits;
-    BigInteger.prototype.DM = ((1<<dbits)-1);
-    BigInteger.prototype.DV = (1<<dbits);
-
-    var BI_FP = 52;
-    BigInteger.prototype.FV = Math.pow(2,BI_FP);
-    BigInteger.prototype.F1 = BI_FP-dbits;
-    BigInteger.prototype.F2 = 2*dbits-BI_FP;
-
-    // Digit conversions
-    var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
-    var BI_RC = new Array();
-    var rr,vv;
-    rr = "0".charCodeAt(0);
-    for(vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
-    rr = "a".charCodeAt(0);
-    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-    rr = "A".charCodeAt(0);
-    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-
-    function int2char(n) { return BI_RM.charAt(n); }
-    function intAt(s,i) {
-      var c = BI_RC[s.charCodeAt(i)];
-      return (c==null)?-1:c;
-    }
-
-    // (protected) copy this to r
-    function bnpCopyTo(r) {
-      for(var i = this.t-1; i >= 0; --i) r[i] = this[i];
-      r.t = this.t;
-      r.s = this.s;
-    }
-
-    // (protected) set from integer value x, -DV <= x < DV
-    function bnpFromInt(x) {
-      this.t = 1;
-      this.s = (x<0)?-1:0;
-      if(x > 0) this[0] = x;
-      else if(x < -1) this[0] = x+this.DV;
-      else this.t = 0;
-    }
-
-    // return bigint initialized to value
-    function nbv(i) { var r = nbi(); r.fromInt(i); return r; }
-
-    // (protected) set from string and radix
-    function bnpFromString(s,b) {
-      var k;
-      if(b == 16) k = 4;
-      else if(b == 8) k = 3;
-      else if(b == 256) k = 8; // byte array
-      else if(b == 2) k = 1;
-      else if(b == 32) k = 5;
-      else if(b == 4) k = 2;
-      else { this.fromRadix(s,b); return; }
-      this.t = 0;
-      this.s = 0;
-      var i = s.length, mi = false, sh = 0;
-      while(--i >= 0) {
-        var x = (k==8)?s[i]&0xff:intAt(s,i);
-        if(x < 0) {
-          if(s.charAt(i) == "-") mi = true;
-          continue;
-        }
-        mi = false;
-        if(sh == 0)
-          this[this.t++] = x;
-        else if(sh+k > this.DB) {
-          this[this.t-1] |= (x&((1<<(this.DB-sh))-1))<<sh;
-          this[this.t++] = (x>>(this.DB-sh));
-        }
-        else
-          this[this.t-1] |= x<<sh;
-        sh += k;
-        if(sh >= this.DB) sh -= this.DB;
-      }
-      if(k == 8 && (s[0]&0x80) != 0) {
-        this.s = -1;
-        if(sh > 0) this[this.t-1] |= ((1<<(this.DB-sh))-1)<<sh;
-      }
-      this.clamp();
-      if(mi) BigInteger.ZERO.subTo(this,this);
-    }
-
-    // (protected) clamp off excess high words
-    function bnpClamp() {
-      var c = this.s&this.DM;
-      while(this.t > 0 && this[this.t-1] == c) --this.t;
-    }
-
-    // (public) return string representation in given radix
-    function bnToString(b) {
-      if(this.s < 0) return "-"+this.negate().toString(b);
-      var k;
-      if(b == 16) k = 4;
-      else if(b == 8) k = 3;
-      else if(b == 2) k = 1;
-      else if(b == 32) k = 5;
-      else if(b == 4) k = 2;
-      else return this.toRadix(b);
-      var km = (1<<k)-1, d, m = false, r = "", i = this.t;
-      var p = this.DB-(i*this.DB)%k;
-      if(i-- > 0) {
-        if(p < this.DB && (d = this[i]>>p) > 0) { m = true; r = int2char(d); }
-        while(i >= 0) {
-          if(p < k) {
-            d = (this[i]&((1<<p)-1))<<(k-p);
-            d |= this[--i]>>(p+=this.DB-k);
-          }
-          else {
-            d = (this[i]>>(p-=k))&km;
-            if(p <= 0) { p += this.DB; --i; }
-          }
-          if(d > 0) m = true;
-          if(m) r += int2char(d);
-        }
-      }
-      return m?r:"0";
-    }
-
-    // (public) -this
-    function bnNegate() { var r = nbi(); BigInteger.ZERO.subTo(this,r); return r; }
-
-    // (public) |this|
-    function bnAbs() { return (this.s<0)?this.negate():this; }
-
-    // (public) return + if this > a, - if this < a, 0 if equal
-    function bnCompareTo(a) {
-      var r = this.s-a.s;
-      if(r != 0) return r;
-      var i = this.t;
-      r = i-a.t;
-      if(r != 0) return (this.s<0)?-r:r;
-      while(--i >= 0) if((r=this[i]-a[i]) != 0) return r;
-      return 0;
-    }
-
-    // returns bit length of the integer x
-    function nbits(x) {
-      var r = 1, t;
-      if((t=x>>>16) != 0) { x = t; r += 16; }
-      if((t=x>>8) != 0) { x = t; r += 8; }
-      if((t=x>>4) != 0) { x = t; r += 4; }
-      if((t=x>>2) != 0) { x = t; r += 2; }
-      if((t=x>>1) != 0) { x = t; r += 1; }
-      return r;
-    }
-
-    // (public) return the number of bits in "this"
-    function bnBitLength() {
-      if(this.t <= 0) return 0;
-      return this.DB*(this.t-1)+nbits(this[this.t-1]^(this.s&this.DM));
-    }
-
-    // (protected) r = this << n*DB
-    function bnpDLShiftTo(n,r) {
-      var i;
-      for(i = this.t-1; i >= 0; --i) r[i+n] = this[i];
-      for(i = n-1; i >= 0; --i) r[i] = 0;
-      r.t = this.t+n;
-      r.s = this.s;
-    }
-
-    // (protected) r = this >> n*DB
-    function bnpDRShiftTo(n,r) {
-      for(var i = n; i < this.t; ++i) r[i-n] = this[i];
-      r.t = Math.max(this.t-n,0);
-      r.s = this.s;
-    }
-
-    // (protected) r = this << n
-    function bnpLShiftTo(n,r) {
-      var bs = n%this.DB;
-      var cbs = this.DB-bs;
-      var bm = (1<<cbs)-1;
-      var ds = Math.floor(n/this.DB), c = (this.s<<bs)&this.DM, i;
-      for(i = this.t-1; i >= 0; --i) {
-        r[i+ds+1] = (this[i]>>cbs)|c;
-        c = (this[i]&bm)<<bs;
-      }
-      for(i = ds-1; i >= 0; --i) r[i] = 0;
-      r[ds] = c;
-      r.t = this.t+ds+1;
-      r.s = this.s;
-      r.clamp();
-    }
-
-    // (protected) r = this >> n
-    function bnpRShiftTo(n,r) {
-      r.s = this.s;
-      var ds = Math.floor(n/this.DB);
-      if(ds >= this.t) { r.t = 0; return; }
-      var bs = n%this.DB;
-      var cbs = this.DB-bs;
-      var bm = (1<<bs)-1;
-      r[0] = this[ds]>>bs;
-      for(var i = ds+1; i < this.t; ++i) {
-        r[i-ds-1] |= (this[i]&bm)<<cbs;
-        r[i-ds] = this[i]>>bs;
-      }
-      if(bs > 0) r[this.t-ds-1] |= (this.s&bm)<<cbs;
-      r.t = this.t-ds;
-      r.clamp();
-    }
-
-    // (protected) r = this - a
-    function bnpSubTo(a,r) {
-      var i = 0, c = 0, m = Math.min(a.t,this.t);
-      while(i < m) {
-        c += this[i]-a[i];
-        r[i++] = c&this.DM;
-        c >>= this.DB;
-      }
-      if(a.t < this.t) {
-        c -= a.s;
-        while(i < this.t) {
-          c += this[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += this.s;
-      }
-      else {
-        c += this.s;
-        while(i < a.t) {
-          c -= a[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c -= a.s;
-      }
-      r.s = (c<0)?-1:0;
-      if(c < -1) r[i++] = this.DV+c;
-      else if(c > 0) r[i++] = c;
-      r.t = i;
-      r.clamp();
-    }
-
-    // (protected) r = this * a, r != this,a (HAC 14.12)
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyTo(a,r) {
-      var x = this.abs(), y = a.abs();
-      var i = x.t;
-      r.t = i+y.t;
-      while(--i >= 0) r[i] = 0;
-      for(i = 0; i < y.t; ++i) r[i+x.t] = x.am(0,y[i],r,i,0,x.t);
-      r.s = 0;
-      r.clamp();
-      if(this.s != a.s) BigInteger.ZERO.subTo(r,r);
-    }
-
-    // (protected) r = this^2, r != this (HAC 14.16)
-    function bnpSquareTo(r) {
-      var x = this.abs();
-      var i = r.t = 2*x.t;
-      while(--i >= 0) r[i] = 0;
-      for(i = 0; i < x.t-1; ++i) {
-        var c = x.am(i,x[i],r,2*i,0,1);
-        if((r[i+x.t]+=x.am(i+1,2*x[i],r,2*i+1,c,x.t-i-1)) >= x.DV) {
-          r[i+x.t] -= x.DV;
-          r[i+x.t+1] = 1;
-        }
-      }
-      if(r.t > 0) r[r.t-1] += x.am(i,x[i],r,2*i,0,1);
-      r.s = 0;
-      r.clamp();
-    }
-
-    // (protected) divide this by m, quotient and remainder to q, r (HAC 14.20)
-    // r != q, this != m.  q or r may be null.
-    function bnpDivRemTo(m,q,r) {
-      var pm = m.abs();
-      if(pm.t <= 0) return;
-      var pt = this.abs();
-      if(pt.t < pm.t) {
-        if(q != null) q.fromInt(0);
-        if(r != null) this.copyTo(r);
-        return;
-      }
-      if(r == null) r = nbi();
-      var y = nbi(), ts = this.s, ms = m.s;
-      var nsh = this.DB-nbits(pm[pm.t-1]);   // normalize modulus
-      if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
-      else { pm.copyTo(y); pt.copyTo(r); }
-      var ys = y.t;
-      var y0 = y[ys-1];
-      if(y0 == 0) return;
-      var yt = y0*(1<<this.F1)+((ys>1)?y[ys-2]>>this.F2:0);
-      var d1 = this.FV/yt, d2 = (1<<this.F1)/yt, e = 1<<this.F2;
-      var i = r.t, j = i-ys, t = (q==null)?nbi():q;
-      y.dlShiftTo(j,t);
-      if(r.compareTo(t) >= 0) {
-        r[r.t++] = 1;
-        r.subTo(t,r);
-      }
-      BigInteger.ONE.dlShiftTo(ys,t);
-      t.subTo(y,y);  // "negative" y so we can replace sub with am later
-      while(y.t < ys) y[y.t++] = 0;
-      while(--j >= 0) {
-        // Estimate quotient digit
-        var qd = (r[--i]==y0)?this.DM:Math.floor(r[i]*d1+(r[i-1]+e)*d2);
-        if((r[i]+=y.am(0,qd,r,j,0,ys)) < qd) {   // Try it out
-          y.dlShiftTo(j,t);
-          r.subTo(t,r);
-          while(r[i] < --qd) r.subTo(t,r);
-        }
-      }
-      if(q != null) {
-        r.drShiftTo(ys,q);
-        if(ts != ms) BigInteger.ZERO.subTo(q,q);
-      }
-      r.t = ys;
-      r.clamp();
-      if(nsh > 0) r.rShiftTo(nsh,r); // Denormalize remainder
-      if(ts < 0) BigInteger.ZERO.subTo(r,r);
-    }
-
-    // (public) this mod a
-    function bnMod(a) {
-      var r = nbi();
-      this.abs().divRemTo(a,null,r);
-      if(this.s < 0 && r.compareTo(BigInteger.ZERO) > 0) a.subTo(r,r);
-      return r;
-    }
-
-    // Modular reduction using "classic" algorithm
-    function Classic(m) { this.m = m; }
-    function cConvert(x) {
-      if(x.s < 0 || x.compareTo(this.m) >= 0) return x.mod(this.m);
-      else return x;
-    }
-    function cRevert(x) { return x; }
-    function cReduce(x) { x.divRemTo(this.m,null,x); }
-    function cMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-    function cSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    Classic.prototype.convert = cConvert;
-    Classic.prototype.revert = cRevert;
-    Classic.prototype.reduce = cReduce;
-    Classic.prototype.mulTo = cMulTo;
-    Classic.prototype.sqrTo = cSqrTo;
-
-    // (protected) return "-1/this % 2^DB"; useful for Mont. reduction
-    // justification:
-    //         xy == 1 (mod m)
-    //         xy =  1+km
-    //   xy(2-xy) = (1+km)(1-km)
-    // x[y(2-xy)] = 1-k^2m^2
-    // x[y(2-xy)] == 1 (mod m^2)
-    // if y is 1/x mod m, then y(2-xy) is 1/x mod m^2
-    // should reduce x and y(2-xy) by m^2 at each step to keep size bounded.
-    // JS multiply "overflows" differently from C/C++, so care is needed here.
-    function bnpInvDigit() {
-      if(this.t < 1) return 0;
-      var x = this[0];
-      if((x&1) == 0) return 0;
-      var y = x&3;       // y == 1/x mod 2^2
-      y = (y*(2-(x&0xf)*y))&0xf; // y == 1/x mod 2^4
-      y = (y*(2-(x&0xff)*y))&0xff;   // y == 1/x mod 2^8
-      y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;    // y == 1/x mod 2^16
-      // last step - calculate inverse mod DV directly;
-      // assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
-      y = (y*(2-x*y%this.DV))%this.DV;       // y == 1/x mod 2^dbits
-      // we really want the negative inverse, and -DV < y < DV
-      return (y>0)?this.DV-y:-y;
-    }
-
-    // Montgomery reduction
-    function Montgomery(m) {
-      this.m = m;
-      this.mp = m.invDigit();
-      this.mpl = this.mp&0x7fff;
-      this.mph = this.mp>>15;
-      this.um = (1<<(m.DB-15))-1;
-      this.mt2 = 2*m.t;
-    }
-
-    // xR mod m
-    function montConvert(x) {
-      var r = nbi();
-      x.abs().dlShiftTo(this.m.t,r);
-      r.divRemTo(this.m,null,r);
-      if(x.s < 0 && r.compareTo(BigInteger.ZERO) > 0) this.m.subTo(r,r);
-      return r;
-    }
-
-    // x/R mod m
-    function montRevert(x) {
-      var r = nbi();
-      x.copyTo(r);
-      this.reduce(r);
-      return r;
-    }
-
-    // x = x/R mod m (HAC 14.32)
-    function montReduce(x) {
-      while(x.t <= this.mt2) // pad x so am has enough room later
-        x[x.t++] = 0;
-      for(var i = 0; i < this.m.t; ++i) {
-        // faster way of calculating u0 = x[i]*mp mod DV
-        var j = x[i]&0x7fff;
-        var u0 = (j*this.mpl+(((j*this.mph+(x[i]>>15)*this.mpl)&this.um)<<15))&x.DM;
-        // use am to combine the multiply-shift-add into one call
-        j = i+this.m.t;
-        x[j] += this.m.am(0,u0,x,i,0,this.m.t);
-        // propagate carry
-        while(x[j] >= x.DV) { x[j] -= x.DV; x[++j]++; }
-      }
-      x.clamp();
-      x.drShiftTo(this.m.t,x);
-      if(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
-    }
-
-    // r = "x^2/R mod m"; x != r
-    function montSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    // r = "xy/R mod m"; x,y != r
-    function montMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-
-    Montgomery.prototype.convert = montConvert;
-    Montgomery.prototype.revert = montRevert;
-    Montgomery.prototype.reduce = montReduce;
-    Montgomery.prototype.mulTo = montMulTo;
-    Montgomery.prototype.sqrTo = montSqrTo;
-
-    // (protected) true iff this is even
-    function bnpIsEven() { return ((this.t>0)?(this[0]&1):this.s) == 0; }
-
-    // (protected) this^e, e < 2^32, doing sqr and mul with "r" (HAC 14.79)
-    function bnpExp(e,z) {
-      if(e > 0xffffffff || e < 1) return BigInteger.ONE;
-      var r = nbi(), r2 = nbi(), g = z.convert(this), i = nbits(e)-1;
-      g.copyTo(r);
-      while(--i >= 0) {
-        z.sqrTo(r,r2);
-        if((e&(1<<i)) > 0) z.mulTo(r2,g,r);
-        else { var t = r; r = r2; r2 = t; }
-      }
-      return z.revert(r);
-    }
-
-    // (public) this^e % m, 0 <= e < 2^32
-    function bnModPowInt(e,m) {
-      var z;
-      if(e < 256 || m.isEven()) z = new Classic(m); else z = new Montgomery(m);
-      return this.exp(e,z);
-    }
-
-    // protected
-    BigInteger.prototype.copyTo = bnpCopyTo;
-    BigInteger.prototype.fromInt = bnpFromInt;
-    BigInteger.prototype.fromString = bnpFromString;
-    BigInteger.prototype.clamp = bnpClamp;
-    BigInteger.prototype.dlShiftTo = bnpDLShiftTo;
-    BigInteger.prototype.drShiftTo = bnpDRShiftTo;
-    BigInteger.prototype.lShiftTo = bnpLShiftTo;
-    BigInteger.prototype.rShiftTo = bnpRShiftTo;
-    BigInteger.prototype.subTo = bnpSubTo;
-    BigInteger.prototype.multiplyTo = bnpMultiplyTo;
-    BigInteger.prototype.squareTo = bnpSquareTo;
-    BigInteger.prototype.divRemTo = bnpDivRemTo;
-    BigInteger.prototype.invDigit = bnpInvDigit;
-    BigInteger.prototype.isEven = bnpIsEven;
-    BigInteger.prototype.exp = bnpExp;
-
-    // public
-    BigInteger.prototype.toString = bnToString;
-    BigInteger.prototype.negate = bnNegate;
-    BigInteger.prototype.abs = bnAbs;
-    BigInteger.prototype.compareTo = bnCompareTo;
-    BigInteger.prototype.bitLength = bnBitLength;
-    BigInteger.prototype.mod = bnMod;
-    BigInteger.prototype.modPowInt = bnModPowInt;
-
-    // "constants"
-    BigInteger.ZERO = nbv(0);
-    BigInteger.ONE = nbv(1);
-
-    // Copyright (c) 2005-2009  Tom Wu
-    // All Rights Reserved.
-    // See "LICENSE" for details.
-
-    // Extended JavaScript BN functions, required for RSA private ops.
-
-    // Version 1.1: new BigInteger("0", 10) returns "proper" zero
-    // Version 1.2: square() API, isProbablePrime fix
-
-    // (public)
-    function bnClone() { var r = nbi(); this.copyTo(r); return r; }
-
-    // (public) return value as integer
-    function bnIntValue() {
-      if(this.s < 0) {
-        if(this.t == 1) return this[0]-this.DV;
-        else if(this.t == 0) return -1;
-      }
-      else if(this.t == 1) return this[0];
-      else if(this.t == 0) return 0;
-      // assumes 16 < DB < 32
-      return ((this[1]&((1<<(32-this.DB))-1))<<this.DB)|this[0];
-    }
-
-    // (public) return value as byte
-    function bnByteValue() { return (this.t==0)?this.s:(this[0]<<24)>>24; }
-
-    // (public) return value as short (assumes DB>=16)
-    function bnShortValue() { return (this.t==0)?this.s:(this[0]<<16)>>16; }
-
-    // (protected) return x s.t. r^x < DV
-    function bnpChunkSize(r) { return Math.floor(Math.LN2*this.DB/Math.log(r)); }
-
-    // (public) 0 if this == 0, 1 if this > 0
-    function bnSigNum() {
-      if(this.s < 0) return -1;
-      else if(this.t <= 0 || (this.t == 1 && this[0] <= 0)) return 0;
-      else return 1;
-    }
-
-    // (protected) convert to radix string
-    function bnpToRadix(b) {
-      if(b == null) b = 10;
-      if(this.signum() == 0 || b < 2 || b > 36) return "0";
-      var cs = this.chunkSize(b);
-      var a = Math.pow(b,cs);
-      var d = nbv(a), y = nbi(), z = nbi(), r = "";
-      this.divRemTo(d,y,z);
-      while(y.signum() > 0) {
-        r = (a+z.intValue()).toString(b).substr(1) + r;
-        y.divRemTo(d,y,z);
-      }
-      return z.intValue().toString(b) + r;
-    }
-
-    // (protected) convert from radix string
-    function bnpFromRadix(s,b) {
-      this.fromInt(0);
-      if(b == null) b = 10;
-      var cs = this.chunkSize(b);
-      var d = Math.pow(b,cs), mi = false, j = 0, w = 0;
-      for(var i = 0; i < s.length; ++i) {
-        var x = intAt(s,i);
-        if(x < 0) {
-          if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
-          continue;
-        }
-        w = b*w+x;
-        if(++j >= cs) {
-          this.dMultiply(d);
-          this.dAddOffset(w,0);
-          j = 0;
-          w = 0;
-        }
-      }
-      if(j > 0) {
-        this.dMultiply(Math.pow(b,j));
-        this.dAddOffset(w,0);
-      }
-      if(mi) BigInteger.ZERO.subTo(this,this);
-    }
-
-    // (protected) alternate constructor
-    function bnpFromNumber(a,b,c) {
-      if("number" == typeof b) {
-        // new BigInteger(int,int,RNG)
-        if(a < 2) this.fromInt(1);
-        else {
-          this.fromNumber(a,c);
-          if(!this.testBit(a-1))	// force MSB set
-            this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
-          if(this.isEven()) this.dAddOffset(1,0); // force odd
-          while(!this.isProbablePrime(b)) {
-            this.dAddOffset(2,0);
-            if(this.bitLength() > a) this.subTo(BigInteger.ONE.shiftLeft(a-1),this);
-          }
-        }
-      }
-      else {
-        // new BigInteger(int,RNG)
-        var x = new Array(), t = a&7;
-        x.length = (a>>3)+1;
-        b.nextBytes(x);
-        if(t > 0) x[0] &= ((1<<t)-1); else x[0] = 0;
-        this.fromString(x,256);
-      }
-    }
-
-    // (public) convert to bigendian byte array
-    function bnToByteArray() {
-      var i = this.t, r = new Array();
-      r[0] = this.s;
-      var p = this.DB-(i*this.DB)%8, d, k = 0;
-      if(i-- > 0) {
-        if(p < this.DB && (d = this[i]>>p) != (this.s&this.DM)>>p)
-          r[k++] = d|(this.s<<(this.DB-p));
-        while(i >= 0) {
-          if(p < 8) {
-            d = (this[i]&((1<<p)-1))<<(8-p);
-            d |= this[--i]>>(p+=this.DB-8);
-          }
-          else {
-            d = (this[i]>>(p-=8))&0xff;
-            if(p <= 0) { p += this.DB; --i; }
-          }
-          if((d&0x80) != 0) d |= -256;
-          if(k == 0 && (this.s&0x80) != (d&0x80)) ++k;
-          if(k > 0 || d != this.s) r[k++] = d;
-        }
-      }
-      return r;
-    }
-
-    function bnEquals(a) { return(this.compareTo(a)==0); }
-    function bnMin(a) { return(this.compareTo(a)<0)?this:a; }
-    function bnMax(a) { return(this.compareTo(a)>0)?this:a; }
-
-    // (protected) r = this op a (bitwise)
-    function bnpBitwiseTo(a,op,r) {
-      var i, f, m = Math.min(a.t,this.t);
-      for(i = 0; i < m; ++i) r[i] = op(this[i],a[i]);
-      if(a.t < this.t) {
-        f = a.s&this.DM;
-        for(i = m; i < this.t; ++i) r[i] = op(this[i],f);
-        r.t = this.t;
-      }
-      else {
-        f = this.s&this.DM;
-        for(i = m; i < a.t; ++i) r[i] = op(f,a[i]);
-        r.t = a.t;
-      }
-      r.s = op(this.s,a.s);
-      r.clamp();
-    }
-
-    // (public) this & a
-    function op_and(x,y) { return x&y; }
-    function bnAnd(a) { var r = nbi(); this.bitwiseTo(a,op_and,r); return r; }
-
-    // (public) this | a
-    function op_or(x,y) { return x|y; }
-    function bnOr(a) { var r = nbi(); this.bitwiseTo(a,op_or,r); return r; }
-
-    // (public) this ^ a
-    function op_xor(x,y) { return x^y; }
-    function bnXor(a) { var r = nbi(); this.bitwiseTo(a,op_xor,r); return r; }
-
-    // (public) this & ~a
-    function op_andnot(x,y) { return x&~y; }
-    function bnAndNot(a) { var r = nbi(); this.bitwiseTo(a,op_andnot,r); return r; }
-
-    // (public) ~this
-    function bnNot() {
-      var r = nbi();
-      for(var i = 0; i < this.t; ++i) r[i] = this.DM&~this[i];
-      r.t = this.t;
-      r.s = ~this.s;
-      return r;
-    }
-
-    // (public) this << n
-    function bnShiftLeft(n) {
-      var r = nbi();
-      if(n < 0) this.rShiftTo(-n,r); else this.lShiftTo(n,r);
-      return r;
-    }
-
-    // (public) this >> n
-    function bnShiftRight(n) {
-      var r = nbi();
-      if(n < 0) this.lShiftTo(-n,r); else this.rShiftTo(n,r);
-      return r;
-    }
-
-    // return index of lowest 1-bit in x, x < 2^31
-    function lbit(x) {
-      if(x == 0) return -1;
-      var r = 0;
-      if((x&0xffff) == 0) { x >>= 16; r += 16; }
-      if((x&0xff) == 0) { x >>= 8; r += 8; }
-      if((x&0xf) == 0) { x >>= 4; r += 4; }
-      if((x&3) == 0) { x >>= 2; r += 2; }
-      if((x&1) == 0) ++r;
-      return r;
-    }
-
-    // (public) returns index of lowest 1-bit (or -1 if none)
-    function bnGetLowestSetBit() {
-      for(var i = 0; i < this.t; ++i)
-        if(this[i] != 0) return i*this.DB+lbit(this[i]);
-      if(this.s < 0) return this.t*this.DB;
-      return -1;
-    }
-
-    // return number of 1 bits in x
-    function cbit(x) {
-      var r = 0;
-      while(x != 0) { x &= x-1; ++r; }
-      return r;
-    }
-
-    // (public) return number of set bits
-    function bnBitCount() {
-      var r = 0, x = this.s&this.DM;
-      for(var i = 0; i < this.t; ++i) r += cbit(this[i]^x);
-      return r;
-    }
-
-    // (public) true iff nth bit is set
-    function bnTestBit(n) {
-      var j = Math.floor(n/this.DB);
-      if(j >= this.t) return(this.s!=0);
-      return((this[j]&(1<<(n%this.DB)))!=0);
-    }
-
-    // (protected) this op (1<<n)
-    function bnpChangeBit(n,op) {
-      var r = BigInteger.ONE.shiftLeft(n);
-      this.bitwiseTo(r,op,r);
-      return r;
-    }
-
-    // (public) this | (1<<n)
-    function bnSetBit(n) { return this.changeBit(n,op_or); }
-
-    // (public) this & ~(1<<n)
-    function bnClearBit(n) { return this.changeBit(n,op_andnot); }
-
-    // (public) this ^ (1<<n)
-    function bnFlipBit(n) { return this.changeBit(n,op_xor); }
-
-    // (protected) r = this + a
-    function bnpAddTo(a,r) {
-      var i = 0, c = 0, m = Math.min(a.t,this.t);
-      while(i < m) {
-        c += this[i]+a[i];
-        r[i++] = c&this.DM;
-        c >>= this.DB;
-      }
-      if(a.t < this.t) {
-        c += a.s;
-        while(i < this.t) {
-          c += this[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += this.s;
-      }
-      else {
-        c += this.s;
-        while(i < a.t) {
-          c += a[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += a.s;
-      }
-      r.s = (c<0)?-1:0;
-      if(c > 0) r[i++] = c;
-      else if(c < -1) r[i++] = this.DV+c;
-      r.t = i;
-      r.clamp();
-    }
-
-    // (public) this + a
-    function bnAdd(a) { var r = nbi(); this.addTo(a,r); return r; }
-
-    // (public) this - a
-    function bnSubtract(a) { var r = nbi(); this.subTo(a,r); return r; }
-
-    // (public) this * a
-    function bnMultiply(a) { var r = nbi(); this.multiplyTo(a,r); return r; }
-
-    // (public) this^2
-    function bnSquare() { var r = nbi(); this.squareTo(r); return r; }
-
-    // (public) this / a
-    function bnDivide(a) { var r = nbi(); this.divRemTo(a,r,null); return r; }
-
-    // (public) this % a
-    function bnRemainder(a) { var r = nbi(); this.divRemTo(a,null,r); return r; }
-
-    // (public) [this/a,this%a]
-    function bnDivideAndRemainder(a) {
-      var q = nbi(), r = nbi();
-      this.divRemTo(a,q,r);
-      return new Array(q,r);
-    }
-
-    // (protected) this *= n, this >= 0, 1 < n < DV
-    function bnpDMultiply(n) {
-      this[this.t] = this.am(0,n-1,this,0,0,this.t);
-      ++this.t;
-      this.clamp();
-    }
-
-    // (protected) this += n << w words, this >= 0
-    function bnpDAddOffset(n,w) {
-      if(n == 0) return;
-      while(this.t <= w) this[this.t++] = 0;
-      this[w] += n;
-      while(this[w] >= this.DV) {
-        this[w] -= this.DV;
-        if(++w >= this.t) this[this.t++] = 0;
-        ++this[w];
-      }
-    }
-
-    // A "null" reducer
-    function NullExp() {}
-    function nNop(x) { return x; }
-    function nMulTo(x,y,r) { x.multiplyTo(y,r); }
-    function nSqrTo(x,r) { x.squareTo(r); }
-
-    NullExp.prototype.convert = nNop;
-    NullExp.prototype.revert = nNop;
-    NullExp.prototype.mulTo = nMulTo;
-    NullExp.prototype.sqrTo = nSqrTo;
-
-    // (public) this^e
-    function bnPow(e) { return this.exp(e,new NullExp()); }
-
-    // (protected) r = lower n words of "this * a", a.t <= n
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyLowerTo(a,n,r) {
-      var i = Math.min(this.t+a.t,n);
-      r.s = 0; // assumes a,this >= 0
-      r.t = i;
-      while(i > 0) r[--i] = 0;
-      var j;
-      for(j = r.t-this.t; i < j; ++i) r[i+this.t] = this.am(0,a[i],r,i,0,this.t);
-      for(j = Math.min(a.t,n); i < j; ++i) this.am(0,a[i],r,i,0,n-i);
-      r.clamp();
-    }
-
-    // (protected) r = "this * a" without lower n words, n > 0
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyUpperTo(a,n,r) {
-      --n;
-      var i = r.t = this.t+a.t-n;
-      r.s = 0; // assumes a,this >= 0
-      while(--i >= 0) r[i] = 0;
-      for(i = Math.max(n-this.t,0); i < a.t; ++i)
-        r[this.t+i-n] = this.am(n-i,a[i],r,0,0,this.t+i-n);
-      r.clamp();
-      r.drShiftTo(1,r);
-    }
-
-    // Barrett modular reduction
-    function Barrett(m) {
-      // setup Barrett
-      this.r2 = nbi();
-      this.q3 = nbi();
-      BigInteger.ONE.dlShiftTo(2*m.t,this.r2);
-      this.mu = this.r2.divide(m);
-      this.m = m;
-    }
-
-    function barrettConvert(x) {
-      if(x.s < 0 || x.t > 2*this.m.t) return x.mod(this.m);
-      else if(x.compareTo(this.m) < 0) return x;
-      else { var r = nbi(); x.copyTo(r); this.reduce(r); return r; }
-    }
-
-    function barrettRevert(x) { return x; }
-
-    // x = x mod m (HAC 14.42)
-    function barrettReduce(x) {
-      x.drShiftTo(this.m.t-1,this.r2);
-      if(x.t > this.m.t+1) { x.t = this.m.t+1; x.clamp(); }
-      this.mu.multiplyUpperTo(this.r2,this.m.t+1,this.q3);
-      this.m.multiplyLowerTo(this.q3,this.m.t+1,this.r2);
-      while(x.compareTo(this.r2) < 0) x.dAddOffset(1,this.m.t+1);
-      x.subTo(this.r2,x);
-      while(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
-    }
-
-    // r = x^2 mod m; x != r
-    function barrettSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    // r = x*y mod m; x,y != r
-    function barrettMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-
-    Barrett.prototype.convert = barrettConvert;
-    Barrett.prototype.revert = barrettRevert;
-    Barrett.prototype.reduce = barrettReduce;
-    Barrett.prototype.mulTo = barrettMulTo;
-    Barrett.prototype.sqrTo = barrettSqrTo;
-
-    // (public) this^e % m (HAC 14.85)
-    function bnModPow(e,m) {
-      var i = e.bitLength(), k, r = nbv(1), z;
-      if(i <= 0) return r;
-      else if(i < 18) k = 1;
-      else if(i < 48) k = 3;
-      else if(i < 144) k = 4;
-      else if(i < 768) k = 5;
-      else k = 6;
-      if(i < 8)
-        z = new Classic(m);
-      else if(m.isEven())
-        z = new Barrett(m);
-      else
-        z = new Montgomery(m);
-
-      // precomputation
-      var g = new Array(), n = 3, k1 = k-1, km = (1<<k)-1;
-      g[1] = z.convert(this);
-      if(k > 1) {
-        var g2 = nbi();
-        z.sqrTo(g[1],g2);
-        while(n <= km) {
-          g[n] = nbi();
-          z.mulTo(g2,g[n-2],g[n]);
-          n += 2;
-        }
-      }
-
-      var j = e.t-1, w, is1 = true, r2 = nbi(), t;
-      i = nbits(e[j])-1;
-      while(j >= 0) {
-        if(i >= k1) w = (e[j]>>(i-k1))&km;
-        else {
-          w = (e[j]&((1<<(i+1))-1))<<(k1-i);
-          if(j > 0) w |= e[j-1]>>(this.DB+i-k1);
-        }
-
-        n = k;
-        while((w&1) == 0) { w >>= 1; --n; }
-        if((i -= n) < 0) { i += this.DB; --j; }
-        if(is1) {	// ret == 1, don't bother squaring or multiplying it
-          g[w].copyTo(r);
-          is1 = false;
-        }
-        else {
-          while(n > 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
-          if(n > 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
-          z.mulTo(r2,g[w],r);
-        }
-
-        while(j >= 0 && (e[j]&(1<<i)) == 0) {
-          z.sqrTo(r,r2); t = r; r = r2; r2 = t;
-          if(--i < 0) { i = this.DB-1; --j; }
-        }
-      }
-      return z.revert(r);
-    }
-
-    // (public) gcd(this,a) (HAC 14.54)
-    function bnGCD(a) {
-      var x = (this.s<0)?this.negate():this.clone();
-      var y = (a.s<0)?a.negate():a.clone();
-      if(x.compareTo(y) < 0) { var t = x; x = y; y = t; }
-      var i = x.getLowestSetBit(), g = y.getLowestSetBit();
-      if(g < 0) return x;
-      if(i < g) g = i;
-      if(g > 0) {
-        x.rShiftTo(g,x);
-        y.rShiftTo(g,y);
-      }
-      while(x.signum() > 0) {
-        if((i = x.getLowestSetBit()) > 0) x.rShiftTo(i,x);
-        if((i = y.getLowestSetBit()) > 0) y.rShiftTo(i,y);
-        if(x.compareTo(y) >= 0) {
-          x.subTo(y,x);
-          x.rShiftTo(1,x);
-        }
-        else {
-          y.subTo(x,y);
-          y.rShiftTo(1,y);
-        }
-      }
-      if(g > 0) y.lShiftTo(g,y);
-      return y;
-    }
-
-    // (protected) this % n, n < 2^26
-    function bnpModInt(n) {
-      if(n <= 0) return 0;
-      var d = this.DV%n, r = (this.s<0)?n-1:0;
-      if(this.t > 0)
-        if(d == 0) r = this[0]%n;
-        else for(var i = this.t-1; i >= 0; --i) r = (d*r+this[i])%n;
-      return r;
-    }
-
-    // (public) 1/this % m (HAC 14.61)
-    function bnModInverse(m) {
-      var ac = m.isEven();
-      if((this.isEven() && ac) || m.signum() == 0) return BigInteger.ZERO;
-      var u = m.clone(), v = this.clone();
-      var a = nbv(1), b = nbv(0), c = nbv(0), d = nbv(1);
-      while(u.signum() != 0) {
-        while(u.isEven()) {
-          u.rShiftTo(1,u);
-          if(ac) {
-            if(!a.isEven() || !b.isEven()) { a.addTo(this,a); b.subTo(m,b); }
-            a.rShiftTo(1,a);
-          }
-          else if(!b.isEven()) b.subTo(m,b);
-          b.rShiftTo(1,b);
-        }
-        while(v.isEven()) {
-          v.rShiftTo(1,v);
-          if(ac) {
-            if(!c.isEven() || !d.isEven()) { c.addTo(this,c); d.subTo(m,d); }
-            c.rShiftTo(1,c);
-          }
-          else if(!d.isEven()) d.subTo(m,d);
-          d.rShiftTo(1,d);
-        }
-        if(u.compareTo(v) >= 0) {
-          u.subTo(v,u);
-          if(ac) a.subTo(c,a);
-          b.subTo(d,b);
-        }
-        else {
-          v.subTo(u,v);
-          if(ac) c.subTo(a,c);
-          d.subTo(b,d);
-        }
-      }
-      if(v.compareTo(BigInteger.ONE) != 0) return BigInteger.ZERO;
-      if(d.compareTo(m) >= 0) return d.subtract(m);
-      if(d.signum() < 0) d.addTo(m,d); else return d;
-      if(d.signum() < 0) return d.add(m); else return d;
-    }
-
-    var lowprimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997];
-    var lplim = (1<<26)/lowprimes[lowprimes.length-1];
-
-    // (public) test primality with certainty >= 1-.5^t
-    function bnIsProbablePrime(t) {
-      var i, x = this.abs();
-      if(x.t == 1 && x[0] <= lowprimes[lowprimes.length-1]) {
-        for(i = 0; i < lowprimes.length; ++i)
-          if(x[0] == lowprimes[i]) return true;
-        return false;
-      }
-      if(x.isEven()) return false;
-      i = 1;
-      while(i < lowprimes.length) {
-        var m = lowprimes[i], j = i+1;
-        while(j < lowprimes.length && m < lplim) m *= lowprimes[j++];
-        m = x.modInt(m);
-        while(i < j) if(m%lowprimes[i++] == 0) return false;
-      }
-      return x.millerRabin(t);
-    }
-
-    // (protected) true if probably prime (HAC 4.24, Miller-Rabin)
-    function bnpMillerRabin(t) {
-      var n1 = this.subtract(BigInteger.ONE);
-      var k = n1.getLowestSetBit();
-      if(k <= 0) return false;
-      var r = n1.shiftRight(k);
-      t = (t+1)>>1;
-      if(t > lowprimes.length) t = lowprimes.length;
-      var a = nbi();
-      for(var i = 0; i < t; ++i) {
-        //Pick bases at random, instead of starting at 2
-        a.fromInt(lowprimes[Math.floor(Math.random()*lowprimes.length)]);
-        var y = a.modPow(r,this);
-        if(y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
-          var j = 1;
-          while(j++ < k && y.compareTo(n1) != 0) {
-            y = y.modPowInt(2,this);
-            if(y.compareTo(BigInteger.ONE) == 0) return false;
-          }
-          if(y.compareTo(n1) != 0) return false;
-        }
-      }
-      return true;
-    }
-
-    // protected
-    BigInteger.prototype.chunkSize = bnpChunkSize;
-    BigInteger.prototype.toRadix = bnpToRadix;
-    BigInteger.prototype.fromRadix = bnpFromRadix;
-    BigInteger.prototype.fromNumber = bnpFromNumber;
-    BigInteger.prototype.bitwiseTo = bnpBitwiseTo;
-    BigInteger.prototype.changeBit = bnpChangeBit;
-    BigInteger.prototype.addTo = bnpAddTo;
-    BigInteger.prototype.dMultiply = bnpDMultiply;
-    BigInteger.prototype.dAddOffset = bnpDAddOffset;
-    BigInteger.prototype.multiplyLowerTo = bnpMultiplyLowerTo;
-    BigInteger.prototype.multiplyUpperTo = bnpMultiplyUpperTo;
-    BigInteger.prototype.modInt = bnpModInt;
-    BigInteger.prototype.millerRabin = bnpMillerRabin;
-
-    // public
-    BigInteger.prototype.clone = bnClone;
-    BigInteger.prototype.intValue = bnIntValue;
-    BigInteger.prototype.byteValue = bnByteValue;
-    BigInteger.prototype.shortValue = bnShortValue;
-    BigInteger.prototype.signum = bnSigNum;
-    BigInteger.prototype.toByteArray = bnToByteArray;
-    BigInteger.prototype.equals = bnEquals;
-    BigInteger.prototype.min = bnMin;
-    BigInteger.prototype.max = bnMax;
-    BigInteger.prototype.and = bnAnd;
-    BigInteger.prototype.or = bnOr;
-    BigInteger.prototype.xor = bnXor;
-    BigInteger.prototype.andNot = bnAndNot;
-    BigInteger.prototype.not = bnNot;
-    BigInteger.prototype.shiftLeft = bnShiftLeft;
-    BigInteger.prototype.shiftRight = bnShiftRight;
-    BigInteger.prototype.getLowestSetBit = bnGetLowestSetBit;
-    BigInteger.prototype.bitCount = bnBitCount;
-    BigInteger.prototype.testBit = bnTestBit;
-    BigInteger.prototype.setBit = bnSetBit;
-    BigInteger.prototype.clearBit = bnClearBit;
-    BigInteger.prototype.flipBit = bnFlipBit;
-    BigInteger.prototype.add = bnAdd;
-    BigInteger.prototype.subtract = bnSubtract;
-    BigInteger.prototype.multiply = bnMultiply;
-    BigInteger.prototype.divide = bnDivide;
-    BigInteger.prototype.remainder = bnRemainder;
-    BigInteger.prototype.divideAndRemainder = bnDivideAndRemainder;
-    BigInteger.prototype.modPow = bnModPow;
-    BigInteger.prototype.modInverse = bnModInverse;
-    BigInteger.prototype.pow = bnPow;
-    BigInteger.prototype.gcd = bnGCD;
-    BigInteger.prototype.isProbablePrime = bnIsProbablePrime;
-
-    // JSBN-specific extension
-    BigInteger.prototype.square = bnSquare;
-
-    // Expose the Barrett function
-    BigInteger.prototype.Barrett = Barrett
-
-    // BigInteger interfaces not implemented in jsbn:
-
-    // BigInteger(int signum, byte[] magnitude)
-    // double doubleValue()
-    // float floatValue()
-    // int hashCode()
-    // long longValue()
-    // static BigInteger valueOf(long val)
-
-	// Random number generator - requires a PRNG backend, e.g. prng4.js
-
-	// For best results, put code like
-	// <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
-	// in your main HTML document.
-
-	var rng_state;
-	var rng_pool;
-	var rng_pptr;
-
-	// Mix in a 32-bit integer into the pool
-	function rng_seed_int(x) {
-	  rng_pool[rng_pptr++] ^= x & 255;
-	  rng_pool[rng_pptr++] ^= (x >> 8) & 255;
-	  rng_pool[rng_pptr++] ^= (x >> 16) & 255;
-	  rng_pool[rng_pptr++] ^= (x >> 24) & 255;
-	  if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
-	}
-
-	// Mix in the current time (w/milliseconds) into the pool
-	function rng_seed_time() {
-	  rng_seed_int(new Date().getTime());
-	}
-
-	// Initialize the pool with junk if needed.
-	if(rng_pool == null) {
-	  rng_pool = new Array();
-	  rng_pptr = 0;
-	  var t;
-	  if(typeof window !== "undefined" && window.crypto) {
-		if (window.crypto.getRandomValues) {
-		  // Use webcrypto if available
-		  var ua = new Uint8Array(32);
-		  window.crypto.getRandomValues(ua);
-		  for(t = 0; t < 32; ++t)
-			rng_pool[rng_pptr++] = ua[t];
-		}
-		else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
-		  // Extract entropy (256 bits) from NS4 RNG if available
-		  var z = window.crypto.random(32);
-		  for(t = 0; t < z.length; ++t)
-			rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
-		}
-	  }
-	  while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-		t = Math.floor(65536 * Math.random());
-		rng_pool[rng_pptr++] = t >>> 8;
-		rng_pool[rng_pptr++] = t & 255;
-	  }
-	  rng_pptr = 0;
-	  rng_seed_time();
-	  //rng_seed_int(window.screenX);
-	  //rng_seed_int(window.screenY);
-	}
-
-	function rng_get_byte() {
-	  if(rng_state == null) {
-		rng_seed_time();
-		rng_state = prng_newstate();
-		rng_state.init(rng_pool);
-		for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
-		  rng_pool[rng_pptr] = 0;
-		rng_pptr = 0;
-		//rng_pool = null;
-	  }
-	  // TODO: allow reseeding after first request
-	  return rng_state.next();
-	}
-
-	function rng_get_bytes(ba) {
-	  var i;
-	  for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
-	}
-
-	function SecureRandom() {}
-
-	SecureRandom.prototype.nextBytes = rng_get_bytes;
-
-	// prng4.js - uses Arcfour as a PRNG
-
-	function Arcfour() {
-	  this.i = 0;
-	  this.j = 0;
-	  this.S = new Array();
-	}
-
-	// Initialize arcfour context from key, an array of ints, each from [0..255]
-	function ARC4init(key) {
-	  var i, j, t;
-	  for(i = 0; i < 256; ++i)
-		this.S[i] = i;
-	  j = 0;
-	  for(i = 0; i < 256; ++i) {
-		j = (j + this.S[i] + key[i % key.length]) & 255;
-		t = this.S[i];
-		this.S[i] = this.S[j];
-		this.S[j] = t;
-	  }
-	  this.i = 0;
-	  this.j = 0;
-	}
-
-	function ARC4next() {
-	  var t;
-	  this.i = (this.i + 1) & 255;
-	  this.j = (this.j + this.S[this.i]) & 255;
-	  t = this.S[this.i];
-	  this.S[this.i] = this.S[this.j];
-	  this.S[this.j] = t;
-	  return this.S[(t + this.S[this.i]) & 255];
-	}
-
-	Arcfour.prototype.init = ARC4init;
-	Arcfour.prototype.next = ARC4next;
-
-	// Plug in your RNG constructor here
-	function prng_newstate() {
-	  return new Arcfour();
-	}
-
-	// Pool size must be a multiple of 4 and greater than 32.
-	// An array of bytes the size of the pool will be passed to init()
-	var rng_psize = 256;
-
-  BigInteger.SecureRandom = SecureRandom;
-  BigInteger.BigInteger = BigInteger;
-  if (true) {
-    exports = module.exports = BigInteger;
-  } else {}
-
-}).call(this);
 
 
 /***/ }),
@@ -53265,7 +51497,7 @@ FormData.prototype.submit = function (params, cb) {
         request.removeListener('error', callback);
         request.removeListener('response', onResponse);
 
-        return cb.call(this, error, responce); // eslint-disable-line no-invalid-this
+        return cb.call(this, error, responce);
       };
 
       onResponse = callback.bind(this, null);
@@ -53289,7 +51521,7 @@ FormData.prototype._error = function (err) {
 FormData.prototype.toString = function () {
   return '[object FormData]';
 };
-setToStringTag(FormData, 'FormData');
+setToStringTag(FormData.prototype, 'FormData');
 
 // Public API
 module.exports = FormData;
@@ -53311,1605 +51543,6 @@ module.exports = function (dst, src) {
 
   return dst;
 };
-
-
-/***/ }),
-
-/***/ 14839:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(35744)
-const path = __nccwpck_require__(16928)
-const mkdirsSync = (__nccwpck_require__(31089).mkdirsSync)
-const utimesMillisSync = (__nccwpck_require__(96934).utimesMillisSync)
-const stat = __nccwpck_require__(90887)
-
-function copySync (src, dest, opts) {
-  if (typeof opts === 'function') {
-    opts = { filter: opts }
-  }
-
-  opts = opts || {}
-  opts.clobber = 'clobber' in opts ? !!opts.clobber : true // default to true for now
-  opts.overwrite = 'overwrite' in opts ? !!opts.overwrite : opts.clobber // overwrite falls back to clobber
-
-  // Warn about using preserveTimestamps on 32-bit node
-  if (opts.preserveTimestamps && process.arch === 'ia32') {
-    process.emitWarning(
-      'Using the preserveTimestamps option in 32-bit node is not recommended;\n\n' +
-      '\tsee https://github.com/jprichardson/node-fs-extra/issues/269',
-      'Warning', 'fs-extra-WARN0002'
-    )
-  }
-
-  const { srcStat, destStat } = stat.checkPathsSync(src, dest, 'copy', opts)
-  stat.checkParentPathsSync(src, srcStat, dest, 'copy')
-  if (opts.filter && !opts.filter(src, dest)) return
-  const destParent = path.dirname(dest)
-  if (!fs.existsSync(destParent)) mkdirsSync(destParent)
-  return getStats(destStat, src, dest, opts)
-}
-
-function getStats (destStat, src, dest, opts) {
-  const statSync = opts.dereference ? fs.statSync : fs.lstatSync
-  const srcStat = statSync(src)
-
-  if (srcStat.isDirectory()) return onDir(srcStat, destStat, src, dest, opts)
-  else if (srcStat.isFile() ||
-           srcStat.isCharacterDevice() ||
-           srcStat.isBlockDevice()) return onFile(srcStat, destStat, src, dest, opts)
-  else if (srcStat.isSymbolicLink()) return onLink(destStat, src, dest, opts)
-  else if (srcStat.isSocket()) throw new Error(`Cannot copy a socket file: ${src}`)
-  else if (srcStat.isFIFO()) throw new Error(`Cannot copy a FIFO pipe: ${src}`)
-  throw new Error(`Unknown file: ${src}`)
-}
-
-function onFile (srcStat, destStat, src, dest, opts) {
-  if (!destStat) return copyFile(srcStat, src, dest, opts)
-  return mayCopyFile(srcStat, src, dest, opts)
-}
-
-function mayCopyFile (srcStat, src, dest, opts) {
-  if (opts.overwrite) {
-    fs.unlinkSync(dest)
-    return copyFile(srcStat, src, dest, opts)
-  } else if (opts.errorOnExist) {
-    throw new Error(`'${dest}' already exists`)
-  }
-}
-
-function copyFile (srcStat, src, dest, opts) {
-  fs.copyFileSync(src, dest)
-  if (opts.preserveTimestamps) handleTimestamps(srcStat.mode, src, dest)
-  return setDestMode(dest, srcStat.mode)
-}
-
-function handleTimestamps (srcMode, src, dest) {
-  // Make sure the file is writable before setting the timestamp
-  // otherwise open fails with EPERM when invoked with 'r+'
-  // (through utimes call)
-  if (fileIsNotWritable(srcMode)) makeFileWritable(dest, srcMode)
-  return setDestTimestamps(src, dest)
-}
-
-function fileIsNotWritable (srcMode) {
-  return (srcMode & 0o200) === 0
-}
-
-function makeFileWritable (dest, srcMode) {
-  return setDestMode(dest, srcMode | 0o200)
-}
-
-function setDestMode (dest, srcMode) {
-  return fs.chmodSync(dest, srcMode)
-}
-
-function setDestTimestamps (src, dest) {
-  // The initial srcStat.atime cannot be trusted
-  // because it is modified by the read(2) system call
-  // (See https://nodejs.org/api/fs.html#fs_stat_time_values)
-  const updatedSrcStat = fs.statSync(src)
-  return utimesMillisSync(dest, updatedSrcStat.atime, updatedSrcStat.mtime)
-}
-
-function onDir (srcStat, destStat, src, dest, opts) {
-  if (!destStat) return mkDirAndCopy(srcStat.mode, src, dest, opts)
-  return copyDir(src, dest, opts)
-}
-
-function mkDirAndCopy (srcMode, src, dest, opts) {
-  fs.mkdirSync(dest)
-  copyDir(src, dest, opts)
-  return setDestMode(dest, srcMode)
-}
-
-function copyDir (src, dest, opts) {
-  fs.readdirSync(src).forEach(item => copyDirItem(item, src, dest, opts))
-}
-
-function copyDirItem (item, src, dest, opts) {
-  const srcItem = path.join(src, item)
-  const destItem = path.join(dest, item)
-  if (opts.filter && !opts.filter(srcItem, destItem)) return
-  const { destStat } = stat.checkPathsSync(srcItem, destItem, 'copy', opts)
-  return getStats(destStat, srcItem, destItem, opts)
-}
-
-function onLink (destStat, src, dest, opts) {
-  let resolvedSrc = fs.readlinkSync(src)
-  if (opts.dereference) {
-    resolvedSrc = path.resolve(process.cwd(), resolvedSrc)
-  }
-
-  if (!destStat) {
-    return fs.symlinkSync(resolvedSrc, dest)
-  } else {
-    let resolvedDest
-    try {
-      resolvedDest = fs.readlinkSync(dest)
-    } catch (err) {
-      // dest exists and is a regular file or directory,
-      // Windows may throw UNKNOWN error. If dest already exists,
-      // fs throws error anyway, so no need to guard against it here.
-      if (err.code === 'EINVAL' || err.code === 'UNKNOWN') return fs.symlinkSync(resolvedSrc, dest)
-      throw err
-    }
-    if (opts.dereference) {
-      resolvedDest = path.resolve(process.cwd(), resolvedDest)
-    }
-    if (stat.isSrcSubdir(resolvedSrc, resolvedDest)) {
-      throw new Error(`Cannot copy '${resolvedSrc}' to a subdirectory of itself, '${resolvedDest}'.`)
-    }
-
-    // prevent copy if src is a subdir of dest since unlinking
-    // dest in this case would result in removing src contents
-    // and therefore a broken symlink would be created.
-    if (stat.isSrcSubdir(resolvedDest, resolvedSrc)) {
-      throw new Error(`Cannot overwrite '${resolvedDest}' with '${resolvedSrc}'.`)
-    }
-    return copyLink(resolvedSrc, dest)
-  }
-}
-
-function copyLink (resolvedSrc, dest) {
-  fs.unlinkSync(dest)
-  return fs.symlinkSync(resolvedSrc, dest)
-}
-
-module.exports = copySync
-
-
-/***/ }),
-
-/***/ 81759:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(3506)
-const path = __nccwpck_require__(16928)
-const { mkdirs } = __nccwpck_require__(31089)
-const { pathExists } = __nccwpck_require__(52881)
-const { utimesMillis } = __nccwpck_require__(96934)
-const stat = __nccwpck_require__(90887)
-
-async function copy (src, dest, opts = {}) {
-  if (typeof opts === 'function') {
-    opts = { filter: opts }
-  }
-
-  opts.clobber = 'clobber' in opts ? !!opts.clobber : true // default to true for now
-  opts.overwrite = 'overwrite' in opts ? !!opts.overwrite : opts.clobber // overwrite falls back to clobber
-
-  // Warn about using preserveTimestamps on 32-bit node
-  if (opts.preserveTimestamps && process.arch === 'ia32') {
-    process.emitWarning(
-      'Using the preserveTimestamps option in 32-bit node is not recommended;\n\n' +
-      '\tsee https://github.com/jprichardson/node-fs-extra/issues/269',
-      'Warning', 'fs-extra-WARN0001'
-    )
-  }
-
-  const { srcStat, destStat } = await stat.checkPaths(src, dest, 'copy', opts)
-
-  await stat.checkParentPaths(src, srcStat, dest, 'copy')
-
-  const include = await runFilter(src, dest, opts)
-
-  if (!include) return
-
-  // check if the parent of dest exists, and create it if it doesn't exist
-  const destParent = path.dirname(dest)
-  const dirExists = await pathExists(destParent)
-  if (!dirExists) {
-    await mkdirs(destParent)
-  }
-
-  await getStatsAndPerformCopy(destStat, src, dest, opts)
-}
-
-async function runFilter (src, dest, opts) {
-  if (!opts.filter) return true
-  return opts.filter(src, dest)
-}
-
-async function getStatsAndPerformCopy (destStat, src, dest, opts) {
-  const statFn = opts.dereference ? fs.stat : fs.lstat
-  const srcStat = await statFn(src)
-
-  if (srcStat.isDirectory()) return onDir(srcStat, destStat, src, dest, opts)
-
-  if (
-    srcStat.isFile() ||
-    srcStat.isCharacterDevice() ||
-    srcStat.isBlockDevice()
-  ) return onFile(srcStat, destStat, src, dest, opts)
-
-  if (srcStat.isSymbolicLink()) return onLink(destStat, src, dest, opts)
-  if (srcStat.isSocket()) throw new Error(`Cannot copy a socket file: ${src}`)
-  if (srcStat.isFIFO()) throw new Error(`Cannot copy a FIFO pipe: ${src}`)
-  throw new Error(`Unknown file: ${src}`)
-}
-
-async function onFile (srcStat, destStat, src, dest, opts) {
-  if (!destStat) return copyFile(srcStat, src, dest, opts)
-
-  if (opts.overwrite) {
-    await fs.unlink(dest)
-    return copyFile(srcStat, src, dest, opts)
-  }
-  if (opts.errorOnExist) {
-    throw new Error(`'${dest}' already exists`)
-  }
-}
-
-async function copyFile (srcStat, src, dest, opts) {
-  await fs.copyFile(src, dest)
-  if (opts.preserveTimestamps) {
-    // Make sure the file is writable before setting the timestamp
-    // otherwise open fails with EPERM when invoked with 'r+'
-    // (through utimes call)
-    if (fileIsNotWritable(srcStat.mode)) {
-      await makeFileWritable(dest, srcStat.mode)
-    }
-
-    // Set timestamps and mode correspondingly
-
-    // Note that The initial srcStat.atime cannot be trusted
-    // because it is modified by the read(2) system call
-    // (See https://nodejs.org/api/fs.html#fs_stat_time_values)
-    const updatedSrcStat = await fs.stat(src)
-    await utimesMillis(dest, updatedSrcStat.atime, updatedSrcStat.mtime)
-  }
-
-  return fs.chmod(dest, srcStat.mode)
-}
-
-function fileIsNotWritable (srcMode) {
-  return (srcMode & 0o200) === 0
-}
-
-function makeFileWritable (dest, srcMode) {
-  return fs.chmod(dest, srcMode | 0o200)
-}
-
-async function onDir (srcStat, destStat, src, dest, opts) {
-  // the dest directory might not exist, create it
-  if (!destStat) {
-    await fs.mkdir(dest)
-  }
-
-  const items = await fs.readdir(src)
-
-  // loop through the files in the current directory to copy everything
-  await Promise.all(items.map(async item => {
-    const srcItem = path.join(src, item)
-    const destItem = path.join(dest, item)
-
-    // skip the item if it is matches by the filter function
-    const include = await runFilter(srcItem, destItem, opts)
-    if (!include) return
-
-    const { destStat } = await stat.checkPaths(srcItem, destItem, 'copy', opts)
-
-    // If the item is a copyable file, `getStatsAndPerformCopy` will copy it
-    // If the item is a directory, `getStatsAndPerformCopy` will call `onDir` recursively
-    return getStatsAndPerformCopy(destStat, srcItem, destItem, opts)
-  }))
-
-  if (!destStat) {
-    await fs.chmod(dest, srcStat.mode)
-  }
-}
-
-async function onLink (destStat, src, dest, opts) {
-  let resolvedSrc = await fs.readlink(src)
-  if (opts.dereference) {
-    resolvedSrc = path.resolve(process.cwd(), resolvedSrc)
-  }
-  if (!destStat) {
-    return fs.symlink(resolvedSrc, dest)
-  }
-
-  let resolvedDest = null
-  try {
-    resolvedDest = await fs.readlink(dest)
-  } catch (e) {
-    // dest exists and is a regular file or directory,
-    // Windows may throw UNKNOWN error. If dest already exists,
-    // fs throws error anyway, so no need to guard against it here.
-    if (e.code === 'EINVAL' || e.code === 'UNKNOWN') return fs.symlink(resolvedSrc, dest)
-    throw e
-  }
-  if (opts.dereference) {
-    resolvedDest = path.resolve(process.cwd(), resolvedDest)
-  }
-  if (stat.isSrcSubdir(resolvedSrc, resolvedDest)) {
-    throw new Error(`Cannot copy '${resolvedSrc}' to a subdirectory of itself, '${resolvedDest}'.`)
-  }
-
-  // do not copy if src is a subdir of dest since unlinking
-  // dest in this case would result in removing src contents
-  // and therefore a broken symlink would be created.
-  if (stat.isSrcSubdir(resolvedDest, resolvedSrc)) {
-    throw new Error(`Cannot overwrite '${resolvedDest}' with '${resolvedSrc}'.`)
-  }
-
-  // copy the link
-  await fs.unlink(dest)
-  return fs.symlink(resolvedSrc, dest)
-}
-
-module.exports = copy
-
-
-/***/ }),
-
-/***/ 75796:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-module.exports = {
-  copy: u(__nccwpck_require__(81759)),
-  copySync: __nccwpck_require__(14839)
-}
-
-
-/***/ }),
-
-/***/ 47882:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const fs = __nccwpck_require__(3506)
-const path = __nccwpck_require__(16928)
-const mkdir = __nccwpck_require__(31089)
-const remove = __nccwpck_require__(56205)
-
-const emptyDir = u(async function emptyDir (dir) {
-  let items
-  try {
-    items = await fs.readdir(dir)
-  } catch {
-    return mkdir.mkdirs(dir)
-  }
-
-  return Promise.all(items.map(item => remove.remove(path.join(dir, item))))
-})
-
-function emptyDirSync (dir) {
-  let items
-  try {
-    items = fs.readdirSync(dir)
-  } catch {
-    return mkdir.mkdirsSync(dir)
-  }
-
-  items.forEach(item => {
-    item = path.join(dir, item)
-    remove.removeSync(item)
-  })
-}
-
-module.exports = {
-  emptyDirSync,
-  emptydirSync: emptyDirSync,
-  emptyDir,
-  emptydir: emptyDir
-}
-
-
-/***/ }),
-
-/***/ 13529:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const path = __nccwpck_require__(16928)
-const fs = __nccwpck_require__(3506)
-const mkdir = __nccwpck_require__(31089)
-
-async function createFile (file) {
-  let stats
-  try {
-    stats = await fs.stat(file)
-  } catch { }
-  if (stats && stats.isFile()) return
-
-  const dir = path.dirname(file)
-
-  let dirStats = null
-  try {
-    dirStats = await fs.stat(dir)
-  } catch (err) {
-    // if the directory doesn't exist, make it
-    if (err.code === 'ENOENT') {
-      await mkdir.mkdirs(dir)
-      await fs.writeFile(file, '')
-      return
-    } else {
-      throw err
-    }
-  }
-
-  if (dirStats.isDirectory()) {
-    await fs.writeFile(file, '')
-  } else {
-    // parent is not a directory
-    // This is just to cause an internal ENOTDIR error to be thrown
-    await fs.readdir(dir)
-  }
-}
-
-function createFileSync (file) {
-  let stats
-  try {
-    stats = fs.statSync(file)
-  } catch { }
-  if (stats && stats.isFile()) return
-
-  const dir = path.dirname(file)
-  try {
-    if (!fs.statSync(dir).isDirectory()) {
-      // parent is not a directory
-      // This is just to cause an internal ENOTDIR error to be thrown
-      fs.readdirSync(dir)
-    }
-  } catch (err) {
-    // If the stat call above failed because the directory doesn't exist, create it
-    if (err && err.code === 'ENOENT') mkdir.mkdirsSync(dir)
-    else throw err
-  }
-
-  fs.writeFileSync(file, '')
-}
-
-module.exports = {
-  createFile: u(createFile),
-  createFileSync
-}
-
-
-/***/ }),
-
-/***/ 45779:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const { createFile, createFileSync } = __nccwpck_require__(13529)
-const { createLink, createLinkSync } = __nccwpck_require__(38751)
-const { createSymlink, createSymlinkSync } = __nccwpck_require__(84896)
-
-module.exports = {
-  // file
-  createFile,
-  createFileSync,
-  ensureFile: createFile,
-  ensureFileSync: createFileSync,
-  // link
-  createLink,
-  createLinkSync,
-  ensureLink: createLink,
-  ensureLinkSync: createLinkSync,
-  // symlink
-  createSymlink,
-  createSymlinkSync,
-  ensureSymlink: createSymlink,
-  ensureSymlinkSync: createSymlinkSync
-}
-
-
-/***/ }),
-
-/***/ 38751:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const path = __nccwpck_require__(16928)
-const fs = __nccwpck_require__(3506)
-const mkdir = __nccwpck_require__(31089)
-const { pathExists } = __nccwpck_require__(52881)
-const { areIdentical } = __nccwpck_require__(90887)
-
-async function createLink (srcpath, dstpath) {
-  let dstStat
-  try {
-    dstStat = await fs.lstat(dstpath)
-  } catch {
-    // ignore error
-  }
-
-  let srcStat
-  try {
-    srcStat = await fs.lstat(srcpath)
-  } catch (err) {
-    err.message = err.message.replace('lstat', 'ensureLink')
-    throw err
-  }
-
-  if (dstStat && areIdentical(srcStat, dstStat)) return
-
-  const dir = path.dirname(dstpath)
-
-  const dirExists = await pathExists(dir)
-
-  if (!dirExists) {
-    await mkdir.mkdirs(dir)
-  }
-
-  await fs.link(srcpath, dstpath)
-}
-
-function createLinkSync (srcpath, dstpath) {
-  let dstStat
-  try {
-    dstStat = fs.lstatSync(dstpath)
-  } catch {}
-
-  try {
-    const srcStat = fs.lstatSync(srcpath)
-    if (dstStat && areIdentical(srcStat, dstStat)) return
-  } catch (err) {
-    err.message = err.message.replace('lstat', 'ensureLink')
-    throw err
-  }
-
-  const dir = path.dirname(dstpath)
-  const dirExists = fs.existsSync(dir)
-  if (dirExists) return fs.linkSync(srcpath, dstpath)
-  mkdir.mkdirsSync(dir)
-
-  return fs.linkSync(srcpath, dstpath)
-}
-
-module.exports = {
-  createLink: u(createLink),
-  createLinkSync
-}
-
-
-/***/ }),
-
-/***/ 83121:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const path = __nccwpck_require__(16928)
-const fs = __nccwpck_require__(3506)
-const { pathExists } = __nccwpck_require__(52881)
-
-const u = (__nccwpck_require__(95077).fromPromise)
-
-/**
- * Function that returns two types of paths, one relative to symlink, and one
- * relative to the current working directory. Checks if path is absolute or
- * relative. If the path is relative, this function checks if the path is
- * relative to symlink or relative to current working directory. This is an
- * initiative to find a smarter `srcpath` to supply when building symlinks.
- * This allows you to determine which path to use out of one of three possible
- * types of source paths. The first is an absolute path. This is detected by
- * `path.isAbsolute()`. When an absolute path is provided, it is checked to
- * see if it exists. If it does it's used, if not an error is returned
- * (callback)/ thrown (sync). The other two options for `srcpath` are a
- * relative url. By default Node's `fs.symlink` works by creating a symlink
- * using `dstpath` and expects the `srcpath` to be relative to the newly
- * created symlink. If you provide a `srcpath` that does not exist on the file
- * system it results in a broken symlink. To minimize this, the function
- * checks to see if the 'relative to symlink' source file exists, and if it
- * does it will use it. If it does not, it checks if there's a file that
- * exists that is relative to the current working directory, if does its used.
- * This preserves the expectations of the original fs.symlink spec and adds
- * the ability to pass in `relative to current working direcotry` paths.
- */
-
-async function symlinkPaths (srcpath, dstpath) {
-  if (path.isAbsolute(srcpath)) {
-    try {
-      await fs.lstat(srcpath)
-    } catch (err) {
-      err.message = err.message.replace('lstat', 'ensureSymlink')
-      throw err
-    }
-
-    return {
-      toCwd: srcpath,
-      toDst: srcpath
-    }
-  }
-
-  const dstdir = path.dirname(dstpath)
-  const relativeToDst = path.join(dstdir, srcpath)
-
-  const exists = await pathExists(relativeToDst)
-  if (exists) {
-    return {
-      toCwd: relativeToDst,
-      toDst: srcpath
-    }
-  }
-
-  try {
-    await fs.lstat(srcpath)
-  } catch (err) {
-    err.message = err.message.replace('lstat', 'ensureSymlink')
-    throw err
-  }
-
-  return {
-    toCwd: srcpath,
-    toDst: path.relative(dstdir, srcpath)
-  }
-}
-
-function symlinkPathsSync (srcpath, dstpath) {
-  if (path.isAbsolute(srcpath)) {
-    const exists = fs.existsSync(srcpath)
-    if (!exists) throw new Error('absolute srcpath does not exist')
-    return {
-      toCwd: srcpath,
-      toDst: srcpath
-    }
-  }
-
-  const dstdir = path.dirname(dstpath)
-  const relativeToDst = path.join(dstdir, srcpath)
-  const exists = fs.existsSync(relativeToDst)
-  if (exists) {
-    return {
-      toCwd: relativeToDst,
-      toDst: srcpath
-    }
-  }
-
-  const srcExists = fs.existsSync(srcpath)
-  if (!srcExists) throw new Error('relative srcpath does not exist')
-  return {
-    toCwd: srcpath,
-    toDst: path.relative(dstdir, srcpath)
-  }
-}
-
-module.exports = {
-  symlinkPaths: u(symlinkPaths),
-  symlinkPathsSync
-}
-
-
-/***/ }),
-
-/***/ 87045:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(3506)
-const u = (__nccwpck_require__(95077).fromPromise)
-
-async function symlinkType (srcpath, type) {
-  if (type) return type
-
-  let stats
-  try {
-    stats = await fs.lstat(srcpath)
-  } catch {
-    return 'file'
-  }
-
-  return (stats && stats.isDirectory()) ? 'dir' : 'file'
-}
-
-function symlinkTypeSync (srcpath, type) {
-  if (type) return type
-
-  let stats
-  try {
-    stats = fs.lstatSync(srcpath)
-  } catch {
-    return 'file'
-  }
-  return (stats && stats.isDirectory()) ? 'dir' : 'file'
-}
-
-module.exports = {
-  symlinkType: u(symlinkType),
-  symlinkTypeSync
-}
-
-
-/***/ }),
-
-/***/ 84896:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const path = __nccwpck_require__(16928)
-const fs = __nccwpck_require__(3506)
-
-const { mkdirs, mkdirsSync } = __nccwpck_require__(31089)
-
-const { symlinkPaths, symlinkPathsSync } = __nccwpck_require__(83121)
-const { symlinkType, symlinkTypeSync } = __nccwpck_require__(87045)
-
-const { pathExists } = __nccwpck_require__(52881)
-
-const { areIdentical } = __nccwpck_require__(90887)
-
-async function createSymlink (srcpath, dstpath, type) {
-  let stats
-  try {
-    stats = await fs.lstat(dstpath)
-  } catch { }
-
-  if (stats && stats.isSymbolicLink()) {
-    const [srcStat, dstStat] = await Promise.all([
-      fs.stat(srcpath),
-      fs.stat(dstpath)
-    ])
-
-    if (areIdentical(srcStat, dstStat)) return
-  }
-
-  const relative = await symlinkPaths(srcpath, dstpath)
-  srcpath = relative.toDst
-  const toType = await symlinkType(relative.toCwd, type)
-  const dir = path.dirname(dstpath)
-
-  if (!(await pathExists(dir))) {
-    await mkdirs(dir)
-  }
-
-  return fs.symlink(srcpath, dstpath, toType)
-}
-
-function createSymlinkSync (srcpath, dstpath, type) {
-  let stats
-  try {
-    stats = fs.lstatSync(dstpath)
-  } catch { }
-  if (stats && stats.isSymbolicLink()) {
-    const srcStat = fs.statSync(srcpath)
-    const dstStat = fs.statSync(dstpath)
-    if (areIdentical(srcStat, dstStat)) return
-  }
-
-  const relative = symlinkPathsSync(srcpath, dstpath)
-  srcpath = relative.toDst
-  type = symlinkTypeSync(relative.toCwd, type)
-  const dir = path.dirname(dstpath)
-  const exists = fs.existsSync(dir)
-  if (exists) return fs.symlinkSync(srcpath, dstpath, type)
-  mkdirsSync(dir)
-  return fs.symlinkSync(srcpath, dstpath, type)
-}
-
-module.exports = {
-  createSymlink: u(createSymlink),
-  createSymlinkSync
-}
-
-
-/***/ }),
-
-/***/ 3506:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-// This is adapted from https://github.com/normalize/mz
-// Copyright (c) 2014-2016 Jonathan Ong me@jongleberry.com and Contributors
-const u = (__nccwpck_require__(95077).fromCallback)
-const fs = __nccwpck_require__(35744)
-
-const api = [
-  'access',
-  'appendFile',
-  'chmod',
-  'chown',
-  'close',
-  'copyFile',
-  'fchmod',
-  'fchown',
-  'fdatasync',
-  'fstat',
-  'fsync',
-  'ftruncate',
-  'futimes',
-  'lchmod',
-  'lchown',
-  'link',
-  'lstat',
-  'mkdir',
-  'mkdtemp',
-  'open',
-  'opendir',
-  'readdir',
-  'readFile',
-  'readlink',
-  'realpath',
-  'rename',
-  'rm',
-  'rmdir',
-  'stat',
-  'symlink',
-  'truncate',
-  'unlink',
-  'utimes',
-  'writeFile'
-].filter(key => {
-  // Some commands are not available on some systems. Ex:
-  // fs.cp was added in Node.js v16.7.0
-  // fs.lchown is not available on at least some Linux
-  return typeof fs[key] === 'function'
-})
-
-// Export cloned fs:
-Object.assign(exports, fs)
-
-// Universalify async methods:
-api.forEach(method => {
-  exports[method] = u(fs[method])
-})
-
-// We differ from mz/fs in that we still ship the old, broken, fs.exists()
-// since we are a drop-in replacement for the native module
-exports.exists = function (filename, callback) {
-  if (typeof callback === 'function') {
-    return fs.exists(filename, callback)
-  }
-  return new Promise(resolve => {
-    return fs.exists(filename, resolve)
-  })
-}
-
-// fs.read(), fs.write(), fs.readv(), & fs.writev() need special treatment due to multiple callback args
-
-exports.read = function (fd, buffer, offset, length, position, callback) {
-  if (typeof callback === 'function') {
-    return fs.read(fd, buffer, offset, length, position, callback)
-  }
-  return new Promise((resolve, reject) => {
-    fs.read(fd, buffer, offset, length, position, (err, bytesRead, buffer) => {
-      if (err) return reject(err)
-      resolve({ bytesRead, buffer })
-    })
-  })
-}
-
-// Function signature can be
-// fs.write(fd, buffer[, offset[, length[, position]]], callback)
-// OR
-// fs.write(fd, string[, position[, encoding]], callback)
-// We need to handle both cases, so we use ...args
-exports.write = function (fd, buffer, ...args) {
-  if (typeof args[args.length - 1] === 'function') {
-    return fs.write(fd, buffer, ...args)
-  }
-
-  return new Promise((resolve, reject) => {
-    fs.write(fd, buffer, ...args, (err, bytesWritten, buffer) => {
-      if (err) return reject(err)
-      resolve({ bytesWritten, buffer })
-    })
-  })
-}
-
-// Function signature is
-// s.readv(fd, buffers[, position], callback)
-// We need to handle the optional arg, so we use ...args
-exports.readv = function (fd, buffers, ...args) {
-  if (typeof args[args.length - 1] === 'function') {
-    return fs.readv(fd, buffers, ...args)
-  }
-
-  return new Promise((resolve, reject) => {
-    fs.readv(fd, buffers, ...args, (err, bytesRead, buffers) => {
-      if (err) return reject(err)
-      resolve({ bytesRead, buffers })
-    })
-  })
-}
-
-// Function signature is
-// s.writev(fd, buffers[, position], callback)
-// We need to handle the optional arg, so we use ...args
-exports.writev = function (fd, buffers, ...args) {
-  if (typeof args[args.length - 1] === 'function') {
-    return fs.writev(fd, buffers, ...args)
-  }
-
-  return new Promise((resolve, reject) => {
-    fs.writev(fd, buffers, ...args, (err, bytesWritten, buffers) => {
-      if (err) return reject(err)
-      resolve({ bytesWritten, buffers })
-    })
-  })
-}
-
-// fs.realpath.native sometimes not available if fs is monkey-patched
-if (typeof fs.realpath.native === 'function') {
-  exports.realpath.native = u(fs.realpath.native)
-} else {
-  process.emitWarning(
-    'fs.realpath.native is not a function. Is fs being monkey-patched?',
-    'Warning', 'fs-extra-WARN0003'
-  )
-}
-
-
-/***/ }),
-
-/***/ 72136:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-module.exports = {
-  // Export promiseified graceful-fs:
-  ...__nccwpck_require__(3506),
-  // Export extra methods:
-  ...__nccwpck_require__(75796),
-  ...__nccwpck_require__(47882),
-  ...__nccwpck_require__(45779),
-  ...__nccwpck_require__(68471),
-  ...__nccwpck_require__(31089),
-  ...__nccwpck_require__(92076),
-  ...__nccwpck_require__(35229),
-  ...__nccwpck_require__(52881),
-  ...__nccwpck_require__(56205)
-}
-
-
-/***/ }),
-
-/***/ 68471:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const jsonFile = __nccwpck_require__(86239)
-
-jsonFile.outputJson = u(__nccwpck_require__(3753))
-jsonFile.outputJsonSync = __nccwpck_require__(90425)
-// aliases
-jsonFile.outputJSON = jsonFile.outputJson
-jsonFile.outputJSONSync = jsonFile.outputJsonSync
-jsonFile.writeJSON = jsonFile.writeJson
-jsonFile.writeJSONSync = jsonFile.writeJsonSync
-jsonFile.readJSON = jsonFile.readJson
-jsonFile.readJSONSync = jsonFile.readJsonSync
-
-module.exports = jsonFile
-
-
-/***/ }),
-
-/***/ 86239:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const jsonFile = __nccwpck_require__(92064)
-
-module.exports = {
-  // jsonfile exports
-  readJson: jsonFile.readFile,
-  readJsonSync: jsonFile.readFileSync,
-  writeJson: jsonFile.writeFile,
-  writeJsonSync: jsonFile.writeFileSync
-}
-
-
-/***/ }),
-
-/***/ 90425:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const { stringify } = __nccwpck_require__(79449)
-const { outputFileSync } = __nccwpck_require__(35229)
-
-function outputJsonSync (file, data, options) {
-  const str = stringify(data, options)
-
-  outputFileSync(file, str, options)
-}
-
-module.exports = outputJsonSync
-
-
-/***/ }),
-
-/***/ 3753:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const { stringify } = __nccwpck_require__(79449)
-const { outputFile } = __nccwpck_require__(35229)
-
-async function outputJson (file, data, options = {}) {
-  const str = stringify(data, options)
-
-  await outputFile(file, str, options)
-}
-
-module.exports = outputJson
-
-
-/***/ }),
-
-/***/ 31089:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const { makeDir: _makeDir, makeDirSync } = __nccwpck_require__(89625)
-const makeDir = u(_makeDir)
-
-module.exports = {
-  mkdirs: makeDir,
-  mkdirsSync: makeDirSync,
-  // alias
-  mkdirp: makeDir,
-  mkdirpSync: makeDirSync,
-  ensureDir: makeDir,
-  ensureDirSync: makeDirSync
-}
-
-
-/***/ }),
-
-/***/ 89625:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const fs = __nccwpck_require__(3506)
-const { checkPath } = __nccwpck_require__(83388)
-
-const getMode = options => {
-  const defaults = { mode: 0o777 }
-  if (typeof options === 'number') return options
-  return ({ ...defaults, ...options }).mode
-}
-
-module.exports.makeDir = async (dir, options) => {
-  checkPath(dir)
-
-  return fs.mkdir(dir, {
-    mode: getMode(options),
-    recursive: true
-  })
-}
-
-module.exports.makeDirSync = (dir, options) => {
-  checkPath(dir)
-
-  return fs.mkdirSync(dir, {
-    mode: getMode(options),
-    recursive: true
-  })
-}
-
-
-/***/ }),
-
-/***/ 83388:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-// Adapted from https://github.com/sindresorhus/make-dir
-// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-const path = __nccwpck_require__(16928)
-
-// https://github.com/nodejs/node/issues/8987
-// https://github.com/libuv/libuv/pull/1088
-module.exports.checkPath = function checkPath (pth) {
-  if (process.platform === 'win32') {
-    const pathHasInvalidWinCharacters = /[<>:"|?*]/.test(pth.replace(path.parse(pth).root, ''))
-
-    if (pathHasInvalidWinCharacters) {
-      const error = new Error(`Path contains invalid characters: ${pth}`)
-      error.code = 'EINVAL'
-      throw error
-    }
-  }
-}
-
-
-/***/ }),
-
-/***/ 92076:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-module.exports = {
-  move: u(__nccwpck_require__(47751)),
-  moveSync: __nccwpck_require__(89951)
-}
-
-
-/***/ }),
-
-/***/ 89951:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(35744)
-const path = __nccwpck_require__(16928)
-const copySync = (__nccwpck_require__(75796).copySync)
-const removeSync = (__nccwpck_require__(56205).removeSync)
-const mkdirpSync = (__nccwpck_require__(31089).mkdirpSync)
-const stat = __nccwpck_require__(90887)
-
-function moveSync (src, dest, opts) {
-  opts = opts || {}
-  const overwrite = opts.overwrite || opts.clobber || false
-
-  const { srcStat, isChangingCase = false } = stat.checkPathsSync(src, dest, 'move', opts)
-  stat.checkParentPathsSync(src, srcStat, dest, 'move')
-  if (!isParentRoot(dest)) mkdirpSync(path.dirname(dest))
-  return doRename(src, dest, overwrite, isChangingCase)
-}
-
-function isParentRoot (dest) {
-  const parent = path.dirname(dest)
-  const parsedPath = path.parse(parent)
-  return parsedPath.root === parent
-}
-
-function doRename (src, dest, overwrite, isChangingCase) {
-  if (isChangingCase) return rename(src, dest, overwrite)
-  if (overwrite) {
-    removeSync(dest)
-    return rename(src, dest, overwrite)
-  }
-  if (fs.existsSync(dest)) throw new Error('dest already exists.')
-  return rename(src, dest, overwrite)
-}
-
-function rename (src, dest, overwrite) {
-  try {
-    fs.renameSync(src, dest)
-  } catch (err) {
-    if (err.code !== 'EXDEV') throw err
-    return moveAcrossDevice(src, dest, overwrite)
-  }
-}
-
-function moveAcrossDevice (src, dest, overwrite) {
-  const opts = {
-    overwrite,
-    errorOnExist: true,
-    preserveTimestamps: true
-  }
-  copySync(src, dest, opts)
-  return removeSync(src)
-}
-
-module.exports = moveSync
-
-
-/***/ }),
-
-/***/ 47751:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(3506)
-const path = __nccwpck_require__(16928)
-const { copy } = __nccwpck_require__(75796)
-const { remove } = __nccwpck_require__(56205)
-const { mkdirp } = __nccwpck_require__(31089)
-const { pathExists } = __nccwpck_require__(52881)
-const stat = __nccwpck_require__(90887)
-
-async function move (src, dest, opts = {}) {
-  const overwrite = opts.overwrite || opts.clobber || false
-
-  const { srcStat, isChangingCase = false } = await stat.checkPaths(src, dest, 'move', opts)
-
-  await stat.checkParentPaths(src, srcStat, dest, 'move')
-
-  // If the parent of dest is not root, make sure it exists before proceeding
-  const destParent = path.dirname(dest)
-  const parsedParentPath = path.parse(destParent)
-  if (parsedParentPath.root !== destParent) {
-    await mkdirp(destParent)
-  }
-
-  return doRename(src, dest, overwrite, isChangingCase)
-}
-
-async function doRename (src, dest, overwrite, isChangingCase) {
-  if (!isChangingCase) {
-    if (overwrite) {
-      await remove(dest)
-    } else if (await pathExists(dest)) {
-      throw new Error('dest already exists.')
-    }
-  }
-
-  try {
-    // Try w/ rename first, and try copy + remove if EXDEV
-    await fs.rename(src, dest)
-  } catch (err) {
-    if (err.code !== 'EXDEV') {
-      throw err
-    }
-    await moveAcrossDevice(src, dest, overwrite)
-  }
-}
-
-async function moveAcrossDevice (src, dest, overwrite) {
-  const opts = {
-    overwrite,
-    errorOnExist: true,
-    preserveTimestamps: true
-  }
-
-  await copy(src, dest, opts)
-  return remove(src)
-}
-
-module.exports = move
-
-
-/***/ }),
-
-/***/ 35229:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const fs = __nccwpck_require__(3506)
-const path = __nccwpck_require__(16928)
-const mkdir = __nccwpck_require__(31089)
-const pathExists = (__nccwpck_require__(52881).pathExists)
-
-async function outputFile (file, data, encoding = 'utf-8') {
-  const dir = path.dirname(file)
-
-  if (!(await pathExists(dir))) {
-    await mkdir.mkdirs(dir)
-  }
-
-  return fs.writeFile(file, data, encoding)
-}
-
-function outputFileSync (file, ...args) {
-  const dir = path.dirname(file)
-  if (!fs.existsSync(dir)) {
-    mkdir.mkdirsSync(dir)
-  }
-
-  fs.writeFileSync(file, ...args)
-}
-
-module.exports = {
-  outputFile: u(outputFile),
-  outputFileSync
-}
-
-
-/***/ }),
-
-/***/ 52881:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const u = (__nccwpck_require__(95077).fromPromise)
-const fs = __nccwpck_require__(3506)
-
-function pathExists (path) {
-  return fs.access(path).then(() => true).catch(() => false)
-}
-
-module.exports = {
-  pathExists: u(pathExists),
-  pathExistsSync: fs.existsSync
-}
-
-
-/***/ }),
-
-/***/ 56205:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(35744)
-const u = (__nccwpck_require__(95077).fromCallback)
-
-function remove (path, callback) {
-  fs.rm(path, { recursive: true, force: true }, callback)
-}
-
-function removeSync (path) {
-  fs.rmSync(path, { recursive: true, force: true })
-}
-
-module.exports = {
-  remove: u(remove),
-  removeSync
-}
-
-
-/***/ }),
-
-/***/ 90887:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(3506)
-const path = __nccwpck_require__(16928)
-const u = (__nccwpck_require__(95077).fromPromise)
-
-function getStats (src, dest, opts) {
-  const statFunc = opts.dereference
-    ? (file) => fs.stat(file, { bigint: true })
-    : (file) => fs.lstat(file, { bigint: true })
-  return Promise.all([
-    statFunc(src),
-    statFunc(dest).catch(err => {
-      if (err.code === 'ENOENT') return null
-      throw err
-    })
-  ]).then(([srcStat, destStat]) => ({ srcStat, destStat }))
-}
-
-function getStatsSync (src, dest, opts) {
-  let destStat
-  const statFunc = opts.dereference
-    ? (file) => fs.statSync(file, { bigint: true })
-    : (file) => fs.lstatSync(file, { bigint: true })
-  const srcStat = statFunc(src)
-  try {
-    destStat = statFunc(dest)
-  } catch (err) {
-    if (err.code === 'ENOENT') return { srcStat, destStat: null }
-    throw err
-  }
-  return { srcStat, destStat }
-}
-
-async function checkPaths (src, dest, funcName, opts) {
-  const { srcStat, destStat } = await getStats(src, dest, opts)
-  if (destStat) {
-    if (areIdentical(srcStat, destStat)) {
-      const srcBaseName = path.basename(src)
-      const destBaseName = path.basename(dest)
-      if (funcName === 'move' &&
-        srcBaseName !== destBaseName &&
-        srcBaseName.toLowerCase() === destBaseName.toLowerCase()) {
-        return { srcStat, destStat, isChangingCase: true }
-      }
-      throw new Error('Source and destination must not be the same.')
-    }
-    if (srcStat.isDirectory() && !destStat.isDirectory()) {
-      throw new Error(`Cannot overwrite non-directory '${dest}' with directory '${src}'.`)
-    }
-    if (!srcStat.isDirectory() && destStat.isDirectory()) {
-      throw new Error(`Cannot overwrite directory '${dest}' with non-directory '${src}'.`)
-    }
-  }
-
-  if (srcStat.isDirectory() && isSrcSubdir(src, dest)) {
-    throw new Error(errMsg(src, dest, funcName))
-  }
-
-  return { srcStat, destStat }
-}
-
-function checkPathsSync (src, dest, funcName, opts) {
-  const { srcStat, destStat } = getStatsSync(src, dest, opts)
-
-  if (destStat) {
-    if (areIdentical(srcStat, destStat)) {
-      const srcBaseName = path.basename(src)
-      const destBaseName = path.basename(dest)
-      if (funcName === 'move' &&
-        srcBaseName !== destBaseName &&
-        srcBaseName.toLowerCase() === destBaseName.toLowerCase()) {
-        return { srcStat, destStat, isChangingCase: true }
-      }
-      throw new Error('Source and destination must not be the same.')
-    }
-    if (srcStat.isDirectory() && !destStat.isDirectory()) {
-      throw new Error(`Cannot overwrite non-directory '${dest}' with directory '${src}'.`)
-    }
-    if (!srcStat.isDirectory() && destStat.isDirectory()) {
-      throw new Error(`Cannot overwrite directory '${dest}' with non-directory '${src}'.`)
-    }
-  }
-
-  if (srcStat.isDirectory() && isSrcSubdir(src, dest)) {
-    throw new Error(errMsg(src, dest, funcName))
-  }
-  return { srcStat, destStat }
-}
-
-// recursively check if dest parent is a subdirectory of src.
-// It works for all file types including symlinks since it
-// checks the src and dest inodes. It starts from the deepest
-// parent and stops once it reaches the src parent or the root path.
-async function checkParentPaths (src, srcStat, dest, funcName) {
-  const srcParent = path.resolve(path.dirname(src))
-  const destParent = path.resolve(path.dirname(dest))
-  if (destParent === srcParent || destParent === path.parse(destParent).root) return
-
-  let destStat
-  try {
-    destStat = await fs.stat(destParent, { bigint: true })
-  } catch (err) {
-    if (err.code === 'ENOENT') return
-    throw err
-  }
-
-  if (areIdentical(srcStat, destStat)) {
-    throw new Error(errMsg(src, dest, funcName))
-  }
-
-  return checkParentPaths(src, srcStat, destParent, funcName)
-}
-
-function checkParentPathsSync (src, srcStat, dest, funcName) {
-  const srcParent = path.resolve(path.dirname(src))
-  const destParent = path.resolve(path.dirname(dest))
-  if (destParent === srcParent || destParent === path.parse(destParent).root) return
-  let destStat
-  try {
-    destStat = fs.statSync(destParent, { bigint: true })
-  } catch (err) {
-    if (err.code === 'ENOENT') return
-    throw err
-  }
-  if (areIdentical(srcStat, destStat)) {
-    throw new Error(errMsg(src, dest, funcName))
-  }
-  return checkParentPathsSync(src, srcStat, destParent, funcName)
-}
-
-function areIdentical (srcStat, destStat) {
-  return destStat.ino && destStat.dev && destStat.ino === srcStat.ino && destStat.dev === srcStat.dev
-}
-
-// return true if dest is a subdir of src, otherwise false.
-// It only checks the path strings.
-function isSrcSubdir (src, dest) {
-  const srcArr = path.resolve(src).split(path.sep).filter(i => i)
-  const destArr = path.resolve(dest).split(path.sep).filter(i => i)
-  return srcArr.every((cur, i) => destArr[i] === cur)
-}
-
-function errMsg (src, dest, funcName) {
-  return `Cannot ${funcName} '${src}' to a subdirectory of itself, '${dest}'.`
-}
-
-module.exports = {
-  // checkPaths
-  checkPaths: u(checkPaths),
-  checkPathsSync,
-  // checkParent
-  checkParentPaths: u(checkParentPaths),
-  checkParentPathsSync,
-  // Misc
-  isSrcSubdir,
-  areIdentical
-}
-
-
-/***/ }),
-
-/***/ 96934:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const fs = __nccwpck_require__(3506)
-const u = (__nccwpck_require__(95077).fromPromise)
-
-async function utimesMillis (path, atime, mtime) {
-  // if (!HAS_MILLIS_RES) return fs.utimes(path, atime, mtime, callback)
-  const fd = await fs.open(path, 'r+')
-
-  let closeErr = null
-
-  try {
-    await fs.futimes(fd, atime, mtime)
-  } finally {
-    try {
-      await fs.close(fd)
-    } catch (e) {
-      closeErr = e
-    }
-  }
-
-  if (closeErr) {
-    throw closeErr
-  }
-}
-
-function utimesMillisSync (path, atime, mtime) {
-  const fd = fs.openSync(path, 'r+')
-  fs.futimesSync(fd, atime, mtime)
-  return fs.closeSync(fd)
-}
-
-module.exports = {
-  utimesMillis: u(utimesMillis),
-  utimesMillisSync
-}
 
 
 /***/ }),
@@ -55528,7 +52161,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.file = void 0;
 const debug_1 = __importDefault(__nccwpck_require__(2830));
 const fs_1 = __nccwpck_require__(79896);
-const fs_extra_1 = __nccwpck_require__(72136);
 const notfound_1 = __importDefault(__nccwpck_require__(53161));
 const notmodified_1 = __importDefault(__nccwpck_require__(12402));
 const url_1 = __nccwpck_require__(87016);
@@ -55545,18 +52177,19 @@ const file = async ({ href: uri }, opts = {}) => {
         debug('Normalized pathname: %o', filepath);
         // `open()` first to get a file descriptor and ensure that the file
         // exists.
-        const fd = await (0, fs_extra_1.open)(filepath, flags, mode);
-        // Now `fstat()` to check the `mtime` and store the stat object for
-        // the cache.
-        const stat = await (0, fs_extra_1.fstat)(fd);
+        const fdHandle = await fs_1.promises.open(filepath, flags, mode);
+        // extract the numeric file descriptor
+        const fd = fdHandle.fd;
+        // store the stat object for the cache.
+        const stat = await fdHandle.stat();
         // if a `cache` was provided, check if the file has not been modified
         if (cache && cache.stat && stat && isNotModified(cache.stat, stat)) {
+            await fdHandle.close();
             throw new notmodified_1.default();
         }
         // `fs.ReadStream` takes care of calling `fs.close()` on the
         // fd after it's done reading
-        // @ts-expect-error `@types/node` doesn't allow `null` as file path :/
-        const rs = (0, fs_1.createReadStream)(null, {
+        const rs = (0, fs_1.createReadStream)(filepath, {
             autoClose: true,
             ...opts,
             fd,
@@ -55959,10 +52592,10 @@ exports.isValidProtocol = isValidProtocol;
  *
  * For caching purposes, you can pass in a `stream` instance from a previous
  * `getUri()` call as a `cache: stream` option, and if the destination has
- * not changed since the last time the endpoint was retreived then the callback
+ * not changed since the last time the endpoint was retrieved then the callback
  * will be invoked with an Error object with `code` set to "ENOTMODIFIED" and
  * `null` for the "stream" instance argument. In this case, you can skip
- * retreiving the file again and continue to use the previous payload.
+ * retrieving the file again and continue to use the previous payload.
  *
  * @param {String} uri URI to retrieve
  * @param {Object} opts optional "options" object
@@ -56065,979 +52698,6 @@ if ($gOPD) {
 }
 
 module.exports = $gOPD;
-
-
-/***/ }),
-
-/***/ 73964:
-/***/ ((module) => {
-
-"use strict";
-
-
-module.exports = clone
-
-var getPrototypeOf = Object.getPrototypeOf || function (obj) {
-  return obj.__proto__
-}
-
-function clone (obj) {
-  if (obj === null || typeof obj !== 'object')
-    return obj
-
-  if (obj instanceof Object)
-    var copy = { __proto__: getPrototypeOf(obj) }
-  else
-    var copy = Object.create(null)
-
-  Object.getOwnPropertyNames(obj).forEach(function (key) {
-    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
-  })
-
-  return copy
-}
-
-
-/***/ }),
-
-/***/ 35744:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-var fs = __nccwpck_require__(79896)
-var polyfills = __nccwpck_require__(83501)
-var legacy = __nccwpck_require__(12270)
-var clone = __nccwpck_require__(73964)
-
-var util = __nccwpck_require__(39023)
-
-/* istanbul ignore next - node 0.x polyfill */
-var gracefulQueue
-var previousSymbol
-
-/* istanbul ignore else - node 0.x polyfill */
-if (typeof Symbol === 'function' && typeof Symbol.for === 'function') {
-  gracefulQueue = Symbol.for('graceful-fs.queue')
-  // This is used in testing by future versions
-  previousSymbol = Symbol.for('graceful-fs.previous')
-} else {
-  gracefulQueue = '___graceful-fs.queue'
-  previousSymbol = '___graceful-fs.previous'
-}
-
-function noop () {}
-
-function publishQueue(context, queue) {
-  Object.defineProperty(context, gracefulQueue, {
-    get: function() {
-      return queue
-    }
-  })
-}
-
-var debug = noop
-if (util.debuglog)
-  debug = util.debuglog('gfs4')
-else if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || ''))
-  debug = function() {
-    var m = util.format.apply(util, arguments)
-    m = 'GFS4: ' + m.split(/\n/).join('\nGFS4: ')
-    console.error(m)
-  }
-
-// Once time initialization
-if (!fs[gracefulQueue]) {
-  // This queue can be shared by multiple loaded instances
-  var queue = global[gracefulQueue] || []
-  publishQueue(fs, queue)
-
-  // Patch fs.close/closeSync to shared queue version, because we need
-  // to retry() whenever a close happens *anywhere* in the program.
-  // This is essential when multiple graceful-fs instances are
-  // in play at the same time.
-  fs.close = (function (fs$close) {
-    function close (fd, cb) {
-      return fs$close.call(fs, fd, function (err) {
-        // This function uses the graceful-fs shared queue
-        if (!err) {
-          resetQueue()
-        }
-
-        if (typeof cb === 'function')
-          cb.apply(this, arguments)
-      })
-    }
-
-    Object.defineProperty(close, previousSymbol, {
-      value: fs$close
-    })
-    return close
-  })(fs.close)
-
-  fs.closeSync = (function (fs$closeSync) {
-    function closeSync (fd) {
-      // This function uses the graceful-fs shared queue
-      fs$closeSync.apply(fs, arguments)
-      resetQueue()
-    }
-
-    Object.defineProperty(closeSync, previousSymbol, {
-      value: fs$closeSync
-    })
-    return closeSync
-  })(fs.closeSync)
-
-  if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
-    process.on('exit', function() {
-      debug(fs[gracefulQueue])
-      __nccwpck_require__(42613).equal(fs[gracefulQueue].length, 0)
-    })
-  }
-}
-
-if (!global[gracefulQueue]) {
-  publishQueue(global, fs[gracefulQueue]);
-}
-
-module.exports = patch(clone(fs))
-if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH && !fs.__patched) {
-    module.exports = patch(fs)
-    fs.__patched = true;
-}
-
-function patch (fs) {
-  // Everything that references the open() function needs to be in here
-  polyfills(fs)
-  fs.gracefulify = patch
-
-  fs.createReadStream = createReadStream
-  fs.createWriteStream = createWriteStream
-  var fs$readFile = fs.readFile
-  fs.readFile = readFile
-  function readFile (path, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    return go$readFile(path, options, cb)
-
-    function go$readFile (path, options, cb, startTime) {
-      return fs$readFile(path, options, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$readFile, [path, options, cb], err, startTime || Date.now(), Date.now()])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-        }
-      })
-    }
-  }
-
-  var fs$writeFile = fs.writeFile
-  fs.writeFile = writeFile
-  function writeFile (path, data, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    return go$writeFile(path, data, options, cb)
-
-    function go$writeFile (path, data, options, cb, startTime) {
-      return fs$writeFile(path, data, options, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$writeFile, [path, data, options, cb], err, startTime || Date.now(), Date.now()])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-        }
-      })
-    }
-  }
-
-  var fs$appendFile = fs.appendFile
-  if (fs$appendFile)
-    fs.appendFile = appendFile
-  function appendFile (path, data, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    return go$appendFile(path, data, options, cb)
-
-    function go$appendFile (path, data, options, cb, startTime) {
-      return fs$appendFile(path, data, options, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$appendFile, [path, data, options, cb], err, startTime || Date.now(), Date.now()])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-        }
-      })
-    }
-  }
-
-  var fs$copyFile = fs.copyFile
-  if (fs$copyFile)
-    fs.copyFile = copyFile
-  function copyFile (src, dest, flags, cb) {
-    if (typeof flags === 'function') {
-      cb = flags
-      flags = 0
-    }
-    return go$copyFile(src, dest, flags, cb)
-
-    function go$copyFile (src, dest, flags, cb, startTime) {
-      return fs$copyFile(src, dest, flags, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$copyFile, [src, dest, flags, cb], err, startTime || Date.now(), Date.now()])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-        }
-      })
-    }
-  }
-
-  var fs$readdir = fs.readdir
-  fs.readdir = readdir
-  var noReaddirOptionVersions = /^v[0-5]\./
-  function readdir (path, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    var go$readdir = noReaddirOptionVersions.test(process.version)
-      ? function go$readdir (path, options, cb, startTime) {
-        return fs$readdir(path, fs$readdirCallback(
-          path, options, cb, startTime
-        ))
-      }
-      : function go$readdir (path, options, cb, startTime) {
-        return fs$readdir(path, options, fs$readdirCallback(
-          path, options, cb, startTime
-        ))
-      }
-
-    return go$readdir(path, options, cb)
-
-    function fs$readdirCallback (path, options, cb, startTime) {
-      return function (err, files) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([
-            go$readdir,
-            [path, options, cb],
-            err,
-            startTime || Date.now(),
-            Date.now()
-          ])
-        else {
-          if (files && files.sort)
-            files.sort()
-
-          if (typeof cb === 'function')
-            cb.call(this, err, files)
-        }
-      }
-    }
-  }
-
-  if (process.version.substr(0, 4) === 'v0.8') {
-    var legStreams = legacy(fs)
-    ReadStream = legStreams.ReadStream
-    WriteStream = legStreams.WriteStream
-  }
-
-  var fs$ReadStream = fs.ReadStream
-  if (fs$ReadStream) {
-    ReadStream.prototype = Object.create(fs$ReadStream.prototype)
-    ReadStream.prototype.open = ReadStream$open
-  }
-
-  var fs$WriteStream = fs.WriteStream
-  if (fs$WriteStream) {
-    WriteStream.prototype = Object.create(fs$WriteStream.prototype)
-    WriteStream.prototype.open = WriteStream$open
-  }
-
-  Object.defineProperty(fs, 'ReadStream', {
-    get: function () {
-      return ReadStream
-    },
-    set: function (val) {
-      ReadStream = val
-    },
-    enumerable: true,
-    configurable: true
-  })
-  Object.defineProperty(fs, 'WriteStream', {
-    get: function () {
-      return WriteStream
-    },
-    set: function (val) {
-      WriteStream = val
-    },
-    enumerable: true,
-    configurable: true
-  })
-
-  // legacy names
-  var FileReadStream = ReadStream
-  Object.defineProperty(fs, 'FileReadStream', {
-    get: function () {
-      return FileReadStream
-    },
-    set: function (val) {
-      FileReadStream = val
-    },
-    enumerable: true,
-    configurable: true
-  })
-  var FileWriteStream = WriteStream
-  Object.defineProperty(fs, 'FileWriteStream', {
-    get: function () {
-      return FileWriteStream
-    },
-    set: function (val) {
-      FileWriteStream = val
-    },
-    enumerable: true,
-    configurable: true
-  })
-
-  function ReadStream (path, options) {
-    if (this instanceof ReadStream)
-      return fs$ReadStream.apply(this, arguments), this
-    else
-      return ReadStream.apply(Object.create(ReadStream.prototype), arguments)
-  }
-
-  function ReadStream$open () {
-    var that = this
-    open(that.path, that.flags, that.mode, function (err, fd) {
-      if (err) {
-        if (that.autoClose)
-          that.destroy()
-
-        that.emit('error', err)
-      } else {
-        that.fd = fd
-        that.emit('open', fd)
-        that.read()
-      }
-    })
-  }
-
-  function WriteStream (path, options) {
-    if (this instanceof WriteStream)
-      return fs$WriteStream.apply(this, arguments), this
-    else
-      return WriteStream.apply(Object.create(WriteStream.prototype), arguments)
-  }
-
-  function WriteStream$open () {
-    var that = this
-    open(that.path, that.flags, that.mode, function (err, fd) {
-      if (err) {
-        that.destroy()
-        that.emit('error', err)
-      } else {
-        that.fd = fd
-        that.emit('open', fd)
-      }
-    })
-  }
-
-  function createReadStream (path, options) {
-    return new fs.ReadStream(path, options)
-  }
-
-  function createWriteStream (path, options) {
-    return new fs.WriteStream(path, options)
-  }
-
-  var fs$open = fs.open
-  fs.open = open
-  function open (path, flags, mode, cb) {
-    if (typeof mode === 'function')
-      cb = mode, mode = null
-
-    return go$open(path, flags, mode, cb)
-
-    function go$open (path, flags, mode, cb, startTime) {
-      return fs$open(path, flags, mode, function (err, fd) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$open, [path, flags, mode, cb], err, startTime || Date.now(), Date.now()])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-        }
-      })
-    }
-  }
-
-  return fs
-}
-
-function enqueue (elem) {
-  debug('ENQUEUE', elem[0].name, elem[1])
-  fs[gracefulQueue].push(elem)
-  retry()
-}
-
-// keep track of the timeout between retry() calls
-var retryTimer
-
-// reset the startTime and lastTime to now
-// this resets the start of the 60 second overall timeout as well as the
-// delay between attempts so that we'll retry these jobs sooner
-function resetQueue () {
-  var now = Date.now()
-  for (var i = 0; i < fs[gracefulQueue].length; ++i) {
-    // entries that are only a length of 2 are from an older version, don't
-    // bother modifying those since they'll be retried anyway.
-    if (fs[gracefulQueue][i].length > 2) {
-      fs[gracefulQueue][i][3] = now // startTime
-      fs[gracefulQueue][i][4] = now // lastTime
-    }
-  }
-  // call retry to make sure we're actively processing the queue
-  retry()
-}
-
-function retry () {
-  // clear the timer and remove it to help prevent unintended concurrency
-  clearTimeout(retryTimer)
-  retryTimer = undefined
-
-  if (fs[gracefulQueue].length === 0)
-    return
-
-  var elem = fs[gracefulQueue].shift()
-  var fn = elem[0]
-  var args = elem[1]
-  // these items may be unset if they were added by an older graceful-fs
-  var err = elem[2]
-  var startTime = elem[3]
-  var lastTime = elem[4]
-
-  // if we don't have a startTime we have no way of knowing if we've waited
-  // long enough, so go ahead and retry this item now
-  if (startTime === undefined) {
-    debug('RETRY', fn.name, args)
-    fn.apply(null, args)
-  } else if (Date.now() - startTime >= 60000) {
-    // it's been more than 60 seconds total, bail now
-    debug('TIMEOUT', fn.name, args)
-    var cb = args.pop()
-    if (typeof cb === 'function')
-      cb.call(null, err)
-  } else {
-    // the amount of time between the last attempt and right now
-    var sinceAttempt = Date.now() - lastTime
-    // the amount of time between when we first tried, and when we last tried
-    // rounded up to at least 1
-    var sinceStart = Math.max(lastTime - startTime, 1)
-    // backoff. wait longer than the total time we've been retrying, but only
-    // up to a maximum of 100ms
-    var desiredDelay = Math.min(sinceStart * 1.2, 100)
-    // it's been long enough since the last retry, do it again
-    if (sinceAttempt >= desiredDelay) {
-      debug('RETRY', fn.name, args)
-      fn.apply(null, args.concat([startTime]))
-    } else {
-      // if we can't do this job yet, push it to the end of the queue
-      // and let the next iteration check again
-      fs[gracefulQueue].push(elem)
-    }
-  }
-
-  // schedule our next run if one isn't already scheduled
-  if (retryTimer === undefined) {
-    retryTimer = setTimeout(retry, 0)
-  }
-}
-
-
-/***/ }),
-
-/***/ 12270:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-var Stream = (__nccwpck_require__(2203).Stream)
-
-module.exports = legacy
-
-function legacy (fs) {
-  return {
-    ReadStream: ReadStream,
-    WriteStream: WriteStream
-  }
-
-  function ReadStream (path, options) {
-    if (!(this instanceof ReadStream)) return new ReadStream(path, options);
-
-    Stream.call(this);
-
-    var self = this;
-
-    this.path = path;
-    this.fd = null;
-    this.readable = true;
-    this.paused = false;
-
-    this.flags = 'r';
-    this.mode = 438; /*=0666*/
-    this.bufferSize = 64 * 1024;
-
-    options = options || {};
-
-    // Mixin options into this
-    var keys = Object.keys(options);
-    for (var index = 0, length = keys.length; index < length; index++) {
-      var key = keys[index];
-      this[key] = options[key];
-    }
-
-    if (this.encoding) this.setEncoding(this.encoding);
-
-    if (this.start !== undefined) {
-      if ('number' !== typeof this.start) {
-        throw TypeError('start must be a Number');
-      }
-      if (this.end === undefined) {
-        this.end = Infinity;
-      } else if ('number' !== typeof this.end) {
-        throw TypeError('end must be a Number');
-      }
-
-      if (this.start > this.end) {
-        throw new Error('start must be <= end');
-      }
-
-      this.pos = this.start;
-    }
-
-    if (this.fd !== null) {
-      process.nextTick(function() {
-        self._read();
-      });
-      return;
-    }
-
-    fs.open(this.path, this.flags, this.mode, function (err, fd) {
-      if (err) {
-        self.emit('error', err);
-        self.readable = false;
-        return;
-      }
-
-      self.fd = fd;
-      self.emit('open', fd);
-      self._read();
-    })
-  }
-
-  function WriteStream (path, options) {
-    if (!(this instanceof WriteStream)) return new WriteStream(path, options);
-
-    Stream.call(this);
-
-    this.path = path;
-    this.fd = null;
-    this.writable = true;
-
-    this.flags = 'w';
-    this.encoding = 'binary';
-    this.mode = 438; /*=0666*/
-    this.bytesWritten = 0;
-
-    options = options || {};
-
-    // Mixin options into this
-    var keys = Object.keys(options);
-    for (var index = 0, length = keys.length; index < length; index++) {
-      var key = keys[index];
-      this[key] = options[key];
-    }
-
-    if (this.start !== undefined) {
-      if ('number' !== typeof this.start) {
-        throw TypeError('start must be a Number');
-      }
-      if (this.start < 0) {
-        throw new Error('start must be >= zero');
-      }
-
-      this.pos = this.start;
-    }
-
-    this.busy = false;
-    this._queue = [];
-
-    if (this.fd === null) {
-      this._open = fs.open;
-      this._queue.push([this._open, this.path, this.flags, this.mode, undefined]);
-      this.flush();
-    }
-  }
-}
-
-
-/***/ }),
-
-/***/ 83501:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-var constants = __nccwpck_require__(49140)
-
-var origCwd = process.cwd
-var cwd = null
-
-var platform = process.env.GRACEFUL_FS_PLATFORM || process.platform
-
-process.cwd = function() {
-  if (!cwd)
-    cwd = origCwd.call(process)
-  return cwd
-}
-try {
-  process.cwd()
-} catch (er) {}
-
-// This check is needed until node.js 12 is required
-if (typeof process.chdir === 'function') {
-  var chdir = process.chdir
-  process.chdir = function (d) {
-    cwd = null
-    chdir.call(process, d)
-  }
-  if (Object.setPrototypeOf) Object.setPrototypeOf(process.chdir, chdir)
-}
-
-module.exports = patch
-
-function patch (fs) {
-  // (re-)implement some things that are known busted or missing.
-
-  // lchmod, broken prior to 0.6.2
-  // back-port the fix here.
-  if (constants.hasOwnProperty('O_SYMLINK') &&
-      process.version.match(/^v0\.6\.[0-2]|^v0\.5\./)) {
-    patchLchmod(fs)
-  }
-
-  // lutimes implementation, or no-op
-  if (!fs.lutimes) {
-    patchLutimes(fs)
-  }
-
-  // https://github.com/isaacs/node-graceful-fs/issues/4
-  // Chown should not fail on einval or eperm if non-root.
-  // It should not fail on enosys ever, as this just indicates
-  // that a fs doesn't support the intended operation.
-
-  fs.chown = chownFix(fs.chown)
-  fs.fchown = chownFix(fs.fchown)
-  fs.lchown = chownFix(fs.lchown)
-
-  fs.chmod = chmodFix(fs.chmod)
-  fs.fchmod = chmodFix(fs.fchmod)
-  fs.lchmod = chmodFix(fs.lchmod)
-
-  fs.chownSync = chownFixSync(fs.chownSync)
-  fs.fchownSync = chownFixSync(fs.fchownSync)
-  fs.lchownSync = chownFixSync(fs.lchownSync)
-
-  fs.chmodSync = chmodFixSync(fs.chmodSync)
-  fs.fchmodSync = chmodFixSync(fs.fchmodSync)
-  fs.lchmodSync = chmodFixSync(fs.lchmodSync)
-
-  fs.stat = statFix(fs.stat)
-  fs.fstat = statFix(fs.fstat)
-  fs.lstat = statFix(fs.lstat)
-
-  fs.statSync = statFixSync(fs.statSync)
-  fs.fstatSync = statFixSync(fs.fstatSync)
-  fs.lstatSync = statFixSync(fs.lstatSync)
-
-  // if lchmod/lchown do not exist, then make them no-ops
-  if (fs.chmod && !fs.lchmod) {
-    fs.lchmod = function (path, mode, cb) {
-      if (cb) process.nextTick(cb)
-    }
-    fs.lchmodSync = function () {}
-  }
-  if (fs.chown && !fs.lchown) {
-    fs.lchown = function (path, uid, gid, cb) {
-      if (cb) process.nextTick(cb)
-    }
-    fs.lchownSync = function () {}
-  }
-
-  // on Windows, A/V software can lock the directory, causing this
-  // to fail with an EACCES or EPERM if the directory contains newly
-  // created files.  Try again on failure, for up to 60 seconds.
-
-  // Set the timeout this long because some Windows Anti-Virus, such as Parity
-  // bit9, may lock files for up to a minute, causing npm package install
-  // failures. Also, take care to yield the scheduler. Windows scheduling gives
-  // CPU to a busy looping process, which can cause the program causing the lock
-  // contention to be starved of CPU by node, so the contention doesn't resolve.
-  if (platform === "win32") {
-    fs.rename = typeof fs.rename !== 'function' ? fs.rename
-    : (function (fs$rename) {
-      function rename (from, to, cb) {
-        var start = Date.now()
-        var backoff = 0;
-        fs$rename(from, to, function CB (er) {
-          if (er
-              && (er.code === "EACCES" || er.code === "EPERM" || er.code === "EBUSY")
-              && Date.now() - start < 60000) {
-            setTimeout(function() {
-              fs.stat(to, function (stater, st) {
-                if (stater && stater.code === "ENOENT")
-                  fs$rename(from, to, CB);
-                else
-                  cb(er)
-              })
-            }, backoff)
-            if (backoff < 100)
-              backoff += 10;
-            return;
-          }
-          if (cb) cb(er)
-        })
-      }
-      if (Object.setPrototypeOf) Object.setPrototypeOf(rename, fs$rename)
-      return rename
-    })(fs.rename)
-  }
-
-  // if read() returns EAGAIN, then just try it again.
-  fs.read = typeof fs.read !== 'function' ? fs.read
-  : (function (fs$read) {
-    function read (fd, buffer, offset, length, position, callback_) {
-      var callback
-      if (callback_ && typeof callback_ === 'function') {
-        var eagCounter = 0
-        callback = function (er, _, __) {
-          if (er && er.code === 'EAGAIN' && eagCounter < 10) {
-            eagCounter ++
-            return fs$read.call(fs, fd, buffer, offset, length, position, callback)
-          }
-          callback_.apply(this, arguments)
-        }
-      }
-      return fs$read.call(fs, fd, buffer, offset, length, position, callback)
-    }
-
-    // This ensures `util.promisify` works as it does for native `fs.read`.
-    if (Object.setPrototypeOf) Object.setPrototypeOf(read, fs$read)
-    return read
-  })(fs.read)
-
-  fs.readSync = typeof fs.readSync !== 'function' ? fs.readSync
-  : (function (fs$readSync) { return function (fd, buffer, offset, length, position) {
-    var eagCounter = 0
-    while (true) {
-      try {
-        return fs$readSync.call(fs, fd, buffer, offset, length, position)
-      } catch (er) {
-        if (er.code === 'EAGAIN' && eagCounter < 10) {
-          eagCounter ++
-          continue
-        }
-        throw er
-      }
-    }
-  }})(fs.readSync)
-
-  function patchLchmod (fs) {
-    fs.lchmod = function (path, mode, callback) {
-      fs.open( path
-             , constants.O_WRONLY | constants.O_SYMLINK
-             , mode
-             , function (err, fd) {
-        if (err) {
-          if (callback) callback(err)
-          return
-        }
-        // prefer to return the chmod error, if one occurs,
-        // but still try to close, and report closing errors if they occur.
-        fs.fchmod(fd, mode, function (err) {
-          fs.close(fd, function(err2) {
-            if (callback) callback(err || err2)
-          })
-        })
-      })
-    }
-
-    fs.lchmodSync = function (path, mode) {
-      var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
-
-      // prefer to return the chmod error, if one occurs,
-      // but still try to close, and report closing errors if they occur.
-      var threw = true
-      var ret
-      try {
-        ret = fs.fchmodSync(fd, mode)
-        threw = false
-      } finally {
-        if (threw) {
-          try {
-            fs.closeSync(fd)
-          } catch (er) {}
-        } else {
-          fs.closeSync(fd)
-        }
-      }
-      return ret
-    }
-  }
-
-  function patchLutimes (fs) {
-    if (constants.hasOwnProperty("O_SYMLINK") && fs.futimes) {
-      fs.lutimes = function (path, at, mt, cb) {
-        fs.open(path, constants.O_SYMLINK, function (er, fd) {
-          if (er) {
-            if (cb) cb(er)
-            return
-          }
-          fs.futimes(fd, at, mt, function (er) {
-            fs.close(fd, function (er2) {
-              if (cb) cb(er || er2)
-            })
-          })
-        })
-      }
-
-      fs.lutimesSync = function (path, at, mt) {
-        var fd = fs.openSync(path, constants.O_SYMLINK)
-        var ret
-        var threw = true
-        try {
-          ret = fs.futimesSync(fd, at, mt)
-          threw = false
-        } finally {
-          if (threw) {
-            try {
-              fs.closeSync(fd)
-            } catch (er) {}
-          } else {
-            fs.closeSync(fd)
-          }
-        }
-        return ret
-      }
-
-    } else if (fs.futimes) {
-      fs.lutimes = function (_a, _b, _c, cb) { if (cb) process.nextTick(cb) }
-      fs.lutimesSync = function () {}
-    }
-  }
-
-  function chmodFix (orig) {
-    if (!orig) return orig
-    return function (target, mode, cb) {
-      return orig.call(fs, target, mode, function (er) {
-        if (chownErOk(er)) er = null
-        if (cb) cb.apply(this, arguments)
-      })
-    }
-  }
-
-  function chmodFixSync (orig) {
-    if (!orig) return orig
-    return function (target, mode) {
-      try {
-        return orig.call(fs, target, mode)
-      } catch (er) {
-        if (!chownErOk(er)) throw er
-      }
-    }
-  }
-
-
-  function chownFix (orig) {
-    if (!orig) return orig
-    return function (target, uid, gid, cb) {
-      return orig.call(fs, target, uid, gid, function (er) {
-        if (chownErOk(er)) er = null
-        if (cb) cb.apply(this, arguments)
-      })
-    }
-  }
-
-  function chownFixSync (orig) {
-    if (!orig) return orig
-    return function (target, uid, gid) {
-      try {
-        return orig.call(fs, target, uid, gid)
-      } catch (er) {
-        if (!chownErOk(er)) throw er
-      }
-    }
-  }
-
-  function statFix (orig) {
-    if (!orig) return orig
-    // Older versions of Node erroneously returned signed integers for
-    // uid + gid.
-    return function (target, options, cb) {
-      if (typeof options === 'function') {
-        cb = options
-        options = null
-      }
-      function callback (er, stats) {
-        if (stats) {
-          if (stats.uid < 0) stats.uid += 0x100000000
-          if (stats.gid < 0) stats.gid += 0x100000000
-        }
-        if (cb) cb.apply(this, arguments)
-      }
-      return options ? orig.call(fs, target, options, callback)
-        : orig.call(fs, target, callback)
-    }
-  }
-
-  function statFixSync (orig) {
-    if (!orig) return orig
-    // Older versions of Node erroneously returned signed integers for
-    // uid + gid.
-    return function (target, options) {
-      var stats = options ? orig.call(fs, target, options)
-        : orig.call(fs, target)
-      if (stats) {
-        if (stats.uid < 0) stats.uid += 0x100000000
-        if (stats.gid < 0) stats.gid += 0x100000000
-      }
-      return stats;
-    }
-  }
-
-  // ENOSYS means that the fs doesn't support the op. Just ignore
-  // that, because it doesn't matter.
-  //
-  // if there's no getuid, or if getuid() is something other
-  // than 0, and the error is EINVAL or EPERM, then just ignore
-  // it.
-  //
-  // This specific case is a silent failure in cp, install, tar,
-  // and most other unix tools that manage permissions.
-  //
-  // When running as root, or if other types of errors are
-  // encountered, then it's strict.
-  function chownErOk (er) {
-    if (!er)
-      return true
-
-    if (er.code === "ENOSYS")
-      return true
-
-    var nonroot = !process.getuid || process.getuid() !== 0
-    if (nonroot) {
-      if (er.code === "EINVAL" || er.code === "EPERM")
-        return true
-    }
-
-    return false
-  }
-}
 
 
 /***/ }),
@@ -59112,6 +54772,17 @@ const agent_base_1 = __nccwpck_require__(98894);
 const url_1 = __nccwpck_require__(87016);
 const parse_proxy_response_1 = __nccwpck_require__(37943);
 const debug = (0, debug_1.default)('https-proxy-agent');
+const setServernameFromNonIpHost = (options) => {
+    if (options.servername === undefined &&
+        options.host &&
+        !net.isIP(options.host)) {
+        return {
+            ...options,
+            servername: options.host,
+        };
+    }
+    return options;
+};
 /**
  * The `HttpsProxyAgent` implements an HTTP Agent subclass that connects to
  * the specified "HTTP(s) proxy server" in order to proxy HTTPS requests.
@@ -59159,11 +54830,7 @@ class HttpsProxyAgent extends agent_base_1.Agent {
         let socket;
         if (proxy.protocol === 'https:') {
             debug('Creating `tls.Socket`: %o', this.connectOpts);
-            const servername = this.connectOpts.servername || this.connectOpts.host;
-            socket = tls.connect({
-                ...this.connectOpts,
-                servername: servername && net.isIP(servername) ? undefined : servername,
-            });
+            socket = tls.connect(setServernameFromNonIpHost(this.connectOpts));
         }
         else {
             debug('Creating `net.Socket`: %o', this.connectOpts);
@@ -59199,11 +54866,9 @@ class HttpsProxyAgent extends agent_base_1.Agent {
                 // The proxy is connecting to a TLS server, so upgrade
                 // this socket connection to a TLS connection.
                 debug('Upgrading socket connection to TLS');
-                const servername = opts.servername || opts.host;
                 return tls.connect({
-                    ...omit(opts, 'host', 'path', 'port'),
+                    ...omit(setServernameFromNonIpHost(opts), 'host', 'path', 'port'),
                     socket,
-                    servername: net.isIP(servername) ? undefined : servername,
                 });
             }
             return socket;
@@ -59372,9 +55037,7 @@ class AddressError extends Error {
     constructor(message, parseMessage) {
         super(message);
         this.name = 'AddressError';
-        if (parseMessage !== null) {
-            this.parseMessage = parseMessage;
-        }
+        this.parseMessage = parseMessage;
     }
 }
 exports.AddressError = AddressError;
@@ -59388,7 +55051,11 @@ exports.AddressError = AddressError;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isCorrect = exports.isInSubnet = void 0;
+exports.isInSubnet = isInSubnet;
+exports.isCorrect = isCorrect;
+exports.numberToPaddedHex = numberToPaddedHex;
+exports.stringToPaddedHex = stringToPaddedHex;
+exports.testBit = testBit;
 function isInSubnet(address) {
     if (this.subnetMask < address.subnetMask) {
         return false;
@@ -59398,7 +55065,6 @@ function isInSubnet(address) {
     }
     return false;
 }
-exports.isInSubnet = isInSubnet;
 function isCorrect(defaultBits) {
     return function () {
         if (this.addressMinusSuffix !== this.correctForm()) {
@@ -59410,7 +55076,24 @@ function isCorrect(defaultBits) {
         return this.parsedSubnet === String(this.subnetMask);
     };
 }
-exports.isCorrect = isCorrect;
+function numberToPaddedHex(number) {
+    return number.toString(16).padStart(2, '0');
+}
+function stringToPaddedHex(numberString) {
+    return numberToPaddedHex(parseInt(numberString, 10));
+}
+/**
+ * @param binaryValue Binary representation of a value (e.g. `10`)
+ * @param position Byte position, where 0 is the least significant bit
+ */
+function testBit(binaryValue, position) {
+    const { length } = binaryValue;
+    if (position > length) {
+        return false;
+    }
+    const positionInString = length - position;
+    return binaryValue.substring(positionInString, positionInString + 1) === '1';
+}
 //# sourceMappingURL=common.js.map
 
 /***/ }),
@@ -59445,11 +55128,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.v6 = exports.AddressError = exports.Address6 = exports.Address4 = void 0;
-const ipv4_1 = __nccwpck_require__(17946);
+var ipv4_1 = __nccwpck_require__(17946);
 Object.defineProperty(exports, "Address4", ({ enumerable: true, get: function () { return ipv4_1.Address4; } }));
-const ipv6_1 = __nccwpck_require__(38096);
+var ipv6_1 = __nccwpck_require__(38096);
 Object.defineProperty(exports, "Address6", ({ enumerable: true, get: function () { return ipv6_1.Address6; } }));
-const address_error_1 = __nccwpck_require__(68850);
+var address_error_1 = __nccwpck_require__(68850);
 Object.defineProperty(exports, "AddressError", ({ enumerable: true, get: function () { return address_error_1.AddressError; } }));
 const helpers = __importStar(__nccwpck_require__(20339));
 exports.v6 = { helpers };
@@ -59491,8 +55174,6 @@ exports.Address4 = void 0;
 const common = __importStar(__nccwpck_require__(45864));
 const constants = __importStar(__nccwpck_require__(66437));
 const address_error_1 = __nccwpck_require__(68850);
-const jsbn_1 = __nccwpck_require__(95947);
-const sprintf_js_1 = __nccwpck_require__(19973);
 /**
  * Represents an IPv4 address
  * @class Address4
@@ -59613,7 +55294,7 @@ class Address4 {
      * @returns {String}
      */
     toHex() {
-        return this.parsedAddress.map((part) => (0, sprintf_js_1.sprintf)('%02x', parseInt(part, 10))).join(':');
+        return this.parsedAddress.map((part) => common.stringToPaddedHex(part)).join(':');
     }
     /**
      * Converts an IPv4 address object to an array of bytes
@@ -59634,28 +55315,27 @@ class Address4 {
         const output = [];
         let i;
         for (i = 0; i < constants.GROUPS; i += 2) {
-            const hex = (0, sprintf_js_1.sprintf)('%02x%02x', parseInt(this.parsedAddress[i], 10), parseInt(this.parsedAddress[i + 1], 10));
-            output.push((0, sprintf_js_1.sprintf)('%x', parseInt(hex, 16)));
+            output.push(`${common.stringToPaddedHex(this.parsedAddress[i])}${common.stringToPaddedHex(this.parsedAddress[i + 1])}`);
         }
         return output.join(':');
     }
     /**
-     * Returns the address as a BigInteger
+     * Returns the address as a `bigint`
      * @memberof Address4
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
-    bigInteger() {
-        return new jsbn_1.BigInteger(this.parsedAddress.map((n) => (0, sprintf_js_1.sprintf)('%02x', parseInt(n, 10))).join(''), 16);
+    bigInt() {
+        return BigInt(`0x${this.parsedAddress.map((n) => common.stringToPaddedHex(n)).join('')}`);
     }
     /**
      * Helper function getting start address.
      * @memberof Address4
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _startAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '0'.repeat(constants.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '0'.repeat(constants.BITS - this.subnetMask)}`);
     }
     /**
      * The first address in the range given by this address' subnet.
@@ -59665,7 +55345,7 @@ class Address4 {
      * @returns {Address4}
      */
     startAddress() {
-        return Address4.fromBigInteger(this._startAddress());
+        return Address4.fromBigInt(this._startAddress());
     }
     /**
      * The first host address in the range given by this address's subnet ie
@@ -59675,17 +55355,17 @@ class Address4 {
      * @returns {Address4}
      */
     startAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address4.fromBigInteger(this._startAddress().add(adjust));
+        const adjust = BigInt('1');
+        return Address4.fromBigInt(this._startAddress() + adjust);
     }
     /**
      * Helper function getting end address.
      * @memberof Address4
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _endAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '1'.repeat(constants.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '1'.repeat(constants.BITS - this.subnetMask)}`);
     }
     /**
      * The last address in the range given by this address' subnet
@@ -59695,7 +55375,7 @@ class Address4 {
      * @returns {Address4}
      */
     endAddress() {
-        return Address4.fromBigInteger(this._endAddress());
+        return Address4.fromBigInt(this._endAddress());
     }
     /**
      * The last host address in the range given by this address's subnet ie
@@ -59705,18 +55385,51 @@ class Address4 {
      * @returns {Address4}
      */
     endAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address4.fromBigInteger(this._endAddress().subtract(adjust));
+        const adjust = BigInt('1');
+        return Address4.fromBigInt(this._endAddress() - adjust);
     }
     /**
-     * Converts a BigInteger to a v4 address object
+     * Converts a BigInt to a v4 address object
      * @memberof Address4
      * @static
-     * @param {BigInteger} bigInteger - a BigInteger to convert
+     * @param {bigint} bigInt - a BigInt to convert
      * @returns {Address4}
      */
-    static fromBigInteger(bigInteger) {
-        return Address4.fromInteger(parseInt(bigInteger.toString(), 10));
+    static fromBigInt(bigInt) {
+        return Address4.fromHex(bigInt.toString(16));
+    }
+    /**
+     * Convert a byte array to an Address4 object
+     * @memberof Address4
+     * @static
+     * @param {Array<number>} bytes - an array of 4 bytes (0-255)
+     * @returns {Address4}
+     */
+    static fromByteArray(bytes) {
+        if (bytes.length !== 4) {
+            throw new address_error_1.AddressError('IPv4 addresses require exactly 4 bytes');
+        }
+        // Validate that all bytes are within valid range (0-255)
+        for (let i = 0; i < bytes.length; i++) {
+            if (!Number.isInteger(bytes[i]) || bytes[i] < 0 || bytes[i] > 255) {
+                throw new address_error_1.AddressError('All bytes must be integers between 0 and 255');
+            }
+        }
+        return this.fromUnsignedByteArray(bytes);
+    }
+    /**
+     * Convert an unsigned byte array to an Address4 object
+     * @memberof Address4
+     * @static
+     * @param {Array<number>} bytes - an array of 4 unsigned bytes (0-255)
+     * @returns {Address4}
+     */
+    static fromUnsignedByteArray(bytes) {
+        if (bytes.length !== 4) {
+            throw new address_error_1.AddressError('IPv4 addresses require exactly 4 bytes');
+        }
+        const address = bytes.join('.');
+        return new Address4(address);
     }
     /**
      * Returns the first n bits of the address, defaulting to the
@@ -59756,7 +55469,7 @@ class Address4 {
         if (options.omitSuffix) {
             return reversed;
         }
-        return (0, sprintf_js_1.sprintf)('%s.in-addr.arpa.', reversed);
+        return `${reversed}.in-addr.arpa.`;
     }
     /**
      * Returns true if the given address is a multicast address
@@ -59774,7 +55487,7 @@ class Address4 {
      * @returns {string}
      */
     binaryZeroPad() {
-        return this.bigInteger().toString(2).padStart(constants.BITS, '0');
+        return this.bigInt().toString(2).padStart(constants.BITS, '0');
     }
     /**
      * Groups an IPv4 address for inclusion at the end of an IPv6 address
@@ -59782,7 +55495,11 @@ class Address4 {
      */
     groupForV6() {
         const segments = this.parsedAddress;
-        return this.address.replace(constants.RE_ADDRESS, (0, sprintf_js_1.sprintf)('<span class="hover-group group-v4 group-6">%s</span>.<span class="hover-group group-v4 group-7">%s</span>', segments.slice(0, 2).join('.'), segments.slice(2, 4).join('.')));
+        return this.address.replace(constants.RE_ADDRESS, `<span class="hover-group group-v4 group-6">${segments
+            .slice(0, 2)
+            .join('.')}</span>.<span class="hover-group group-v4 group-7">${segments
+            .slice(2, 4)
+            .join('.')}</span>`);
     }
 }
 exports.Address4 = Address4;
@@ -59829,8 +55546,7 @@ const helpers = __importStar(__nccwpck_require__(20339));
 const ipv4_1 = __nccwpck_require__(17946);
 const regular_expressions_1 = __nccwpck_require__(72016);
 const address_error_1 = __nccwpck_require__(68850);
-const jsbn_1 = __nccwpck_require__(95947);
-const sprintf_js_1 = __nccwpck_require__(19973);
+const common_1 = __nccwpck_require__(45864);
 function assert(condition) {
     if (!condition) {
         throw new Error('Assertion failed.');
@@ -59866,7 +55582,7 @@ function compact(address, slice) {
     return s1.concat(['compact']).concat(s2);
 }
 function paddedHex(octet) {
-    return (0, sprintf_js_1.sprintf)('%04x', parseInt(octet, 16));
+    return parseInt(octet, 16).toString(16).padStart(4, '0');
 }
 function unsignByte(b) {
     // eslint-disable-next-line no-bitwise
@@ -59944,18 +55660,18 @@ class Address6 {
         }
     }
     /**
-     * Convert a BigInteger to a v6 address object
+     * Convert a BigInt to a v6 address object
      * @memberof Address6
      * @static
-     * @param {BigInteger} bigInteger - a BigInteger to convert
+     * @param {bigint} bigInt - a BigInt to convert
      * @returns {Address6}
      * @example
-     * var bigInteger = new BigInteger('1000000000000');
-     * var address = Address6.fromBigInteger(bigInteger);
+     * var bigInt = BigInt('1000000000000');
+     * var address = Address6.fromBigInt(bigInt);
      * address.correctForm(); // '::e8:d4a5:1000'
      */
-    static fromBigInteger(bigInteger) {
-        const hex = bigInteger.toString(16).padStart(32, '0');
+    static fromBigInt(bigInt) {
+        const hex = bigInt.toString(16).padStart(32, '0');
         const groups = [];
         let i;
         for (i = 0; i < constants6.GROUPS; i++) {
@@ -60075,7 +55791,7 @@ class Address6 {
      * @returns {String} the Microsoft UNC transcription of the address
      */
     microsoftTranscription() {
-        return (0, sprintf_js_1.sprintf)('%s.ipv6-literal.net', this.correctForm().replace(/:/g, '-'));
+        return `${this.correctForm().replace(/:/g, '-')}.ipv6-literal.net`;
     }
     /**
      * Return the first n bits of the address, defaulting to the subnet mask
@@ -60091,7 +55807,7 @@ class Address6 {
      * Return the number of possible subnets of a given size in the address
      * @memberof Address6
      * @instance
-     * @param {number} [size=128] - the subnet size
+     * @param {number} [subnetSize=128] - the subnet size
      * @returns {String}
      */
     // TODO: probably useful to have a numeric version of this too
@@ -60102,16 +55818,16 @@ class Address6 {
         if (subnetPowers < 0) {
             return '0';
         }
-        return addCommas(new jsbn_1.BigInteger('2', 10).pow(subnetPowers).toString(10));
+        return addCommas((BigInt('2') ** BigInt(subnetPowers)).toString(10));
     }
     /**
      * Helper function getting start address.
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _startAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '0'.repeat(constants6.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '0'.repeat(constants6.BITS - this.subnetMask)}`);
     }
     /**
      * The first address in the range given by this address' subnet
@@ -60121,7 +55837,7 @@ class Address6 {
      * @returns {Address6}
      */
     startAddress() {
-        return Address6.fromBigInteger(this._startAddress());
+        return Address6.fromBigInt(this._startAddress());
     }
     /**
      * The first host address in the range given by this address's subnet ie
@@ -60131,17 +55847,17 @@ class Address6 {
      * @returns {Address6}
      */
     startAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address6.fromBigInteger(this._startAddress().add(adjust));
+        const adjust = BigInt('1');
+        return Address6.fromBigInt(this._startAddress() + adjust);
     }
     /**
      * Helper function getting end address.
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     _endAddress() {
-        return new jsbn_1.BigInteger(this.mask() + '1'.repeat(constants6.BITS - this.subnetMask), 2);
+        return BigInt(`0b${this.mask() + '1'.repeat(constants6.BITS - this.subnetMask)}`);
     }
     /**
      * The last address in the range given by this address' subnet
@@ -60151,7 +55867,7 @@ class Address6 {
      * @returns {Address6}
      */
     endAddress() {
-        return Address6.fromBigInteger(this._endAddress());
+        return Address6.fromBigInt(this._endAddress());
     }
     /**
      * The last host address in the range given by this address's subnet ie
@@ -60161,8 +55877,8 @@ class Address6 {
      * @returns {Address6}
      */
     endAddressExclusive() {
-        const adjust = new jsbn_1.BigInteger('1');
-        return Address6.fromBigInteger(this._endAddress().subtract(adjust));
+        const adjust = BigInt('1');
+        return Address6.fromBigInt(this._endAddress() - adjust);
     }
     /**
      * Return the scope of the address
@@ -60171,7 +55887,7 @@ class Address6 {
      * @returns {String}
      */
     getScope() {
-        let scope = constants6.SCOPES[this.getBits(12, 16).intValue()];
+        let scope = constants6.SCOPES[parseInt(this.getBits(12, 16).toString(10), 10)];
         if (this.getType() === 'Global unicast' && scope !== 'Link local') {
             scope = 'Global';
         }
@@ -60192,13 +55908,13 @@ class Address6 {
         return 'Global unicast';
     }
     /**
-     * Return the bits in the given range as a BigInteger
+     * Return the bits in the given range as a BigInt
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
     getBits(start, end) {
-        return new jsbn_1.BigInteger(this.getBitsBase2(start, end), 2);
+        return BigInt(`0b${this.getBitsBase2(start, end)}`);
     }
     /**
      * Return the bits in the given range as a base-2 string
@@ -60256,7 +55972,7 @@ class Address6 {
             if (options.omitSuffix) {
                 return reversed;
             }
-            return (0, sprintf_js_1.sprintf)('%s.ip6.arpa.', reversed);
+            return `${reversed}.ip6.arpa.`;
         }
         if (options.omitSuffix) {
             return '';
@@ -60305,7 +56021,7 @@ class Address6 {
         }
         let correct = groups.join(':');
         correct = correct.replace(/^compact$/, '::');
-        correct = correct.replace(/^compact|compact$/, ':');
+        correct = correct.replace(/(^compact)|(compact$)/, ':');
         correct = correct.replace(/compact/, '');
         return correct;
     }
@@ -60321,7 +56037,7 @@ class Address6 {
      * //  0000000000000000000000000000000000000000000000000001000000010001'
      */
     binaryZeroPad() {
-        return this.bigInteger().toString(2).padStart(constants6.BITS, '0');
+        return this.bigInt().toString(2).padStart(constants6.BITS, '0');
     }
     // TODO: Improve the semantics of this helper function
     parse4in6(address) {
@@ -60347,11 +56063,11 @@ class Address6 {
         address = this.parse4in6(address);
         const badCharacters = address.match(constants6.RE_BAD_CHARACTERS);
         if (badCharacters) {
-            throw new address_error_1.AddressError((0, sprintf_js_1.sprintf)('Bad character%s detected in address: %s', badCharacters.length > 1 ? 's' : '', badCharacters.join('')), address.replace(constants6.RE_BAD_CHARACTERS, '<span class="parse-error">$1</span>'));
+            throw new address_error_1.AddressError(`Bad character${badCharacters.length > 1 ? 's' : ''} detected in address: ${badCharacters.join('')}`, address.replace(constants6.RE_BAD_CHARACTERS, '<span class="parse-error">$1</span>'));
         }
         const badAddress = address.match(constants6.RE_BAD_ADDRESS);
         if (badAddress) {
-            throw new address_error_1.AddressError((0, sprintf_js_1.sprintf)('Address failed regex: %s', badAddress.join('')), address.replace(constants6.RE_BAD_ADDRESS, '<span class="parse-error">$1</span>'));
+            throw new address_error_1.AddressError(`Address failed regex: ${badAddress.join('')}`, address.replace(constants6.RE_BAD_ADDRESS, '<span class="parse-error">$1</span>'));
         }
         let groups = [];
         const halves = address.split('::');
@@ -60384,7 +56100,7 @@ class Address6 {
         else {
             throw new address_error_1.AddressError('Too many :: groups found');
         }
-        groups = groups.map((group) => (0, sprintf_js_1.sprintf)('%x', parseInt(group, 16)));
+        groups = groups.map((group) => parseInt(group, 16).toString(16));
         if (groups.length !== this.groups) {
             throw new address_error_1.AddressError('Incorrect number of groups found');
         }
@@ -60406,16 +56122,16 @@ class Address6 {
      * @returns {String}
      */
     decimal() {
-        return this.parsedAddress.map((n) => (0, sprintf_js_1.sprintf)('%05d', parseInt(n, 16))).join(':');
+        return this.parsedAddress.map((n) => parseInt(n, 16).toString(10).padStart(5, '0')).join(':');
     }
     /**
-     * Return the address as a BigInteger
+     * Return the address as a BigInt
      * @memberof Address6
      * @instance
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
-    bigInteger() {
-        return new jsbn_1.BigInteger(this.parsedAddress.map(paddedHex).join(''), 16);
+    bigInt() {
+        return BigInt(`0x${this.parsedAddress.map(paddedHex).join('')}`);
     }
     /**
      * Return the last two groups of this address as an IPv4 address string
@@ -60428,7 +56144,7 @@ class Address6 {
      */
     to4() {
         const binary = this.binaryZeroPad().split('');
-        return ipv4_1.Address4.fromHex(new jsbn_1.BigInteger(binary.slice(96, 128).join(''), 2).toString(16));
+        return ipv4_1.Address4.fromHex(BigInt(`0b${binary.slice(96, 128).join('')}`).toString(16));
     }
     /**
      * Return the v4-in-v6 form of the address
@@ -60475,18 +56191,21 @@ class Address6 {
           public IPv4 address of the NAT with all bits inverted.
         */
         const prefix = this.getBitsBase16(0, 32);
-        const udpPort = this.getBits(80, 96).xor(new jsbn_1.BigInteger('ffff', 16)).toString();
+        const bitsForUdpPort = this.getBits(80, 96);
+        // eslint-disable-next-line no-bitwise
+        const udpPort = (bitsForUdpPort ^ BigInt('0xffff')).toString();
         const server4 = ipv4_1.Address4.fromHex(this.getBitsBase16(32, 64));
-        const client4 = ipv4_1.Address4.fromHex(this.getBits(96, 128).xor(new jsbn_1.BigInteger('ffffffff', 16)).toString(16));
-        const flags = this.getBits(64, 80);
+        const bitsForClient4 = this.getBits(96, 128);
+        // eslint-disable-next-line no-bitwise
+        const client4 = ipv4_1.Address4.fromHex((bitsForClient4 ^ BigInt('0xffffffff')).toString(16));
         const flagsBase2 = this.getBitsBase2(64, 80);
-        const coneNat = flags.testBit(15);
-        const reserved = flags.testBit(14);
-        const groupIndividual = flags.testBit(8);
-        const universalLocal = flags.testBit(9);
-        const nonce = new jsbn_1.BigInteger(flagsBase2.slice(2, 6) + flagsBase2.slice(8, 16), 2).toString(10);
+        const coneNat = (0, common_1.testBit)(flagsBase2, 15);
+        const reserved = (0, common_1.testBit)(flagsBase2, 14);
+        const groupIndividual = (0, common_1.testBit)(flagsBase2, 8);
+        const universalLocal = (0, common_1.testBit)(flagsBase2, 9);
+        const nonce = BigInt(`0b${flagsBase2.slice(2, 6) + flagsBase2.slice(8, 16)}`).toString(10);
         return {
-            prefix: (0, sprintf_js_1.sprintf)('%s:%s', prefix.slice(0, 4), prefix.slice(4, 8)),
+            prefix: `${prefix.slice(0, 4)}:${prefix.slice(4, 8)}`,
             server4: server4.address,
             client4: client4.address,
             flags: flagsBase2,
@@ -60514,7 +56233,7 @@ class Address6 {
         const prefix = this.getBitsBase16(0, 16);
         const gateway = ipv4_1.Address4.fromHex(this.getBitsBase16(16, 48));
         return {
-            prefix: (0, sprintf_js_1.sprintf)('%s', prefix.slice(0, 4)),
+            prefix: prefix.slice(0, 4),
             gateway: gateway.address,
         };
     }
@@ -60544,12 +56263,14 @@ class Address6 {
      * @returns {Array}
      */
     toByteArray() {
-        const byteArray = this.bigInteger().toByteArray();
-        // work around issue where `toByteArray` returns a leading 0 element
-        if (byteArray.length === 17 && byteArray[0] === 0) {
-            return byteArray.slice(1);
+        const valueWithoutPadding = this.bigInt().toString(16);
+        const leadingPad = '0'.repeat(valueWithoutPadding.length % 2);
+        const value = `${leadingPad}${valueWithoutPadding}`;
+        const bytes = [];
+        for (let i = 0, length = value.length; i < length; i += 2) {
+            bytes.push(parseInt(value.substring(i, i + 2), 16));
         }
-        return byteArray;
+        return bytes;
     }
     /**
      * Return an unsigned byte array
@@ -60576,14 +56297,14 @@ class Address6 {
      * @returns {Address6}
      */
     static fromUnsignedByteArray(bytes) {
-        const BYTE_MAX = new jsbn_1.BigInteger('256', 10);
-        let result = new jsbn_1.BigInteger('0', 10);
-        let multiplier = new jsbn_1.BigInteger('1', 10);
+        const BYTE_MAX = BigInt('256');
+        let result = BigInt('0');
+        let multiplier = BigInt('1');
         for (let i = bytes.length - 1; i >= 0; i--) {
-            result = result.add(multiplier.multiply(new jsbn_1.BigInteger(bytes[i].toString(10), 10)));
-            multiplier = multiplier.multiply(BYTE_MAX);
+            result += multiplier * BigInt(bytes[i].toString(10));
+            multiplier *= BYTE_MAX;
         }
-        return Address6.fromBigInteger(result);
+        return Address6.fromBigInt(result);
     }
     /**
      * Returns true if the address is in the canonical form, false otherwise
@@ -60663,9 +56384,9 @@ class Address6 {
             optionalPort = '';
         }
         else {
-            optionalPort = (0, sprintf_js_1.sprintf)(':%s', optionalPort);
+            optionalPort = `:${optionalPort}`;
         }
-        return (0, sprintf_js_1.sprintf)('http://[%s]%s/', this.correctForm(), optionalPort);
+        return `http://[${this.correctForm()}]${optionalPort}/`;
     }
     /**
      * @returns {String} a link suitable for conveying the address via a URL hash
@@ -60687,10 +56408,11 @@ class Address6 {
         if (options.v4) {
             formFunction = this.to4in6;
         }
+        const form = formFunction.call(this);
         if (options.className) {
-            return (0, sprintf_js_1.sprintf)('<a href="%1$s%2$s" class="%3$s">%2$s</a>', options.prefix, formFunction.call(this), options.className);
+            return `<a href="${options.prefix}${form}" class="${options.className}">${form}</a>`;
         }
-        return (0, sprintf_js_1.sprintf)('<a href="%1$s%2$s">%2$s</a>', options.prefix, formFunction.call(this));
+        return `<a href="${options.prefix}${form}">${form}</a>`;
     }
     /**
      * Groups an address
@@ -60714,9 +56436,9 @@ class Address6 {
         }
         const classes = ['hover-group'];
         for (let i = this.elisionBegin; i < this.elisionBegin + this.elidedGroups; i++) {
-            classes.push((0, sprintf_js_1.sprintf)('group-%d', i));
+            classes.push(`group-${i}`);
         }
-        output.push((0, sprintf_js_1.sprintf)('<span class="%s"></span>', classes.join(' ')));
+        output.push(`<span class="${classes.join(' ')}"></span>`);
         if (right.length) {
             output.push(...helpers.simpleGroup(right, this.elisionEnd));
         }
@@ -60887,38 +56609,37 @@ exports.RE_SUBNET_STRING = /\/\d{1,3}(?=%|$)/;
  * @static
  */
 exports.RE_ZONE_STRING = /%.*$/;
-exports.RE_URL = new RegExp(/^\[{0,1}([0-9a-f:]+)\]{0,1}/);
-exports.RE_URL_WITH_PORT = new RegExp(/\[([0-9a-f:]+)\]:([0-9]{1,5})/);
+exports.RE_URL = /^\[{0,1}([0-9a-f:]+)\]{0,1}/;
+exports.RE_URL_WITH_PORT = /\[([0-9a-f:]+)\]:([0-9]{1,5})/;
 //# sourceMappingURL=constants.js.map
 
 /***/ }),
 
 /***/ 20339:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.simpleGroup = exports.spanLeadingZeroes = exports.spanAll = exports.spanAllZeroes = void 0;
-const sprintf_js_1 = __nccwpck_require__(19973);
+exports.spanAllZeroes = spanAllZeroes;
+exports.spanAll = spanAll;
+exports.spanLeadingZeroes = spanLeadingZeroes;
+exports.simpleGroup = simpleGroup;
 /**
  * @returns {String} the string with all zeroes contained in a <span>
  */
 function spanAllZeroes(s) {
     return s.replace(/(0+)/g, '<span class="zero">$1</span>');
 }
-exports.spanAllZeroes = spanAllZeroes;
 /**
  * @returns {String} the string with each character contained in a <span>
  */
 function spanAll(s, offset = 0) {
     const letters = s.split('');
     return letters
-        .map((n, i) => (0, sprintf_js_1.sprintf)('<span class="digit value-%s position-%d">%s</span>', n, i + offset, spanAllZeroes(n)) // XXX Use #base-2 .value-0 instead?
-    )
+        .map((n, i) => `<span class="digit value-${n} position-${i + offset}">${spanAllZeroes(n)}</span>`)
         .join('');
 }
-exports.spanAll = spanAll;
 function spanLeadingZeroesSimple(group) {
     return group.replace(/^(0+)/, '<span class="zero">$1</span>');
 }
@@ -60929,7 +56650,6 @@ function spanLeadingZeroes(address) {
     const groups = address.split(':');
     return groups.map((g) => spanLeadingZeroesSimple(g)).join(':');
 }
-exports.spanLeadingZeroes = spanLeadingZeroes;
 /**
  * Groups an address
  * @returns {String} a grouped address
@@ -60940,10 +56660,9 @@ function simpleGroup(addressString, offset = 0) {
         if (/group-v4/.test(g)) {
             return g;
         }
-        return (0, sprintf_js_1.sprintf)('<span class="hover-group group-%d">%s</span>', i + offset, spanLeadingZeroesSimple(g));
+        return `<span class="hover-group group-${i + offset}">${spanLeadingZeroesSimple(g)}</span>`;
     });
 }
-exports.simpleGroup = simpleGroup;
 //# sourceMappingURL=helpers.js.map
 
 /***/ }),
@@ -60977,20 +56696,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.possibleElisions = exports.simpleRegularExpression = exports.ADDRESS_BOUNDARY = exports.padGroup = exports.groupPossibilities = void 0;
-const v6 = __importStar(__nccwpck_require__(52899));
-const sprintf_js_1 = __nccwpck_require__(19973);
-function groupPossibilities(possibilities) {
-    return (0, sprintf_js_1.sprintf)('(%s)', possibilities.join('|'));
-}
+exports.ADDRESS_BOUNDARY = void 0;
 exports.groupPossibilities = groupPossibilities;
+exports.padGroup = padGroup;
+exports.simpleRegularExpression = simpleRegularExpression;
+exports.possibleElisions = possibleElisions;
+const v6 = __importStar(__nccwpck_require__(52899));
+function groupPossibilities(possibilities) {
+    return `(${possibilities.join('|')})`;
+}
 function padGroup(group) {
     if (group.length < 4) {
-        return (0, sprintf_js_1.sprintf)('0{0,%d}%s', 4 - group.length, group);
+        return `0{0,${4 - group.length}}${group}`;
     }
     return group;
 }
-exports.padGroup = padGroup;
 exports.ADDRESS_BOUNDARY = '[^A-Fa-f0-9:]';
 function simpleRegularExpression(groups) {
     const zeroIndexes = [];
@@ -61015,7 +56735,6 @@ function simpleRegularExpression(groups) {
     possibilities.push(groups.map(padGroup).join(':'));
     return groupPossibilities(possibilities);
 }
-exports.simpleRegularExpression = simpleRegularExpression;
 function possibleElisions(elidedGroups, moreLeft, moreRight) {
     const left = moreLeft ? '' : ':';
     const right = moreRight ? '' : ':';
@@ -61033,20 +56752,19 @@ function possibleElisions(elidedGroups, moreLeft, moreRight) {
         possibilities.push(':');
     }
     // 4. elision from the left side
-    possibilities.push((0, sprintf_js_1.sprintf)('%s(:0{1,4}){1,%d}', left, elidedGroups - 1));
+    possibilities.push(`${left}(:0{1,4}){1,${elidedGroups - 1}}`);
     // 5. elision from the right side
-    possibilities.push((0, sprintf_js_1.sprintf)('(0{1,4}:){1,%d}%s', elidedGroups - 1, right));
+    possibilities.push(`(0{1,4}:){1,${elidedGroups - 1}}${right}`);
     // 6. no elision
-    possibilities.push((0, sprintf_js_1.sprintf)('(0{1,4}:){%d}0{1,4}', elidedGroups - 1));
+    possibilities.push(`(0{1,4}:){${elidedGroups - 1}}0{1,4}`);
     // 7. elision (including sloppy elision) from the middle
     for (let groups = 1; groups < elidedGroups - 1; groups++) {
         for (let position = 1; position < elidedGroups - groups; position++) {
-            possibilities.push((0, sprintf_js_1.sprintf)('(0{1,4}:){%d}:(0{1,4}:){%d}0{1,4}', position, elidedGroups - position - groups - 1));
+            possibilities.push(`(0{1,4}:){${position}}:(0{1,4}:){${elidedGroups - position - groups - 1}}0{1,4}`);
         }
     }
     return groupPossibilities(possibilities);
 }
-exports.possibleElisions = possibleElisions;
 //# sourceMappingURL=regular-expressions.js.map
 
 /***/ }),
@@ -61806,7 +57524,7 @@ module.exports.isDuplex   = isDuplex
         if(a < 2) this.fromInt(1);
         else {
           this.fromNumber(a,c);
-          if(!this.testBit(a-1))    // force MSB set
+          if(!this.testBit(a-1))	// force MSB set
             this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
           if(this.isEven()) this.dAddOffset(1,0); // force odd
           while(!this.isProbablePrime(b)) {
@@ -62167,7 +57885,7 @@ module.exports.isDuplex   = isDuplex
         n = k;
         while((w&1) == 0) { w >>= 1; --n; }
         if((i -= n) < 0) { i += this.DB; --j; }
-        if(is1) {    // ret == 1, don't bother squaring or multiplying it
+        if(is1) {	// ret == 1, don't bother squaring or multiplying it
           g[w].copyTo(r);
           is1 = false;
         }
@@ -62377,137 +58095,135 @@ module.exports.isDuplex   = isDuplex
     // long longValue()
     // static BigInteger valueOf(long val)
 
-    // Random number generator - requires a PRNG backend, e.g. prng4.js
+	// Random number generator - requires a PRNG backend, e.g. prng4.js
 
-    // For best results, put code like
-    // <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
-    // in your main HTML document.
+	// For best results, put code like
+	// <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
+	// in your main HTML document.
 
-    var rng_state;
-    var rng_pool;
-    var rng_pptr;
+	var rng_state;
+	var rng_pool;
+	var rng_pptr;
 
-    // Mix in a 32-bit integer into the pool
-    function rng_seed_int(x) {
-      rng_pool[rng_pptr++] ^= x & 255;
-      rng_pool[rng_pptr++] ^= (x >> 8) & 255;
-      rng_pool[rng_pptr++] ^= (x >> 16) & 255;
-      rng_pool[rng_pptr++] ^= (x >> 24) & 255;
-      if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
-    }
+	// Mix in a 32-bit integer into the pool
+	function rng_seed_int(x) {
+	  rng_pool[rng_pptr++] ^= x & 255;
+	  rng_pool[rng_pptr++] ^= (x >> 8) & 255;
+	  rng_pool[rng_pptr++] ^= (x >> 16) & 255;
+	  rng_pool[rng_pptr++] ^= (x >> 24) & 255;
+	  if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
+	}
 
-    // Mix in the current time (w/milliseconds) into the pool
-    function rng_seed_time() {
-      rng_seed_int(new Date().getTime());
-    }
+	// Mix in the current time (w/milliseconds) into the pool
+	function rng_seed_time() {
+	  rng_seed_int(new Date().getTime());
+	}
 
-    // Initialize the pool with junk if needed.
-    if(rng_pool == null) {
-      rng_pool = new Array();
-      rng_pptr = 0;
-      var t;
-      if(typeof window !== "undefined" && window.crypto) {
-        if (window.crypto.getRandomValues) {
-          // Use webcrypto if available
-          var ua = new Uint8Array(32);
-          window.crypto.getRandomValues(ua);
-          for(t = 0; t < 32; ++t)
-            rng_pool[rng_pptr++] = ua[t];
-        }
-        else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
-          // Extract entropy (256 bits) from NS4 RNG if available
-          var z = window.crypto.random(32);
-          for(t = 0; t < z.length; ++t)
-            rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
-        }
-      }
-      while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-        t = Math.floor(65536 * Math.random());
-        rng_pool[rng_pptr++] = t >>> 8;
-        rng_pool[rng_pptr++] = t & 255;
-      }
-      rng_pptr = 0;
-      rng_seed_time();
-      //rng_seed_int(window.screenX);
-      //rng_seed_int(window.screenY);
-    }
+	// Initialize the pool with junk if needed.
+	if(rng_pool == null) {
+	  rng_pool = new Array();
+	  rng_pptr = 0;
+	  var t;
+	  if(typeof window !== "undefined" && window.crypto) {
+		if (window.crypto.getRandomValues) {
+		  // Use webcrypto if available
+		  var ua = new Uint8Array(32);
+		  window.crypto.getRandomValues(ua);
+		  for(t = 0; t < 32; ++t)
+			rng_pool[rng_pptr++] = ua[t];
+		}
+		else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
+		  // Extract entropy (256 bits) from NS4 RNG if available
+		  var z = window.crypto.random(32);
+		  for(t = 0; t < z.length; ++t)
+			rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
+		}
+	  }
+	  while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
+		t = Math.floor(65536 * Math.random());
+		rng_pool[rng_pptr++] = t >>> 8;
+		rng_pool[rng_pptr++] = t & 255;
+	  }
+	  rng_pptr = 0;
+	  rng_seed_time();
+	  //rng_seed_int(window.screenX);
+	  //rng_seed_int(window.screenY);
+	}
 
-    function rng_get_byte() {
-      if(rng_state == null) {
-        rng_seed_time();
-        rng_state = prng_newstate();
-        rng_state.init(rng_pool);
-        for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
-          rng_pool[rng_pptr] = 0;
-        rng_pptr = 0;
-        //rng_pool = null;
-      }
-      // TODO: allow reseeding after first request
-      return rng_state.next();
-    }
+	function rng_get_byte() {
+	  if(rng_state == null) {
+		rng_seed_time();
+		rng_state = prng_newstate();
+		rng_state.init(rng_pool);
+		for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
+		  rng_pool[rng_pptr] = 0;
+		rng_pptr = 0;
+		//rng_pool = null;
+	  }
+	  // TODO: allow reseeding after first request
+	  return rng_state.next();
+	}
 
-    function rng_get_bytes(ba) {
-      var i;
-      for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
-    }
+	function rng_get_bytes(ba) {
+	  var i;
+	  for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
+	}
 
-    function SecureRandom() {}
+	function SecureRandom() {}
 
-    SecureRandom.prototype.nextBytes = rng_get_bytes;
+	SecureRandom.prototype.nextBytes = rng_get_bytes;
 
-    // prng4.js - uses Arcfour as a PRNG
+	// prng4.js - uses Arcfour as a PRNG
 
-    function Arcfour() {
-      this.i = 0;
-      this.j = 0;
-      this.S = new Array();
-    }
+	function Arcfour() {
+	  this.i = 0;
+	  this.j = 0;
+	  this.S = new Array();
+	}
 
-    // Initialize arcfour context from key, an array of ints, each from [0..255]
-    function ARC4init(key) {
-      var i, j, t;
-      for(i = 0; i < 256; ++i)
-        this.S[i] = i;
-      j = 0;
-      for(i = 0; i < 256; ++i) {
-        j = (j + this.S[i] + key[i % key.length]) & 255;
-        t = this.S[i];
-        this.S[i] = this.S[j];
-        this.S[j] = t;
-      }
-      this.i = 0;
-      this.j = 0;
-    }
+	// Initialize arcfour context from key, an array of ints, each from [0..255]
+	function ARC4init(key) {
+	  var i, j, t;
+	  for(i = 0; i < 256; ++i)
+		this.S[i] = i;
+	  j = 0;
+	  for(i = 0; i < 256; ++i) {
+		j = (j + this.S[i] + key[i % key.length]) & 255;
+		t = this.S[i];
+		this.S[i] = this.S[j];
+		this.S[j] = t;
+	  }
+	  this.i = 0;
+	  this.j = 0;
+	}
 
-    function ARC4next() {
-      var t;
-      this.i = (this.i + 1) & 255;
-      this.j = (this.j + this.S[this.i]) & 255;
-      t = this.S[this.i];
-      this.S[this.i] = this.S[this.j];
-      this.S[this.j] = t;
-      return this.S[(t + this.S[this.i]) & 255];
-    }
+	function ARC4next() {
+	  var t;
+	  this.i = (this.i + 1) & 255;
+	  this.j = (this.j + this.S[this.i]) & 255;
+	  t = this.S[this.i];
+	  this.S[this.i] = this.S[this.j];
+	  this.S[this.j] = t;
+	  return this.S[(t + this.S[this.i]) & 255];
+	}
 
-    Arcfour.prototype.init = ARC4init;
-    Arcfour.prototype.next = ARC4next;
+	Arcfour.prototype.init = ARC4init;
+	Arcfour.prototype.next = ARC4next;
 
-    // Plug in your RNG constructor here
-    function prng_newstate() {
-      return new Arcfour();
-    }
+	// Plug in your RNG constructor here
+	function prng_newstate() {
+	  return new Arcfour();
+	}
 
-    // Pool size must be a multiple of 4 and greater than 32.
-    // An array of bytes the size of the pool will be passed to init()
-    var rng_psize = 256;
+	// Pool size must be a multiple of 4 and greater than 32.
+	// An array of bytes the size of the pool will be passed to init()
+	var rng_psize = 256;
 
-    if (true) {
-        exports = module.exports = {
-            default: BigInteger,
-            BigInteger: BigInteger,
-            SecureRandom: SecureRandom,
-        };
-    } else {}
+  BigInteger.SecureRandom = SecureRandom;
+  BigInteger.BigInteger = BigInteger;
+  if (true) {
+    exports = module.exports = BigInteger;
+  } else {}
 
 }).call(this);
 
@@ -62822,122 +58538,6 @@ function serializer(replacer, cycleReplacer) {
     return replacer == null ? value : replacer.call(this, key, value)
   }
 }
-
-
-/***/ }),
-
-/***/ 92064:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-let _fs
-try {
-  _fs = __nccwpck_require__(35744)
-} catch (_) {
-  _fs = __nccwpck_require__(79896)
-}
-const universalify = __nccwpck_require__(95077)
-const { stringify, stripBom } = __nccwpck_require__(79449)
-
-async function _readFile (file, options = {}) {
-  if (typeof options === 'string') {
-    options = { encoding: options }
-  }
-
-  const fs = options.fs || _fs
-
-  const shouldThrow = 'throws' in options ? options.throws : true
-
-  let data = await universalify.fromCallback(fs.readFile)(file, options)
-
-  data = stripBom(data)
-
-  let obj
-  try {
-    obj = JSON.parse(data, options ? options.reviver : null)
-  } catch (err) {
-    if (shouldThrow) {
-      err.message = `${file}: ${err.message}`
-      throw err
-    } else {
-      return null
-    }
-  }
-
-  return obj
-}
-
-const readFile = universalify.fromPromise(_readFile)
-
-function readFileSync (file, options = {}) {
-  if (typeof options === 'string') {
-    options = { encoding: options }
-  }
-
-  const fs = options.fs || _fs
-
-  const shouldThrow = 'throws' in options ? options.throws : true
-
-  try {
-    let content = fs.readFileSync(file, options)
-    content = stripBom(content)
-    return JSON.parse(content, options.reviver)
-  } catch (err) {
-    if (shouldThrow) {
-      err.message = `${file}: ${err.message}`
-      throw err
-    } else {
-      return null
-    }
-  }
-}
-
-async function _writeFile (file, obj, options = {}) {
-  const fs = options.fs || _fs
-
-  const str = stringify(obj, options)
-
-  await universalify.fromCallback(fs.writeFile)(file, str, options)
-}
-
-const writeFile = universalify.fromPromise(_writeFile)
-
-function writeFileSync (file, obj, options = {}) {
-  const fs = options.fs || _fs
-
-  const str = stringify(obj, options)
-  // not sure if fs.writeFileSync returns anything, but just in case
-  return fs.writeFileSync(file, str, options)
-}
-
-const jsonfile = {
-  readFile,
-  readFileSync,
-  writeFile,
-  writeFileSync
-}
-
-module.exports = jsonfile
-
-
-/***/ }),
-
-/***/ 79449:
-/***/ ((module) => {
-
-function stringify (obj, { EOL = '\n', finalEOL = true, replacer = null, spaces } = {}) {
-  const EOF = finalEOL ? EOL : ''
-  const str = JSON.stringify(obj, replacer, spaces)
-
-  return str.replace(/\n/g, EOL) + EOF
-}
-
-function stripBom (content) {
-  // we do this because JSON.parse would convert it to a utf8 string if encoding wasn't specified
-  if (Buffer.isBuffer(content)) content = content.toString('utf8')
-  return content.replace(/^\uFEFF/, '')
-}
-
-module.exports = { stringify, stripBom }
 
 
 /***/ }),
@@ -64455,7 +60055,6 @@ function mergeObjects(provided, overrides, defaults)
 /***/ 38622:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var bufferEqual = __nccwpck_require__(39732);
 var Buffer = (__nccwpck_require__(93058).Buffer);
 var crypto = __nccwpck_require__(76982);
 var formatEcdsa = __nccwpck_require__(325);
@@ -64592,10 +60191,25 @@ function createHmacSigner(bits) {
   }
 }
 
+var bufferEqual;
+var timingSafeEqual = 'timingSafeEqual' in crypto ? function timingSafeEqual(a, b) {
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(a, b)
+} : function timingSafeEqual(a, b) {
+  if (!bufferEqual) {
+    bufferEqual = __nccwpck_require__(39732);
+  }
+
+  return bufferEqual(a, b)
+}
+
 function createHmacVerifier(bits) {
   return function verify(thing, signature, secret) {
     var computedSig = createHmacSigner(bits)(thing, secret);
-    return bufferEqual(Buffer.from(signature), Buffer.from(computedSig));
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(computedSig));
   }
 }
 
@@ -64696,7 +60310,7 @@ module.exports = function jwa(algorithm) {
     es: createECDSAVerifer,
     none: createNoneVerifier,
   }
-  var match = algorithm.match(/^(RS|PS|ES|HS)(256|384|512)$|^(none)$/i);
+  var match = algorithm.match(/^(RS|PS|ES|HS)(256|384|512)$|^(none)$/);
   if (!match)
     throw typeError(MSG_INVALID_ALGORITHM, algorithm);
   var algo = (match[1] || match[3]).toLowerCase();
@@ -64841,7 +60455,12 @@ function jwsSign(opts) {
 }
 
 function SignStream(opts) {
-  var secret = opts.secret||opts.privateKey||opts.key;
+  var secret = opts.secret;
+  secret = secret == null ? opts.privateKey : secret;
+  secret = secret == null ? opts.key : secret;
+  if (/^hs/i.test(opts.header.alg) === true && secret == null) {
+    throw new TypeError('secret must be a string or buffer or a KeyObject')
+  }
   var secretStream = new DataStream(secret);
   this.readable = true;
   this.header = opts.header;
@@ -64988,7 +60607,12 @@ function jwsDecode(jwsSig, opts) {
 
 function VerifyStream(opts) {
   opts = opts || {};
-  var secretOrKey = opts.secret||opts.publicKey||opts.key;
+  var secretOrKey = opts.secret;
+  secretOrKey = secretOrKey == null ? opts.publicKey : secretOrKey;
+  secretOrKey = secretOrKey == null ? opts.key : secretOrKey;
+  if (/^hs/i.test(opts.algorithm) === true && secretOrKey == null) {
+    throw new TypeError('secret must be a string or buffer or a KeyObject')
+  }
   var secretStream = new DataStream(secretOrKey);
   this.readable = true;
   this.algorithm = opts.algorithm;
@@ -68249,13 +63873,21 @@ const events_1 = __nccwpck_require__(24434);
 const debug_1 = __importDefault(__nccwpck_require__(2830));
 const url_1 = __nccwpck_require__(87016);
 const agent_base_1 = __nccwpck_require__(98894);
-const http_proxy_agent_1 = __nccwpck_require__(81970);
-const https_proxy_agent_1 = __nccwpck_require__(3669);
-const socks_proxy_agent_1 = __nccwpck_require__(53357);
 const get_uri_1 = __nccwpck_require__(23624);
 const pac_resolver_1 = __nccwpck_require__(80598);
 const quickjs_emscripten_1 = __nccwpck_require__(91942);
 const debug = (0, debug_1.default)('pac-proxy-agent');
+const setServernameFromNonIpHost = (options) => {
+    if (options.servername === undefined &&
+        options.host &&
+        !net.isIP(options.host)) {
+        return {
+            ...options,
+            servername: options.host,
+        };
+    }
+    return options;
+};
 /**
  * The `PacProxyAgent` class.
  *
@@ -68292,8 +63924,6 @@ class PacProxyAgent extends agent_base_1.Agent {
     /**
      * Loads the PAC proxy file from the source if necessary, and returns
      * a generated `FindProxyForURL()` resolver function to use.
-     *
-     * @api private
      */
     getResolver() {
         if (!this.resolverPromise) {
@@ -68350,32 +63980,16 @@ class PacProxyAgent extends agent_base_1.Agent {
      */
     async connect(req, opts) {
         const { secureEndpoint } = opts;
+        const isWebSocket = req.getHeader('upgrade') === 'websocket';
         // First, get a generated `FindProxyForURL()` function,
         // either cached or retrieved from the source
         const resolver = await this.getResolver();
         // Calculate the `url` parameter
+        const protocol = secureEndpoint ? 'https:' : 'http:';
+        const host = opts.host && net.isIPv6(opts.host) ? `[${opts.host}]` : opts.host;
         const defaultPort = secureEndpoint ? 443 : 80;
-        let path = req.path;
-        let search = null;
-        const firstQuestion = path.indexOf('?');
-        if (firstQuestion !== -1) {
-            search = path.substring(firstQuestion);
-            path = path.substring(0, firstQuestion);
-        }
-        const urlOpts = {
-            ...opts,
-            protocol: secureEndpoint ? 'https:' : 'http:',
-            pathname: path,
-            search,
-            // need to use `hostname` instead of `host` otherwise `port` is ignored
-            hostname: opts.host,
-            host: null,
-            href: null,
-            // set `port` to null when it is the protocol default port (80 / 443)
-            port: defaultPort === opts.port ? null : opts.port,
-        };
-        const url = (0, url_1.format)(urlOpts);
-        debug('url: %o', url);
+        const url = Object.assign(new url_1.URL(req.path, `${protocol}//${host}`), defaultPort ? undefined : { port: opts.port });
+        debug('url: %s', url);
         let result = await resolver(url);
         // Default to "DIRECT" if a falsey value was returned (or nothing)
         if (!result) {
@@ -68396,13 +64010,7 @@ class PacProxyAgent extends agent_base_1.Agent {
             if (type === 'DIRECT') {
                 // Direct connection to the destination endpoint
                 if (secureEndpoint) {
-                    const servername = opts.servername || opts.host;
-                    socket = tls.connect({
-                        ...opts,
-                        servername: !servername || net.isIP(servername)
-                            ? undefined
-                            : servername,
-                    });
+                    socket = tls.connect(setServernameFromNonIpHost(opts));
                 }
                 else {
                     socket = net.connect(opts);
@@ -68410,11 +64018,13 @@ class PacProxyAgent extends agent_base_1.Agent {
             }
             else if (type === 'SOCKS' || type === 'SOCKS5') {
                 // Use a SOCKSv5h proxy
-                agent = new socks_proxy_agent_1.SocksProxyAgent(`socks://${target}`, this.opts);
+                const { SocksProxyAgent } = await Promise.resolve().then(() => __importStar(__nccwpck_require__(53357)));
+                agent = new SocksProxyAgent(`socks://${target}`, this.opts);
             }
             else if (type === 'SOCKS4') {
                 // Use a SOCKSv4a proxy
-                agent = new socks_proxy_agent_1.SocksProxyAgent(`socks4a://${target}`, this.opts);
+                const { SocksProxyAgent } = await Promise.resolve().then(() => __importStar(__nccwpck_require__(53357)));
+                agent = new SocksProxyAgent(`socks4a://${target}`, this.opts);
             }
             else if (type === 'PROXY' ||
                 type === 'HTTP' ||
@@ -68422,11 +64032,13 @@ class PacProxyAgent extends agent_base_1.Agent {
                 // Use an HTTP or HTTPS proxy
                 // http://dev.chromium.org/developers/design-documents/secure-web-proxy
                 const proxyURL = `${type === 'HTTPS' ? 'https' : 'http'}://${target}`;
-                if (secureEndpoint) {
-                    agent = new https_proxy_agent_1.HttpsProxyAgent(proxyURL, this.opts);
+                if (secureEndpoint || isWebSocket) {
+                    const { HttpsProxyAgent } = await Promise.resolve().then(() => __importStar(__nccwpck_require__(3669)));
+                    agent = new HttpsProxyAgent(proxyURL, this.opts);
                 }
                 else {
-                    agent = new http_proxy_agent_1.HttpProxyAgent(proxyURL, this.opts);
+                    const { HttpProxyAgent } = await Promise.resolve().then(() => __importStar(__nccwpck_require__(81970)));
+                    agent = new HttpProxyAgent(proxyURL, this.opts);
                 }
             }
             try {
@@ -69584,35 +65196,37 @@ const lru_cache_1 = __importDefault(__nccwpck_require__(58973));
 const agent_base_1 = __nccwpck_require__(98894);
 const debug_1 = __importDefault(__nccwpck_require__(2830));
 const proxy_from_env_1 = __nccwpck_require__(77777);
-const pac_proxy_agent_1 = __nccwpck_require__(84498);
-const http_proxy_agent_1 = __nccwpck_require__(81970);
-const https_proxy_agent_1 = __nccwpck_require__(3669);
-const socks_proxy_agent_1 = __nccwpck_require__(53357);
 const debug = (0, debug_1.default)('proxy-agent');
-const PROTOCOLS = [
-    ...http_proxy_agent_1.HttpProxyAgent.protocols,
-    ...socks_proxy_agent_1.SocksProxyAgent.protocols,
-    ...pac_proxy_agent_1.PacProxyAgent.protocols,
-];
+/**
+ * Shorthands for built-in supported types.
+ * Lazily loaded since some of these imports can be quite expensive
+ * (in particular, pac-proxy-agent).
+ */
+const wellKnownAgents = {
+    http: async () => (await Promise.resolve().then(() => __importStar(__nccwpck_require__(81970)))).HttpProxyAgent,
+    https: async () => (await Promise.resolve().then(() => __importStar(__nccwpck_require__(3669)))).HttpsProxyAgent,
+    socks: async () => (await Promise.resolve().then(() => __importStar(__nccwpck_require__(53357)))).SocksProxyAgent,
+    pac: async () => (await Promise.resolve().then(() => __importStar(__nccwpck_require__(84498)))).PacProxyAgent,
+};
 /**
  * Supported proxy types.
  */
 exports.proxies = {
-    http: [http_proxy_agent_1.HttpProxyAgent, https_proxy_agent_1.HttpsProxyAgent],
-    https: [http_proxy_agent_1.HttpProxyAgent, https_proxy_agent_1.HttpsProxyAgent],
-    socks: [socks_proxy_agent_1.SocksProxyAgent, socks_proxy_agent_1.SocksProxyAgent],
-    socks4: [socks_proxy_agent_1.SocksProxyAgent, socks_proxy_agent_1.SocksProxyAgent],
-    socks4a: [socks_proxy_agent_1.SocksProxyAgent, socks_proxy_agent_1.SocksProxyAgent],
-    socks5: [socks_proxy_agent_1.SocksProxyAgent, socks_proxy_agent_1.SocksProxyAgent],
-    socks5h: [socks_proxy_agent_1.SocksProxyAgent, socks_proxy_agent_1.SocksProxyAgent],
-    'pac+data': [pac_proxy_agent_1.PacProxyAgent, pac_proxy_agent_1.PacProxyAgent],
-    'pac+file': [pac_proxy_agent_1.PacProxyAgent, pac_proxy_agent_1.PacProxyAgent],
-    'pac+ftp': [pac_proxy_agent_1.PacProxyAgent, pac_proxy_agent_1.PacProxyAgent],
-    'pac+http': [pac_proxy_agent_1.PacProxyAgent, pac_proxy_agent_1.PacProxyAgent],
-    'pac+https': [pac_proxy_agent_1.PacProxyAgent, pac_proxy_agent_1.PacProxyAgent],
+    http: [wellKnownAgents.http, wellKnownAgents.https],
+    https: [wellKnownAgents.http, wellKnownAgents.https],
+    socks: [wellKnownAgents.socks, wellKnownAgents.socks],
+    socks4: [wellKnownAgents.socks, wellKnownAgents.socks],
+    socks4a: [wellKnownAgents.socks, wellKnownAgents.socks],
+    socks5: [wellKnownAgents.socks, wellKnownAgents.socks],
+    socks5h: [wellKnownAgents.socks, wellKnownAgents.socks],
+    'pac+data': [wellKnownAgents.pac, wellKnownAgents.pac],
+    'pac+file': [wellKnownAgents.pac, wellKnownAgents.pac],
+    'pac+ftp': [wellKnownAgents.pac, wellKnownAgents.pac],
+    'pac+http': [wellKnownAgents.pac, wellKnownAgents.pac],
+    'pac+https': [wellKnownAgents.pac, wellKnownAgents.pac],
 };
 function isValidProtocol(v) {
-    return PROTOCOLS.includes(v);
+    return Object.keys(exports.proxies).includes(v);
 }
 /**
  * Uses the appropriate `Agent` subclass based off of the "proxy"
@@ -69627,7 +65241,10 @@ class ProxyAgent extends agent_base_1.Agent {
         /**
          * Cache for `Agent` instances.
          */
-        this.cache = new lru_cache_1.default({ max: 20 });
+        this.cache = new lru_cache_1.default({
+            max: 20,
+            dispose: (agent) => agent.destroy(),
+        });
         debug('Creating new ProxyAgent instance: %o', opts);
         this.connectOpts = opts;
         this.httpAgent = opts?.httpAgent || new http.Agent(opts);
@@ -69647,7 +65264,7 @@ class ProxyAgent extends agent_base_1.Agent {
                 : 'http:';
         const host = req.getHeader('host');
         const url = new url_1.URL(req.path, `${protocol}//${host}`).href;
-        const proxy = await this.getProxyForUrl(url);
+        const proxy = await this.getProxyForUrl(url, req);
         if (!proxy) {
             debug('Proxy not enabled for URL: %o', url);
             return secureEndpoint ? this.httpsAgent : this.httpAgent;
@@ -69663,8 +65280,7 @@ class ProxyAgent extends agent_base_1.Agent {
             if (!isValidProtocol(proxyProto)) {
                 throw new Error(`Unsupported protocol for proxy URL: ${proxy}`);
             }
-            const ctor = exports.proxies[proxyProto][secureEndpoint || isWebSocket ? 1 : 0];
-            // @ts-expect-error meh…
+            const ctor = await exports.proxies[proxyProto][secureEndpoint || isWebSocket ? 1 : 0]();
             agent = new ctor(proxy, this.connectOpts);
             this.cache.set(cacheKey, agent);
         }
@@ -69965,16 +65581,18 @@ var parseValues = function parseQueryStringValues(str, options) {
         } else {
             key = options.decoder(part.slice(0, pos), defaults.decoder, charset, 'key');
 
-            val = utils.maybeMap(
-                parseArrayValue(
-                    part.slice(pos + 1),
-                    options,
-                    isArray(obj[key]) ? obj[key].length : 0
-                ),
-                function (encodedVal) {
-                    return options.decoder(encodedVal, defaults.decoder, charset, 'value');
-                }
-            );
+            if (key !== null) {
+                val = utils.maybeMap(
+                    parseArrayValue(
+                        part.slice(pos + 1),
+                        options,
+                        isArray(obj[key]) ? obj[key].length : 0
+                    ),
+                    function (encodedVal) {
+                        return options.decoder(encodedVal, defaults.decoder, charset, 'value');
+                    }
+                );
+            }
         }
 
         if (val && options.interpretNumericEntities && charset === 'iso-8859-1') {
@@ -69985,11 +65603,18 @@ var parseValues = function parseQueryStringValues(str, options) {
             val = isArray(val) ? [val] : val;
         }
 
-        var existing = has.call(obj, key);
-        if (existing && options.duplicates === 'combine') {
-            obj[key] = utils.combine(obj[key], val);
-        } else if (!existing || options.duplicates === 'last') {
-            obj[key] = val;
+        if (key !== null) {
+            var existing = has.call(obj, key);
+            if (existing && options.duplicates === 'combine') {
+                obj[key] = utils.combine(
+                    obj[key],
+                    val,
+                    options.arrayLimit,
+                    options.plainObjects
+                );
+            } else if (!existing || options.duplicates === 'last') {
+                obj[key] = val;
+            }
         }
     }
 
@@ -70010,9 +65635,19 @@ var parseObject = function (chain, val, options, valuesParsed) {
         var root = chain[i];
 
         if (root === '[]' && options.parseArrays) {
-            obj = options.allowEmptyArrays && (leaf === '' || (options.strictNullHandling && leaf === null))
-                ? []
-                : utils.combine([], leaf);
+            if (utils.isOverflow(leaf)) {
+                // leaf is already an overflow object, preserve it
+                obj = leaf;
+            } else {
+                obj = options.allowEmptyArrays && (leaf === '' || (options.strictNullHandling && leaf === null))
+                    ? []
+                    : utils.combine(
+                        [],
+                        leaf,
+                        options.arrayLimit,
+                        options.plainObjects
+                    );
+            }
         } else {
             obj = options.plainObjects ? { __proto__: null } : {};
             var cleanRoot = root.charAt(0) === '[' && root.charAt(root.length - 1) === ']' ? root.slice(1, -1) : root;
@@ -70040,29 +65675,28 @@ var parseObject = function (chain, val, options, valuesParsed) {
     return leaf;
 };
 
-var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
-    if (!givenKey) {
-        return;
-    }
-
-    // Transform dot notation to bracket notation
+var splitKeyIntoSegments = function splitKeyIntoSegments(givenKey, options) {
     var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, '[$1]') : givenKey;
 
-    // The regex chunks
+    if (options.depth <= 0) {
+        if (!options.plainObjects && has.call(Object.prototype, key)) {
+            if (!options.allowPrototypes) {
+                return;
+            }
+        }
+
+        return [key];
+    }
 
     var brackets = /(\[[^[\]]*])/;
     var child = /(\[[^[\]]*])/g;
 
-    // Get the parent
-
-    var segment = options.depth > 0 && brackets.exec(key);
+    var segment = brackets.exec(key);
     var parent = segment ? key.slice(0, segment.index) : key;
 
-    // Stash the parent if it exists
-
     var keys = [];
+
     if (parent) {
-        // If we aren't using plain objects, optionally prefix keys that would overwrite object prototype properties
         if (!options.plainObjects && has.call(Object.prototype, parent)) {
             if (!options.allowPrototypes) {
                 return;
@@ -70072,26 +65706,40 @@ var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesPars
         keys.push(parent);
     }
 
-    // Loop through children appending to the array until we hit depth
-
     var i = 0;
-    while (options.depth > 0 && (segment = child.exec(key)) !== null && i < options.depth) {
+    while ((segment = child.exec(key)) !== null && i < options.depth) {
         i += 1;
-        if (!options.plainObjects && has.call(Object.prototype, segment[1].slice(1, -1))) {
+
+        var segmentContent = segment[1].slice(1, -1);
+        if (!options.plainObjects && has.call(Object.prototype, segmentContent)) {
             if (!options.allowPrototypes) {
                 return;
             }
         }
+
         keys.push(segment[1]);
     }
-
-    // If there's a remainder, check strictDepth option for throw, else just add whatever is left
 
     if (segment) {
         if (options.strictDepth === true) {
             throw new RangeError('Input depth exceeded depth option of ' + options.depth + ' and strictDepth is true');
         }
+
         keys.push('[' + key.slice(segment.index) + ']');
+    }
+
+    return keys;
+};
+
+var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
+    if (!givenKey) {
+        return;
+    }
+
+    var keys = splitKeyIntoSegments(givenKey, options);
+
+    if (!keys) {
+        return;
     }
 
     return parseObject(keys, val, options, valuesParsed);
@@ -70558,9 +66206,31 @@ module.exports = function (object, opts) {
 
 
 var formats = __nccwpck_require__(86032);
+var getSideChannel = __nccwpck_require__(94753);
 
 var has = Object.prototype.hasOwnProperty;
 var isArray = Array.isArray;
+
+// Track objects created from arrayLimit overflow using side-channel
+// Stores the current max numeric index for O(1) lookup
+var overflowChannel = getSideChannel();
+
+var markOverflow = function markOverflow(obj, maxIndex) {
+    overflowChannel.set(obj, maxIndex);
+    return obj;
+};
+
+var isOverflow = function isOverflow(obj) {
+    return overflowChannel.has(obj);
+};
+
+var getMaxIndex = function getMaxIndex(obj) {
+    return overflowChannel.get(obj);
+};
+
+var setMaxIndex = function setMaxIndex(obj, maxIndex) {
+    overflowChannel.set(obj, maxIndex);
+};
 
 var hexTable = (function () {
     var array = [];
@@ -70611,7 +66281,12 @@ var merge = function merge(target, source, options) {
         if (isArray(target)) {
             target.push(source);
         } else if (target && typeof target === 'object') {
-            if (
+            if (isOverflow(target)) {
+                // Add at next numeric index for overflow objects
+                var newIndex = getMaxIndex(target) + 1;
+                target[newIndex] = source;
+                setMaxIndex(target, newIndex);
+            } else if (
                 (options && (options.plainObjects || options.allowPrototypes))
                 || !has.call(Object.prototype, source)
             ) {
@@ -70625,6 +66300,18 @@ var merge = function merge(target, source, options) {
     }
 
     if (!target || typeof target !== 'object') {
+        if (isOverflow(source)) {
+            // Create new object with target at 0, source values shifted by 1
+            var sourceKeys = Object.keys(source);
+            var result = options && options.plainObjects
+                ? { __proto__: null, 0: target }
+                : { 0: target };
+            for (var m = 0; m < sourceKeys.length; m++) {
+                var oldKey = parseInt(sourceKeys[m], 10);
+                result[oldKey + 1] = source[sourceKeys[m]];
+            }
+            return markOverflow(result, getMaxIndex(source) + 1);
+        }
         return [target].concat(source);
     }
 
@@ -70796,8 +66483,20 @@ var isBuffer = function isBuffer(obj) {
     return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 };
 
-var combine = function combine(a, b) {
-    return [].concat(a, b);
+var combine = function combine(a, b, arrayLimit, plainObjects) {
+    // If 'a' is already an overflow object, add to it
+    if (isOverflow(a)) {
+        var newIndex = getMaxIndex(a) + 1;
+        a[newIndex] = b;
+        setMaxIndex(a, newIndex);
+        return a;
+    }
+
+    var result = [].concat(a, b);
+    if (result.length > arrayLimit) {
+        return markOverflow(arrayToObject(result, { plainObjects: plainObjects }), result.length - 1);
+    }
+    return result;
 };
 
 var maybeMap = function maybeMap(val, fn) {
@@ -70819,6 +66518,7 @@ module.exports = {
     decode: decode,
     encode: encode,
     isBuffer: isBuffer,
+    isOverflow: isOverflow,
     isRegExp: isRegExp,
     maybeMap: maybeMap,
     merge: merge
@@ -70987,6 +66687,9 @@ module.exports = safer
 /***/ 89379:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const ANY = Symbol('SemVer ANY')
 // hoisted class for cyclic dependency
 class Comparator {
@@ -71135,6 +66838,11 @@ const Range = __nccwpck_require__(96782)
 /***/ 96782:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
+const SPACE_CHARACTERS = /\s+/g
+
 // hoisted class for cyclic dependency
 class Range {
   constructor (range, options) {
@@ -71155,7 +66863,7 @@ class Range {
       // just put it in the set and return
       this.raw = range.value
       this.set = [[range]]
-      this.format()
+      this.formatted = undefined
       return this
     }
 
@@ -71166,10 +66874,7 @@ class Range {
     // First reduce all whitespace as much as possible so we do not have to rely
     // on potentially slow regexes like \s*. This is then stored and used for
     // future error messages as well.
-    this.raw = range
-      .trim()
-      .split(/\s+/)
-      .join(' ')
+    this.raw = range.trim().replace(SPACE_CHARACTERS, ' ')
 
     // First, split on ||
     this.set = this.raw
@@ -71203,14 +66908,29 @@ class Range {
       }
     }
 
-    this.format()
+    this.formatted = undefined
+  }
+
+  get range () {
+    if (this.formatted === undefined) {
+      this.formatted = ''
+      for (let i = 0; i < this.set.length; i++) {
+        if (i > 0) {
+          this.formatted += '||'
+        }
+        const comps = this.set[i]
+        for (let k = 0; k < comps.length; k++) {
+          if (k > 0) {
+            this.formatted += ' '
+          }
+          this.formatted += comps[k].toString().trim()
+        }
+      }
+    }
+    return this.formatted
   }
 
   format () {
-    this.range = this.set
-      .map((comps) => comps.join(' ').trim())
-      .join('||')
-      .trim()
     return this.range
   }
 
@@ -71335,8 +67055,8 @@ class Range {
 
 module.exports = Range
 
-const LRU = __nccwpck_require__(5882)
-const cache = new LRU({ max: 1000 })
+const LRU = __nccwpck_require__(61383)
+const cache = new LRU()
 
 const parseOptions = __nccwpck_require__(70356)
 const Comparator = __nccwpck_require__(89379)
@@ -71376,6 +67096,7 @@ const isSatisfiable = (comparators, options) => {
 // already replaced the hyphen ranges
 // turn into a set of JUST comparators.
 const parseComparator = (comp, options) => {
+  comp = comp.replace(re[t.BUILD], '')
   debug('comp', comp, options)
   comp = replaceCarets(comp, options)
   debug('caret', comp)
@@ -71607,9 +67328,10 @@ const replaceGTE0 = (comp, options) => {
 // 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
 // 1.2.3 - 3.4 => >=1.2.0 <3.5.0-0 Any 3.4.x will do
 // 1.2 - 3.4 => >=1.2.0 <3.5.0-0
+// TODO build?
 const hyphenReplace = incPr => ($0,
   from, fM, fm, fp, fpr, fb,
-  to, tM, tm, tp, tpr, tb) => {
+  to, tM, tm, tp, tpr) => {
   if (isX(fM)) {
     from = ''
   } else if (isX(fm)) {
@@ -71681,6 +67403,9 @@ const testSet = (set, version, options) => {
 /***/ 7163:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const debug = __nccwpck_require__(1159)
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(45101)
 const { safeRe: re, t } = __nccwpck_require__(95471)
@@ -71693,7 +67418,7 @@ class SemVer {
 
     if (version instanceof SemVer) {
       if (version.loose === !!options.loose &&
-          version.includePrerelease === !!options.includePrerelease) {
+        version.includePrerelease === !!options.includePrerelease) {
         return version
       } else {
         version = version.version
@@ -71792,11 +67517,25 @@ class SemVer {
       other = new SemVer(other, this.options)
     }
 
-    return (
-      compareIdentifiers(this.major, other.major) ||
-      compareIdentifiers(this.minor, other.minor) ||
-      compareIdentifiers(this.patch, other.patch)
-    )
+    if (this.major < other.major) {
+      return -1
+    }
+    if (this.major > other.major) {
+      return 1
+    }
+    if (this.minor < other.minor) {
+      return -1
+    }
+    if (this.minor > other.minor) {
+      return 1
+    }
+    if (this.patch < other.patch) {
+      return -1
+    }
+    if (this.patch > other.patch) {
+      return 1
+    }
+    return 0
   }
 
   comparePre (other) {
@@ -71841,7 +67580,7 @@ class SemVer {
     do {
       const a = this.build[i]
       const b = other.build[i]
-      debug('prerelease compare', i, a, b)
+      debug('build compare', i, a, b)
       if (a === undefined && b === undefined) {
         return 0
       } else if (b === undefined) {
@@ -71859,6 +67598,19 @@ class SemVer {
   // preminor will bump the version up to the next minor release, and immediately
   // down to pre-release. premajor and prepatch work the same way.
   inc (release, identifier, identifierBase) {
+    if (release.startsWith('pre')) {
+      if (!identifier && identifierBase === false) {
+        throw new Error('invalid increment argument: identifier is empty')
+      }
+      // Avoid an invalid semver results
+      if (identifier) {
+        const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE])
+        if (!match || match[1] !== identifier) {
+          throw new Error(`invalid identifier: ${identifier}`)
+        }
+      }
+    }
+
     switch (release) {
       case 'premajor':
         this.prerelease.length = 0
@@ -71888,6 +67640,12 @@ class SemVer {
           this.inc('patch', identifier, identifierBase)
         }
         this.inc('pre', identifier, identifierBase)
+        break
+      case 'release':
+        if (this.prerelease.length === 0) {
+          throw new Error(`version ${this.raw} is not a prerelease`)
+        }
+        this.prerelease.length = 0
         break
 
       case 'major':
@@ -71931,10 +67689,6 @@ class SemVer {
       // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
       case 'pre': {
         const base = Number(identifierBase) ? 1 : 0
-
-        if (!identifier && identifierBase === false) {
-          throw new Error('invalid increment argument: identifier is empty')
-        }
 
         if (this.prerelease.length === 0) {
           this.prerelease = [base]
@@ -71990,6 +67744,9 @@ module.exports = SemVer
 /***/ 1799:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const parse = __nccwpck_require__(16353)
 const clean = (version, options) => {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
@@ -72002,6 +67759,9 @@ module.exports = clean
 
 /***/ 28646:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const eq = __nccwpck_require__(55082)
 const neq = __nccwpck_require__(4974)
@@ -72061,6 +67821,9 @@ module.exports = cmp
 
 /***/ 35385:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const parse = __nccwpck_require__(16353)
@@ -72129,6 +67892,9 @@ module.exports = coerce
 /***/ 37648:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const compareBuild = (a, b, loose) => {
   const versionA = new SemVer(a, loose)
@@ -72143,6 +67909,9 @@ module.exports = compareBuild
 /***/ 56874:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const compareLoose = (a, b) => compare(a, b, true)
 module.exports = compareLoose
@@ -72152,6 +67921,9 @@ module.exports = compareLoose
 
 /***/ 78469:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const compare = (a, b, loose) =>
@@ -72164,6 +67936,9 @@ module.exports = compare
 
 /***/ 70711:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(16353)
 
@@ -72194,20 +67969,13 @@ const diff = (version1, version2) => {
       return 'major'
     }
 
-    // Otherwise it can be determined by checking the high version
-
-    if (highVersion.patch) {
-      // anything higher than a patch bump would result in the wrong version
+    // If the main part has no difference
+    if (lowVersion.compareMain(highVersion) === 0) {
+      if (lowVersion.minor && !lowVersion.patch) {
+        return 'minor'
+      }
       return 'patch'
     }
-
-    if (highVersion.minor) {
-      // anything higher than a minor bump would result in the wrong version
-      return 'minor'
-    }
-
-    // bumping major/minor/patch all have same result
-    return 'major'
   }
 
   // add the `pre` prefix if we are going to a prerelease version
@@ -72237,6 +68005,9 @@ module.exports = diff
 /***/ 55082:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const eq = (a, b, loose) => compare(a, b, loose) === 0
 module.exports = eq
@@ -72246,6 +68017,9 @@ module.exports = eq
 
 /***/ 16599:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const compare = __nccwpck_require__(78469)
 const gt = (a, b, loose) => compare(a, b, loose) > 0
@@ -72257,6 +68031,9 @@ module.exports = gt
 /***/ 41236:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const gte = (a, b, loose) => compare(a, b, loose) >= 0
 module.exports = gte
@@ -72266,6 +68043,9 @@ module.exports = gte
 
 /***/ 62338:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 
@@ -72293,6 +68073,9 @@ module.exports = inc
 /***/ 3872:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const lt = (a, b, loose) => compare(a, b, loose) < 0
 module.exports = lt
@@ -72302,6 +68085,9 @@ module.exports = lt
 
 /***/ 56717:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const compare = __nccwpck_require__(78469)
 const lte = (a, b, loose) => compare(a, b, loose) <= 0
@@ -72313,6 +68099,9 @@ module.exports = lte
 /***/ 68511:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const major = (a, loose) => new SemVer(a, loose).major
 module.exports = major
@@ -72322,6 +68111,9 @@ module.exports = major
 
 /***/ 32603:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const minor = (a, loose) => new SemVer(a, loose).minor
@@ -72333,6 +68125,9 @@ module.exports = minor
 /***/ 4974:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const neq = (a, b, loose) => compare(a, b, loose) !== 0
 module.exports = neq
@@ -72342,6 +68137,9 @@ module.exports = neq
 
 /***/ 16353:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const parse = (version, options, throwErrors = false) => {
@@ -72366,6 +68164,9 @@ module.exports = parse
 /***/ 48756:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const patch = (a, loose) => new SemVer(a, loose).patch
 module.exports = patch
@@ -72375,6 +68176,9 @@ module.exports = patch
 
 /***/ 15714:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(16353)
 const prerelease = (version, options) => {
@@ -72389,6 +68193,9 @@ module.exports = prerelease
 /***/ 32173:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(78469)
 const rcompare = (a, b, loose) => compare(b, a, loose)
 module.exports = rcompare
@@ -72399,6 +68206,9 @@ module.exports = rcompare
 /***/ 87192:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compareBuild = __nccwpck_require__(37648)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
@@ -72408,6 +68218,9 @@ module.exports = rsort
 
 /***/ 68011:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const satisfies = (version, range, options) => {
@@ -72426,6 +68239,9 @@ module.exports = satisfies
 /***/ 29872:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compareBuild = __nccwpck_require__(37648)
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
@@ -72435,6 +68251,9 @@ module.exports = sort
 
 /***/ 58780:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(16353)
 const valid = (version, options) => {
@@ -72448,6 +68267,9 @@ module.exports = valid
 
 /***/ 62088:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 // just pre-load all the stuff that index.js lazily exports
 const internalRe = __nccwpck_require__(95471)
@@ -72545,6 +68367,9 @@ module.exports = {
 /***/ 45101:
 /***/ ((module) => {
 
+"use strict";
+
+
 // Note: this is the semver.org version of the spec that it implements
 // Not necessarily the package version of this code.
 const SEMVER_SPEC_VERSION = '2.0.0'
@@ -72587,6 +68412,9 @@ module.exports = {
 /***/ 1159:
 /***/ ((module) => {
 
+"use strict";
+
+
 const debug = (
   typeof process === 'object' &&
   process.env &&
@@ -72603,8 +68431,15 @@ module.exports = debug
 /***/ 73348:
 /***/ ((module) => {
 
+"use strict";
+
+
 const numeric = /^[0-9]+$/
 const compareIdentifiers = (a, b) => {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a === b ? 0 : a < b ? -1 : 1
+  }
+
   const anum = numeric.test(a)
   const bnum = numeric.test(b)
 
@@ -72630,8 +68465,61 @@ module.exports = {
 
 /***/ }),
 
+/***/ 61383:
+/***/ ((module) => {
+
+"use strict";
+
+
+class LRUCache {
+  constructor () {
+    this.max = 1000
+    this.map = new Map()
+  }
+
+  get (key) {
+    const value = this.map.get(key)
+    if (value === undefined) {
+      return undefined
+    } else {
+      // Remove the key from the map and add it to the end
+      this.map.delete(key)
+      this.map.set(key, value)
+      return value
+    }
+  }
+
+  delete (key) {
+    return this.map.delete(key)
+  }
+
+  set (key, value) {
+    const deleted = this.delete(key)
+
+    if (!deleted && value !== undefined) {
+      // If cache is full, delete the least recently used item
+      if (this.map.size >= this.max) {
+        const firstKey = this.map.keys().next().value
+        this.delete(firstKey)
+      }
+
+      this.map.set(key, value)
+    }
+
+    return this
+  }
+}
+
+module.exports = LRUCache
+
+
+/***/ }),
+
 /***/ 70356:
 /***/ ((module) => {
+
+"use strict";
+
 
 // parse out just the options we care about
 const looseOption = Object.freeze({ loose: true })
@@ -72655,6 +68543,9 @@ module.exports = parseOptions
 /***/ 95471:
 /***/ ((module, exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const {
   MAX_SAFE_COMPONENT_LENGTH,
   MAX_SAFE_BUILD_LENGTH,
@@ -72667,6 +68558,7 @@ exports = module.exports = {}
 const re = exports.re = []
 const safeRe = exports.safeRe = []
 const src = exports.src = []
+const safeSrc = exports.safeSrc = []
 const t = exports.t = {}
 let R = 0
 
@@ -72699,6 +68591,7 @@ const createToken = (name, value, isGlobal) => {
   debug(name, index, value)
   t[name] = index
   src[index] = value
+  safeSrc[index] = safe
   re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
   safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined)
 }
@@ -72731,12 +68624,14 @@ createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
+// Non-numberic identifiers include numberic identifiers but can be longer.
+// Therefore non-numberic identifiers must go first.
 
-createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NONNUMERICIDENTIFIER]
+}|${src[t.NUMERICIDENTIFIER]})`)
 
-createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NONNUMERICIDENTIFIER]
+}|${src[t.NUMERICIDENTIFIERLOOSE]})`)
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
@@ -72876,350 +68771,11 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 
 /***/ }),
 
-/***/ 5882:
+/***/ 12276:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
-
-// A linked list to keep track of recently-used-ness
-const Yallist = __nccwpck_require__(17864)
-
-const MAX = Symbol('max')
-const LENGTH = Symbol('length')
-const LENGTH_CALCULATOR = Symbol('lengthCalculator')
-const ALLOW_STALE = Symbol('allowStale')
-const MAX_AGE = Symbol('maxAge')
-const DISPOSE = Symbol('dispose')
-const NO_DISPOSE_ON_SET = Symbol('noDisposeOnSet')
-const LRU_LIST = Symbol('lruList')
-const CACHE = Symbol('cache')
-const UPDATE_AGE_ON_GET = Symbol('updateAgeOnGet')
-
-const naiveLength = () => 1
-
-// lruList is a yallist where the head is the youngest
-// item, and the tail is the oldest.  the list contains the Hit
-// objects as the entries.
-// Each Hit object has a reference to its Yallist.Node.  This
-// never changes.
-//
-// cache is a Map (or PseudoMap) that matches the keys to
-// the Yallist.Node object.
-class LRUCache {
-  constructor (options) {
-    if (typeof options === 'number')
-      options = { max: options }
-
-    if (!options)
-      options = {}
-
-    if (options.max && (typeof options.max !== 'number' || options.max < 0))
-      throw new TypeError('max must be a non-negative number')
-    // Kind of weird to have a default max of Infinity, but oh well.
-    const max = this[MAX] = options.max || Infinity
-
-    const lc = options.length || naiveLength
-    this[LENGTH_CALCULATOR] = (typeof lc !== 'function') ? naiveLength : lc
-    this[ALLOW_STALE] = options.stale || false
-    if (options.maxAge && typeof options.maxAge !== 'number')
-      throw new TypeError('maxAge must be a number')
-    this[MAX_AGE] = options.maxAge || 0
-    this[DISPOSE] = options.dispose
-    this[NO_DISPOSE_ON_SET] = options.noDisposeOnSet || false
-    this[UPDATE_AGE_ON_GET] = options.updateAgeOnGet || false
-    this.reset()
-  }
-
-  // resize the cache when the max changes.
-  set max (mL) {
-    if (typeof mL !== 'number' || mL < 0)
-      throw new TypeError('max must be a non-negative number')
-
-    this[MAX] = mL || Infinity
-    trim(this)
-  }
-  get max () {
-    return this[MAX]
-  }
-
-  set allowStale (allowStale) {
-    this[ALLOW_STALE] = !!allowStale
-  }
-  get allowStale () {
-    return this[ALLOW_STALE]
-  }
-
-  set maxAge (mA) {
-    if (typeof mA !== 'number')
-      throw new TypeError('maxAge must be a non-negative number')
-
-    this[MAX_AGE] = mA
-    trim(this)
-  }
-  get maxAge () {
-    return this[MAX_AGE]
-  }
-
-  // resize the cache when the lengthCalculator changes.
-  set lengthCalculator (lC) {
-    if (typeof lC !== 'function')
-      lC = naiveLength
-
-    if (lC !== this[LENGTH_CALCULATOR]) {
-      this[LENGTH_CALCULATOR] = lC
-      this[LENGTH] = 0
-      this[LRU_LIST].forEach(hit => {
-        hit.length = this[LENGTH_CALCULATOR](hit.value, hit.key)
-        this[LENGTH] += hit.length
-      })
-    }
-    trim(this)
-  }
-  get lengthCalculator () { return this[LENGTH_CALCULATOR] }
-
-  get length () { return this[LENGTH] }
-  get itemCount () { return this[LRU_LIST].length }
-
-  rforEach (fn, thisp) {
-    thisp = thisp || this
-    for (let walker = this[LRU_LIST].tail; walker !== null;) {
-      const prev = walker.prev
-      forEachStep(this, fn, walker, thisp)
-      walker = prev
-    }
-  }
-
-  forEach (fn, thisp) {
-    thisp = thisp || this
-    for (let walker = this[LRU_LIST].head; walker !== null;) {
-      const next = walker.next
-      forEachStep(this, fn, walker, thisp)
-      walker = next
-    }
-  }
-
-  keys () {
-    return this[LRU_LIST].toArray().map(k => k.key)
-  }
-
-  values () {
-    return this[LRU_LIST].toArray().map(k => k.value)
-  }
-
-  reset () {
-    if (this[DISPOSE] &&
-        this[LRU_LIST] &&
-        this[LRU_LIST].length) {
-      this[LRU_LIST].forEach(hit => this[DISPOSE](hit.key, hit.value))
-    }
-
-    this[CACHE] = new Map() // hash of items by key
-    this[LRU_LIST] = new Yallist() // list of items in order of use recency
-    this[LENGTH] = 0 // length of items in the list
-  }
-
-  dump () {
-    return this[LRU_LIST].map(hit =>
-      isStale(this, hit) ? false : {
-        k: hit.key,
-        v: hit.value,
-        e: hit.now + (hit.maxAge || 0)
-      }).toArray().filter(h => h)
-  }
-
-  dumpLru () {
-    return this[LRU_LIST]
-  }
-
-  set (key, value, maxAge) {
-    maxAge = maxAge || this[MAX_AGE]
-
-    if (maxAge && typeof maxAge !== 'number')
-      throw new TypeError('maxAge must be a number')
-
-    const now = maxAge ? Date.now() : 0
-    const len = this[LENGTH_CALCULATOR](value, key)
-
-    if (this[CACHE].has(key)) {
-      if (len > this[MAX]) {
-        del(this, this[CACHE].get(key))
-        return false
-      }
-
-      const node = this[CACHE].get(key)
-      const item = node.value
-
-      // dispose of the old one before overwriting
-      // split out into 2 ifs for better coverage tracking
-      if (this[DISPOSE]) {
-        if (!this[NO_DISPOSE_ON_SET])
-          this[DISPOSE](key, item.value)
-      }
-
-      item.now = now
-      item.maxAge = maxAge
-      item.value = value
-      this[LENGTH] += len - item.length
-      item.length = len
-      this.get(key)
-      trim(this)
-      return true
-    }
-
-    const hit = new Entry(key, value, len, now, maxAge)
-
-    // oversized objects fall out of cache automatically.
-    if (hit.length > this[MAX]) {
-      if (this[DISPOSE])
-        this[DISPOSE](key, value)
-
-      return false
-    }
-
-    this[LENGTH] += hit.length
-    this[LRU_LIST].unshift(hit)
-    this[CACHE].set(key, this[LRU_LIST].head)
-    trim(this)
-    return true
-  }
-
-  has (key) {
-    if (!this[CACHE].has(key)) return false
-    const hit = this[CACHE].get(key).value
-    return !isStale(this, hit)
-  }
-
-  get (key) {
-    return get(this, key, true)
-  }
-
-  peek (key) {
-    return get(this, key, false)
-  }
-
-  pop () {
-    const node = this[LRU_LIST].tail
-    if (!node)
-      return null
-
-    del(this, node)
-    return node.value
-  }
-
-  del (key) {
-    del(this, this[CACHE].get(key))
-  }
-
-  load (arr) {
-    // reset the cache
-    this.reset()
-
-    const now = Date.now()
-    // A previous serialized cache has the most recent items first
-    for (let l = arr.length - 1; l >= 0; l--) {
-      const hit = arr[l]
-      const expiresAt = hit.e || 0
-      if (expiresAt === 0)
-        // the item was created without expiration in a non aged cache
-        this.set(hit.k, hit.v)
-      else {
-        const maxAge = expiresAt - now
-        // dont add already expired items
-        if (maxAge > 0) {
-          this.set(hit.k, hit.v, maxAge)
-        }
-      }
-    }
-  }
-
-  prune () {
-    this[CACHE].forEach((value, key) => get(this, key, false))
-  }
-}
-
-const get = (self, key, doUse) => {
-  const node = self[CACHE].get(key)
-  if (node) {
-    const hit = node.value
-    if (isStale(self, hit)) {
-      del(self, node)
-      if (!self[ALLOW_STALE])
-        return undefined
-    } else {
-      if (doUse) {
-        if (self[UPDATE_AGE_ON_GET])
-          node.value.now = Date.now()
-        self[LRU_LIST].unshiftNode(node)
-      }
-    }
-    return hit.value
-  }
-}
-
-const isStale = (self, hit) => {
-  if (!hit || (!hit.maxAge && !self[MAX_AGE]))
-    return false
-
-  const diff = Date.now() - hit.now
-  return hit.maxAge ? diff > hit.maxAge
-    : self[MAX_AGE] && (diff > self[MAX_AGE])
-}
-
-const trim = self => {
-  if (self[LENGTH] > self[MAX]) {
-    for (let walker = self[LRU_LIST].tail;
-      self[LENGTH] > self[MAX] && walker !== null;) {
-      // We know that we're about to delete this one, and also
-      // what the next least recently used key will be, so just
-      // go ahead and set it now.
-      const prev = walker.prev
-      del(self, walker)
-      walker = prev
-    }
-  }
-}
-
-const del = (self, node) => {
-  if (node) {
-    const hit = node.value
-    if (self[DISPOSE])
-      self[DISPOSE](hit.key, hit.value)
-
-    self[LENGTH] -= hit.length
-    self[CACHE].delete(hit.key)
-    self[LRU_LIST].removeNode(node)
-  }
-}
-
-class Entry {
-  constructor (key, value, length, now, maxAge) {
-    this.key = key
-    this.value = value
-    this.length = length
-    this.now = now
-    this.maxAge = maxAge || 0
-  }
-}
-
-const forEachStep = (self, fn, node, thisp) => {
-  let hit = node.value
-  if (isStale(self, hit)) {
-    del(self, node)
-    if (!self[ALLOW_STALE])
-      hit = undefined
-  }
-  if (hit)
-    fn.call(thisp, hit.value, hit.key, self)
-}
-
-module.exports = LRUCache
-
-
-/***/ }),
-
-/***/ 12276:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 // Determine if version is greater than all the versions possible in the range.
 const outside = __nccwpck_require__(10280)
@@ -73231,6 +68787,9 @@ module.exports = gtr
 
 /***/ 23465:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const intersects = (r1, r2, options) => {
@@ -73246,6 +68805,9 @@ module.exports = intersects
 /***/ 15213:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const outside = __nccwpck_require__(10280)
 // Determine if version is less than all the versions possible in the range
 const ltr = (version, range, options) => outside(version, range, '<', options)
@@ -73256,6 +68818,9 @@ module.exports = ltr
 
 /***/ 73193:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const Range = __nccwpck_require__(96782)
@@ -73289,6 +68854,9 @@ module.exports = maxSatisfying
 /***/ 68595:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(7163)
 const Range = __nccwpck_require__(96782)
 const minSatisfying = (versions, range, options) => {
@@ -73319,6 +68887,9 @@ module.exports = minSatisfying
 
 /***/ 51866:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const Range = __nccwpck_require__(96782)
@@ -73387,6 +68958,9 @@ module.exports = minVersion
 
 /***/ 10280:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(7163)
 const Comparator = __nccwpck_require__(89379)
@@ -73475,6 +69049,9 @@ module.exports = outside
 /***/ 82028:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
@@ -73528,6 +69105,9 @@ module.exports = (versions, range, options) => {
 
 /***/ 61489:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const Comparator = __nccwpck_require__(89379)
@@ -73783,6 +69363,9 @@ module.exports = subset
 /***/ 54750:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const Range = __nccwpck_require__(96782)
 
 // Mostly just for testing and legacy API reasons
@@ -73797,6 +69380,9 @@ module.exports = toComparators
 
 /***/ 64737:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(96782)
 const validRange = (range, options) => {
@@ -75549,6 +71135,17 @@ const net = __importStar(__nccwpck_require__(69278));
 const tls = __importStar(__nccwpck_require__(64756));
 const url_1 = __nccwpck_require__(87016);
 const debug = (0, debug_1.default)('socks-proxy-agent');
+const setServernameFromNonIpHost = (options) => {
+    if (options.servername === undefined &&
+        options.host &&
+        !net.isIP(options.host)) {
+        return {
+            ...options,
+            servername: options.host,
+        };
+    }
+    return options;
+};
 function parseSocksURL(url) {
     let lookup = false;
     let type = 5;
@@ -75608,6 +71205,7 @@ class SocksProxyAgent extends agent_base_1.Agent {
         this.shouldLookup = lookup;
         this.proxy = proxy;
         this.timeout = opts?.timeout ?? null;
+        this.socketOptions = opts?.socketOptions ?? null;
     }
     /**
      * Initiates a SOCKS connection to the specified SOCKS proxy server,
@@ -75642,6 +71240,9 @@ class SocksProxyAgent extends agent_base_1.Agent {
             },
             command: 'connect',
             timeout: timeout ?? undefined,
+            // @ts-expect-error the type supplied by socks for socket_options is wider
+            // than necessary since socks will always override the host and port
+            socket_options: this.socketOptions ?? undefined,
         };
         const cleanup = (tlsSocket) => {
             req.destroy();
@@ -75660,11 +71261,9 @@ class SocksProxyAgent extends agent_base_1.Agent {
             // The proxy is connecting to a TLS server, so upgrade
             // this socket connection to a TLS connection.
             debug('Upgrading socket connection to TLS');
-            const servername = opts.servername || opts.host;
             const tlsSocket = tls.connect({
-                ...omit(opts, 'host', 'path', 'port'),
+                ...omit(setServernameFromNonIpHost(opts), 'host', 'path', 'port'),
                 socket,
-                servername: net.isIP(servername) ? undefined : servername,
             });
             tlsSocket.once('error', (error) => {
                 debug('Socket TLS error', error.message);
@@ -76722,6 +72321,7 @@ function validateCustomProxyAuth(proxy, options) {
 function isValidSocksRemoteHost(remoteHost) {
     return (remoteHost &&
         typeof remoteHost.host === 'string' &&
+        Buffer.byteLength(remoteHost.host) < 256 &&
         typeof remoteHost.port === 'number' &&
         remoteHost.port >= 0 &&
         remoteHost.port <= 65535);
@@ -76748,7 +72348,7 @@ function isValidTimeoutValue(value) {
 function ipv4ToInt32(ip) {
     const address = new ip_address_1.Address4(ip);
     // Convert the IPv4 address parts to an integer
-    return address.toArray().reduce((acc, part) => (acc << 8) + part, 0);
+    return address.toArray().reduce((acc, part) => (acc << 8) + part, 0) >>> 0;
 }
 exports.ipv4ToInt32 = ipv4ToInt32;
 function int32ToIpv4(int32) {
@@ -76770,7 +72370,11 @@ function ipToBuffer(ip) {
     else if (net.isIPv6(ip)) {
         // Handle IPv6 addresses
         const address = new ip_address_1.Address6(ip);
-        return Buffer.from(address.toByteArray());
+        return Buffer.from(address
+            .canonicalForm()
+            .split(':')
+            .map((segment) => segment.padStart(4, '0'))
+            .join(''), 'hex');
     }
     else {
         throw new Error('Invalid IP address format');
@@ -80077,244 +75681,6 @@ exports.SourceNode = __nccwpck_require__(49706).SourceNode;
 
 /***/ }),
 
-/***/ 19973:
-/***/ ((__unused_webpack_module, exports) => {
-
-/* global window, exports, define */
-
-!function() {
-    'use strict'
-
-    var re = {
-        not_string: /[^s]/,
-        not_bool: /[^t]/,
-        not_type: /[^T]/,
-        not_primitive: /[^v]/,
-        number: /[diefg]/,
-        numeric_arg: /[bcdiefguxX]/,
-        json: /[j]/,
-        not_json: /[^j]/,
-        text: /^[^\x25]+/,
-        modulo: /^\x25{2}/,
-        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-gijostTuvxX])/,
-        key: /^([a-z_][a-z_\d]*)/i,
-        key_access: /^\.([a-z_][a-z_\d]*)/i,
-        index_access: /^\[(\d+)\]/,
-        sign: /^[+-]/
-    }
-
-    function sprintf(key) {
-        // `arguments` is not an array, but should be fine for this call
-        return sprintf_format(sprintf_parse(key), arguments)
-    }
-
-    function vsprintf(fmt, argv) {
-        return sprintf.apply(null, [fmt].concat(argv || []))
-    }
-
-    function sprintf_format(parse_tree, argv) {
-        var cursor = 1, tree_length = parse_tree.length, arg, output = '', i, k, ph, pad, pad_character, pad_length, is_positive, sign
-        for (i = 0; i < tree_length; i++) {
-            if (typeof parse_tree[i] === 'string') {
-                output += parse_tree[i]
-            }
-            else if (typeof parse_tree[i] === 'object') {
-                ph = parse_tree[i] // convenience purposes only
-                if (ph.keys) { // keyword argument
-                    arg = argv[cursor]
-                    for (k = 0; k < ph.keys.length; k++) {
-                        if (arg == undefined) {
-                            throw new Error(sprintf('[sprintf] Cannot access property "%s" of undefined value "%s"', ph.keys[k], ph.keys[k-1]))
-                        }
-                        arg = arg[ph.keys[k]]
-                    }
-                }
-                else if (ph.param_no) { // positional argument (explicit)
-                    arg = argv[ph.param_no]
-                }
-                else { // positional argument (implicit)
-                    arg = argv[cursor++]
-                }
-
-                if (re.not_type.test(ph.type) && re.not_primitive.test(ph.type) && arg instanceof Function) {
-                    arg = arg()
-                }
-
-                if (re.numeric_arg.test(ph.type) && (typeof arg !== 'number' && isNaN(arg))) {
-                    throw new TypeError(sprintf('[sprintf] expecting number but found %T', arg))
-                }
-
-                if (re.number.test(ph.type)) {
-                    is_positive = arg >= 0
-                }
-
-                switch (ph.type) {
-                    case 'b':
-                        arg = parseInt(arg, 10).toString(2)
-                        break
-                    case 'c':
-                        arg = String.fromCharCode(parseInt(arg, 10))
-                        break
-                    case 'd':
-                    case 'i':
-                        arg = parseInt(arg, 10)
-                        break
-                    case 'j':
-                        arg = JSON.stringify(arg, null, ph.width ? parseInt(ph.width) : 0)
-                        break
-                    case 'e':
-                        arg = ph.precision ? parseFloat(arg).toExponential(ph.precision) : parseFloat(arg).toExponential()
-                        break
-                    case 'f':
-                        arg = ph.precision ? parseFloat(arg).toFixed(ph.precision) : parseFloat(arg)
-                        break
-                    case 'g':
-                        arg = ph.precision ? String(Number(arg.toPrecision(ph.precision))) : parseFloat(arg)
-                        break
-                    case 'o':
-                        arg = (parseInt(arg, 10) >>> 0).toString(8)
-                        break
-                    case 's':
-                        arg = String(arg)
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 't':
-                        arg = String(!!arg)
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 'T':
-                        arg = Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 'u':
-                        arg = parseInt(arg, 10) >>> 0
-                        break
-                    case 'v':
-                        arg = arg.valueOf()
-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
-                        break
-                    case 'x':
-                        arg = (parseInt(arg, 10) >>> 0).toString(16)
-                        break
-                    case 'X':
-                        arg = (parseInt(arg, 10) >>> 0).toString(16).toUpperCase()
-                        break
-                }
-                if (re.json.test(ph.type)) {
-                    output += arg
-                }
-                else {
-                    if (re.number.test(ph.type) && (!is_positive || ph.sign)) {
-                        sign = is_positive ? '+' : '-'
-                        arg = arg.toString().replace(re.sign, '')
-                    }
-                    else {
-                        sign = ''
-                    }
-                    pad_character = ph.pad_char ? ph.pad_char === '0' ? '0' : ph.pad_char.charAt(1) : ' '
-                    pad_length = ph.width - (sign + arg).length
-                    pad = ph.width ? (pad_length > 0 ? pad_character.repeat(pad_length) : '') : ''
-                    output += ph.align ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg)
-                }
-            }
-        }
-        return output
-    }
-
-    var sprintf_cache = Object.create(null)
-
-    function sprintf_parse(fmt) {
-        if (sprintf_cache[fmt]) {
-            return sprintf_cache[fmt]
-        }
-
-        var _fmt = fmt, match, parse_tree = [], arg_names = 0
-        while (_fmt) {
-            if ((match = re.text.exec(_fmt)) !== null) {
-                parse_tree.push(match[0])
-            }
-            else if ((match = re.modulo.exec(_fmt)) !== null) {
-                parse_tree.push('%')
-            }
-            else if ((match = re.placeholder.exec(_fmt)) !== null) {
-                if (match[2]) {
-                    arg_names |= 1
-                    var field_list = [], replacement_field = match[2], field_match = []
-                    if ((field_match = re.key.exec(replacement_field)) !== null) {
-                        field_list.push(field_match[1])
-                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
-                                field_list.push(field_match[1])
-                            }
-                            else {
-                                throw new SyntaxError('[sprintf] failed to parse named argument key')
-                            }
-                        }
-                    }
-                    else {
-                        throw new SyntaxError('[sprintf] failed to parse named argument key')
-                    }
-                    match[2] = field_list
-                }
-                else {
-                    arg_names |= 2
-                }
-                if (arg_names === 3) {
-                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
-                }
-
-                parse_tree.push(
-                    {
-                        placeholder: match[0],
-                        param_no:    match[1],
-                        keys:        match[2],
-                        sign:        match[3],
-                        pad_char:    match[4],
-                        align:       match[5],
-                        width:       match[6],
-                        precision:   match[7],
-                        type:        match[8]
-                    }
-                )
-            }
-            else {
-                throw new SyntaxError('[sprintf] unexpected placeholder')
-            }
-            _fmt = _fmt.substring(match[0].length)
-        }
-        return sprintf_cache[fmt] = parse_tree
-    }
-
-    /**
-     * export to either browser or node.js
-     */
-    /* eslint-disable quote-props */
-    if (true) {
-        exports.sprintf = sprintf
-        exports.vsprintf = vsprintf
-    }
-    if (typeof window !== 'undefined') {
-        window['sprintf'] = sprintf
-        window['vsprintf'] = vsprintf
-
-        if (typeof define === 'function' && define['amd']) {
-            define(function() {
-                return {
-                    'sprintf': sprintf,
-                    'vsprintf': vsprintf
-                }
-            })
-        }
-    }
-    /* eslint-enable quote-props */
-}(); // eslint-disable-line
-
-
-/***/ }),
-
 /***/ 70696:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -80932,7 +76298,7 @@ var CRYPTO_HAVE_ECDH = (crypto.createECDH !== undefined);
 
 var ecdh = __nccwpck_require__(59123);
 var ec = __nccwpck_require__(98051);
-var jsbn = (__nccwpck_require__(73188).BigInteger);
+var jsbn = (__nccwpck_require__(95947).BigInteger);
 
 function DiffieHellman(key) {
 	utils.assertCompatible(key, Key, [1, 4], 'key');
@@ -86952,7 +82318,7 @@ var algs = __nccwpck_require__(70696);
 var asn1 = __nccwpck_require__(89837);
 
 var ec = __nccwpck_require__(98051);
-var jsbn = (__nccwpck_require__(73188).BigInteger);
+var jsbn = (__nccwpck_require__(95947).BigInteger);
 var nacl = __nccwpck_require__(80668);
 
 var MAX_CLASS_DEPTH = 3;
@@ -87324,1367 +82690,6 @@ function opensshCipherInfo(cipher) {
 	}
 	return (inf);
 }
-
-
-/***/ }),
-
-/***/ 73188:
-/***/ (function(module, exports) {
-
-(function(){
-
-    // Copyright (c) 2005  Tom Wu
-    // All Rights Reserved.
-    // See "LICENSE" for details.
-
-    // Basic JavaScript BN library - subset useful for RSA encryption.
-
-    // Bits per digit
-    var dbits;
-
-    // JavaScript engine analysis
-    var canary = 0xdeadbeefcafe;
-    var j_lm = ((canary&0xffffff)==0xefcafe);
-
-    // (public) Constructor
-    function BigInteger(a,b,c) {
-      if(a != null)
-        if("number" == typeof a) this.fromNumber(a,b,c);
-        else if(b == null && "string" != typeof a) this.fromString(a,256);
-        else this.fromString(a,b);
-    }
-
-    // return new, unset BigInteger
-    function nbi() { return new BigInteger(null); }
-
-    // am: Compute w_j += (x*this_i), propagate carries,
-    // c is initial carry, returns final carry.
-    // c < 3*dvalue, x < 2*dvalue, this_i < dvalue
-    // We need to select the fastest one that works in this environment.
-
-    // am1: use a single mult and divide to get the high bits,
-    // max digit bits should be 26 because
-    // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
-    function am1(i,x,w,j,c,n) {
-      while(--n >= 0) {
-        var v = x*this[i++]+w[j]+c;
-        c = Math.floor(v/0x4000000);
-        w[j++] = v&0x3ffffff;
-      }
-      return c;
-    }
-    // am2 avoids a big mult-and-extract completely.
-    // Max digit bits should be <= 30 because we do bitwise ops
-    // on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
-    function am2(i,x,w,j,c,n) {
-      var xl = x&0x7fff, xh = x>>15;
-      while(--n >= 0) {
-        var l = this[i]&0x7fff;
-        var h = this[i++]>>15;
-        var m = xh*l+h*xl;
-        l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
-        c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
-        w[j++] = l&0x3fffffff;
-      }
-      return c;
-    }
-    // Alternately, set max digit bits to 28 since some
-    // browsers slow down when dealing with 32-bit numbers.
-    function am3(i,x,w,j,c,n) {
-      var xl = x&0x3fff, xh = x>>14;
-      while(--n >= 0) {
-        var l = this[i]&0x3fff;
-        var h = this[i++]>>14;
-        var m = xh*l+h*xl;
-        l = xl*l+((m&0x3fff)<<14)+w[j]+c;
-        c = (l>>28)+(m>>14)+xh*h;
-        w[j++] = l&0xfffffff;
-      }
-      return c;
-    }
-    var inBrowser = typeof navigator !== "undefined";
-    if(inBrowser && j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
-      BigInteger.prototype.am = am2;
-      dbits = 30;
-    }
-    else if(inBrowser && j_lm && (navigator.appName != "Netscape")) {
-      BigInteger.prototype.am = am1;
-      dbits = 26;
-    }
-    else { // Mozilla/Netscape seems to prefer am3
-      BigInteger.prototype.am = am3;
-      dbits = 28;
-    }
-
-    BigInteger.prototype.DB = dbits;
-    BigInteger.prototype.DM = ((1<<dbits)-1);
-    BigInteger.prototype.DV = (1<<dbits);
-
-    var BI_FP = 52;
-    BigInteger.prototype.FV = Math.pow(2,BI_FP);
-    BigInteger.prototype.F1 = BI_FP-dbits;
-    BigInteger.prototype.F2 = 2*dbits-BI_FP;
-
-    // Digit conversions
-    var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
-    var BI_RC = new Array();
-    var rr,vv;
-    rr = "0".charCodeAt(0);
-    for(vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
-    rr = "a".charCodeAt(0);
-    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-    rr = "A".charCodeAt(0);
-    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
-
-    function int2char(n) { return BI_RM.charAt(n); }
-    function intAt(s,i) {
-      var c = BI_RC[s.charCodeAt(i)];
-      return (c==null)?-1:c;
-    }
-
-    // (protected) copy this to r
-    function bnpCopyTo(r) {
-      for(var i = this.t-1; i >= 0; --i) r[i] = this[i];
-      r.t = this.t;
-      r.s = this.s;
-    }
-
-    // (protected) set from integer value x, -DV <= x < DV
-    function bnpFromInt(x) {
-      this.t = 1;
-      this.s = (x<0)?-1:0;
-      if(x > 0) this[0] = x;
-      else if(x < -1) this[0] = x+this.DV;
-      else this.t = 0;
-    }
-
-    // return bigint initialized to value
-    function nbv(i) { var r = nbi(); r.fromInt(i); return r; }
-
-    // (protected) set from string and radix
-    function bnpFromString(s,b) {
-      var k;
-      if(b == 16) k = 4;
-      else if(b == 8) k = 3;
-      else if(b == 256) k = 8; // byte array
-      else if(b == 2) k = 1;
-      else if(b == 32) k = 5;
-      else if(b == 4) k = 2;
-      else { this.fromRadix(s,b); return; }
-      this.t = 0;
-      this.s = 0;
-      var i = s.length, mi = false, sh = 0;
-      while(--i >= 0) {
-        var x = (k==8)?s[i]&0xff:intAt(s,i);
-        if(x < 0) {
-          if(s.charAt(i) == "-") mi = true;
-          continue;
-        }
-        mi = false;
-        if(sh == 0)
-          this[this.t++] = x;
-        else if(sh+k > this.DB) {
-          this[this.t-1] |= (x&((1<<(this.DB-sh))-1))<<sh;
-          this[this.t++] = (x>>(this.DB-sh));
-        }
-        else
-          this[this.t-1] |= x<<sh;
-        sh += k;
-        if(sh >= this.DB) sh -= this.DB;
-      }
-      if(k == 8 && (s[0]&0x80) != 0) {
-        this.s = -1;
-        if(sh > 0) this[this.t-1] |= ((1<<(this.DB-sh))-1)<<sh;
-      }
-      this.clamp();
-      if(mi) BigInteger.ZERO.subTo(this,this);
-    }
-
-    // (protected) clamp off excess high words
-    function bnpClamp() {
-      var c = this.s&this.DM;
-      while(this.t > 0 && this[this.t-1] == c) --this.t;
-    }
-
-    // (public) return string representation in given radix
-    function bnToString(b) {
-      if(this.s < 0) return "-"+this.negate().toString(b);
-      var k;
-      if(b == 16) k = 4;
-      else if(b == 8) k = 3;
-      else if(b == 2) k = 1;
-      else if(b == 32) k = 5;
-      else if(b == 4) k = 2;
-      else return this.toRadix(b);
-      var km = (1<<k)-1, d, m = false, r = "", i = this.t;
-      var p = this.DB-(i*this.DB)%k;
-      if(i-- > 0) {
-        if(p < this.DB && (d = this[i]>>p) > 0) { m = true; r = int2char(d); }
-        while(i >= 0) {
-          if(p < k) {
-            d = (this[i]&((1<<p)-1))<<(k-p);
-            d |= this[--i]>>(p+=this.DB-k);
-          }
-          else {
-            d = (this[i]>>(p-=k))&km;
-            if(p <= 0) { p += this.DB; --i; }
-          }
-          if(d > 0) m = true;
-          if(m) r += int2char(d);
-        }
-      }
-      return m?r:"0";
-    }
-
-    // (public) -this
-    function bnNegate() { var r = nbi(); BigInteger.ZERO.subTo(this,r); return r; }
-
-    // (public) |this|
-    function bnAbs() { return (this.s<0)?this.negate():this; }
-
-    // (public) return + if this > a, - if this < a, 0 if equal
-    function bnCompareTo(a) {
-      var r = this.s-a.s;
-      if(r != 0) return r;
-      var i = this.t;
-      r = i-a.t;
-      if(r != 0) return (this.s<0)?-r:r;
-      while(--i >= 0) if((r=this[i]-a[i]) != 0) return r;
-      return 0;
-    }
-
-    // returns bit length of the integer x
-    function nbits(x) {
-      var r = 1, t;
-      if((t=x>>>16) != 0) { x = t; r += 16; }
-      if((t=x>>8) != 0) { x = t; r += 8; }
-      if((t=x>>4) != 0) { x = t; r += 4; }
-      if((t=x>>2) != 0) { x = t; r += 2; }
-      if((t=x>>1) != 0) { x = t; r += 1; }
-      return r;
-    }
-
-    // (public) return the number of bits in "this"
-    function bnBitLength() {
-      if(this.t <= 0) return 0;
-      return this.DB*(this.t-1)+nbits(this[this.t-1]^(this.s&this.DM));
-    }
-
-    // (protected) r = this << n*DB
-    function bnpDLShiftTo(n,r) {
-      var i;
-      for(i = this.t-1; i >= 0; --i) r[i+n] = this[i];
-      for(i = n-1; i >= 0; --i) r[i] = 0;
-      r.t = this.t+n;
-      r.s = this.s;
-    }
-
-    // (protected) r = this >> n*DB
-    function bnpDRShiftTo(n,r) {
-      for(var i = n; i < this.t; ++i) r[i-n] = this[i];
-      r.t = Math.max(this.t-n,0);
-      r.s = this.s;
-    }
-
-    // (protected) r = this << n
-    function bnpLShiftTo(n,r) {
-      var bs = n%this.DB;
-      var cbs = this.DB-bs;
-      var bm = (1<<cbs)-1;
-      var ds = Math.floor(n/this.DB), c = (this.s<<bs)&this.DM, i;
-      for(i = this.t-1; i >= 0; --i) {
-        r[i+ds+1] = (this[i]>>cbs)|c;
-        c = (this[i]&bm)<<bs;
-      }
-      for(i = ds-1; i >= 0; --i) r[i] = 0;
-      r[ds] = c;
-      r.t = this.t+ds+1;
-      r.s = this.s;
-      r.clamp();
-    }
-
-    // (protected) r = this >> n
-    function bnpRShiftTo(n,r) {
-      r.s = this.s;
-      var ds = Math.floor(n/this.DB);
-      if(ds >= this.t) { r.t = 0; return; }
-      var bs = n%this.DB;
-      var cbs = this.DB-bs;
-      var bm = (1<<bs)-1;
-      r[0] = this[ds]>>bs;
-      for(var i = ds+1; i < this.t; ++i) {
-        r[i-ds-1] |= (this[i]&bm)<<cbs;
-        r[i-ds] = this[i]>>bs;
-      }
-      if(bs > 0) r[this.t-ds-1] |= (this.s&bm)<<cbs;
-      r.t = this.t-ds;
-      r.clamp();
-    }
-
-    // (protected) r = this - a
-    function bnpSubTo(a,r) {
-      var i = 0, c = 0, m = Math.min(a.t,this.t);
-      while(i < m) {
-        c += this[i]-a[i];
-        r[i++] = c&this.DM;
-        c >>= this.DB;
-      }
-      if(a.t < this.t) {
-        c -= a.s;
-        while(i < this.t) {
-          c += this[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += this.s;
-      }
-      else {
-        c += this.s;
-        while(i < a.t) {
-          c -= a[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c -= a.s;
-      }
-      r.s = (c<0)?-1:0;
-      if(c < -1) r[i++] = this.DV+c;
-      else if(c > 0) r[i++] = c;
-      r.t = i;
-      r.clamp();
-    }
-
-    // (protected) r = this * a, r != this,a (HAC 14.12)
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyTo(a,r) {
-      var x = this.abs(), y = a.abs();
-      var i = x.t;
-      r.t = i+y.t;
-      while(--i >= 0) r[i] = 0;
-      for(i = 0; i < y.t; ++i) r[i+x.t] = x.am(0,y[i],r,i,0,x.t);
-      r.s = 0;
-      r.clamp();
-      if(this.s != a.s) BigInteger.ZERO.subTo(r,r);
-    }
-
-    // (protected) r = this^2, r != this (HAC 14.16)
-    function bnpSquareTo(r) {
-      var x = this.abs();
-      var i = r.t = 2*x.t;
-      while(--i >= 0) r[i] = 0;
-      for(i = 0; i < x.t-1; ++i) {
-        var c = x.am(i,x[i],r,2*i,0,1);
-        if((r[i+x.t]+=x.am(i+1,2*x[i],r,2*i+1,c,x.t-i-1)) >= x.DV) {
-          r[i+x.t] -= x.DV;
-          r[i+x.t+1] = 1;
-        }
-      }
-      if(r.t > 0) r[r.t-1] += x.am(i,x[i],r,2*i,0,1);
-      r.s = 0;
-      r.clamp();
-    }
-
-    // (protected) divide this by m, quotient and remainder to q, r (HAC 14.20)
-    // r != q, this != m.  q or r may be null.
-    function bnpDivRemTo(m,q,r) {
-      var pm = m.abs();
-      if(pm.t <= 0) return;
-      var pt = this.abs();
-      if(pt.t < pm.t) {
-        if(q != null) q.fromInt(0);
-        if(r != null) this.copyTo(r);
-        return;
-      }
-      if(r == null) r = nbi();
-      var y = nbi(), ts = this.s, ms = m.s;
-      var nsh = this.DB-nbits(pm[pm.t-1]);   // normalize modulus
-      if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
-      else { pm.copyTo(y); pt.copyTo(r); }
-      var ys = y.t;
-      var y0 = y[ys-1];
-      if(y0 == 0) return;
-      var yt = y0*(1<<this.F1)+((ys>1)?y[ys-2]>>this.F2:0);
-      var d1 = this.FV/yt, d2 = (1<<this.F1)/yt, e = 1<<this.F2;
-      var i = r.t, j = i-ys, t = (q==null)?nbi():q;
-      y.dlShiftTo(j,t);
-      if(r.compareTo(t) >= 0) {
-        r[r.t++] = 1;
-        r.subTo(t,r);
-      }
-      BigInteger.ONE.dlShiftTo(ys,t);
-      t.subTo(y,y);  // "negative" y so we can replace sub with am later
-      while(y.t < ys) y[y.t++] = 0;
-      while(--j >= 0) {
-        // Estimate quotient digit
-        var qd = (r[--i]==y0)?this.DM:Math.floor(r[i]*d1+(r[i-1]+e)*d2);
-        if((r[i]+=y.am(0,qd,r,j,0,ys)) < qd) {   // Try it out
-          y.dlShiftTo(j,t);
-          r.subTo(t,r);
-          while(r[i] < --qd) r.subTo(t,r);
-        }
-      }
-      if(q != null) {
-        r.drShiftTo(ys,q);
-        if(ts != ms) BigInteger.ZERO.subTo(q,q);
-      }
-      r.t = ys;
-      r.clamp();
-      if(nsh > 0) r.rShiftTo(nsh,r); // Denormalize remainder
-      if(ts < 0) BigInteger.ZERO.subTo(r,r);
-    }
-
-    // (public) this mod a
-    function bnMod(a) {
-      var r = nbi();
-      this.abs().divRemTo(a,null,r);
-      if(this.s < 0 && r.compareTo(BigInteger.ZERO) > 0) a.subTo(r,r);
-      return r;
-    }
-
-    // Modular reduction using "classic" algorithm
-    function Classic(m) { this.m = m; }
-    function cConvert(x) {
-      if(x.s < 0 || x.compareTo(this.m) >= 0) return x.mod(this.m);
-      else return x;
-    }
-    function cRevert(x) { return x; }
-    function cReduce(x) { x.divRemTo(this.m,null,x); }
-    function cMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-    function cSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    Classic.prototype.convert = cConvert;
-    Classic.prototype.revert = cRevert;
-    Classic.prototype.reduce = cReduce;
-    Classic.prototype.mulTo = cMulTo;
-    Classic.prototype.sqrTo = cSqrTo;
-
-    // (protected) return "-1/this % 2^DB"; useful for Mont. reduction
-    // justification:
-    //         xy == 1 (mod m)
-    //         xy =  1+km
-    //   xy(2-xy) = (1+km)(1-km)
-    // x[y(2-xy)] = 1-k^2m^2
-    // x[y(2-xy)] == 1 (mod m^2)
-    // if y is 1/x mod m, then y(2-xy) is 1/x mod m^2
-    // should reduce x and y(2-xy) by m^2 at each step to keep size bounded.
-    // JS multiply "overflows" differently from C/C++, so care is needed here.
-    function bnpInvDigit() {
-      if(this.t < 1) return 0;
-      var x = this[0];
-      if((x&1) == 0) return 0;
-      var y = x&3;       // y == 1/x mod 2^2
-      y = (y*(2-(x&0xf)*y))&0xf; // y == 1/x mod 2^4
-      y = (y*(2-(x&0xff)*y))&0xff;   // y == 1/x mod 2^8
-      y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;    // y == 1/x mod 2^16
-      // last step - calculate inverse mod DV directly;
-      // assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
-      y = (y*(2-x*y%this.DV))%this.DV;       // y == 1/x mod 2^dbits
-      // we really want the negative inverse, and -DV < y < DV
-      return (y>0)?this.DV-y:-y;
-    }
-
-    // Montgomery reduction
-    function Montgomery(m) {
-      this.m = m;
-      this.mp = m.invDigit();
-      this.mpl = this.mp&0x7fff;
-      this.mph = this.mp>>15;
-      this.um = (1<<(m.DB-15))-1;
-      this.mt2 = 2*m.t;
-    }
-
-    // xR mod m
-    function montConvert(x) {
-      var r = nbi();
-      x.abs().dlShiftTo(this.m.t,r);
-      r.divRemTo(this.m,null,r);
-      if(x.s < 0 && r.compareTo(BigInteger.ZERO) > 0) this.m.subTo(r,r);
-      return r;
-    }
-
-    // x/R mod m
-    function montRevert(x) {
-      var r = nbi();
-      x.copyTo(r);
-      this.reduce(r);
-      return r;
-    }
-
-    // x = x/R mod m (HAC 14.32)
-    function montReduce(x) {
-      while(x.t <= this.mt2) // pad x so am has enough room later
-        x[x.t++] = 0;
-      for(var i = 0; i < this.m.t; ++i) {
-        // faster way of calculating u0 = x[i]*mp mod DV
-        var j = x[i]&0x7fff;
-        var u0 = (j*this.mpl+(((j*this.mph+(x[i]>>15)*this.mpl)&this.um)<<15))&x.DM;
-        // use am to combine the multiply-shift-add into one call
-        j = i+this.m.t;
-        x[j] += this.m.am(0,u0,x,i,0,this.m.t);
-        // propagate carry
-        while(x[j] >= x.DV) { x[j] -= x.DV; x[++j]++; }
-      }
-      x.clamp();
-      x.drShiftTo(this.m.t,x);
-      if(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
-    }
-
-    // r = "x^2/R mod m"; x != r
-    function montSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    // r = "xy/R mod m"; x,y != r
-    function montMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-
-    Montgomery.prototype.convert = montConvert;
-    Montgomery.prototype.revert = montRevert;
-    Montgomery.prototype.reduce = montReduce;
-    Montgomery.prototype.mulTo = montMulTo;
-    Montgomery.prototype.sqrTo = montSqrTo;
-
-    // (protected) true iff this is even
-    function bnpIsEven() { return ((this.t>0)?(this[0]&1):this.s) == 0; }
-
-    // (protected) this^e, e < 2^32, doing sqr and mul with "r" (HAC 14.79)
-    function bnpExp(e,z) {
-      if(e > 0xffffffff || e < 1) return BigInteger.ONE;
-      var r = nbi(), r2 = nbi(), g = z.convert(this), i = nbits(e)-1;
-      g.copyTo(r);
-      while(--i >= 0) {
-        z.sqrTo(r,r2);
-        if((e&(1<<i)) > 0) z.mulTo(r2,g,r);
-        else { var t = r; r = r2; r2 = t; }
-      }
-      return z.revert(r);
-    }
-
-    // (public) this^e % m, 0 <= e < 2^32
-    function bnModPowInt(e,m) {
-      var z;
-      if(e < 256 || m.isEven()) z = new Classic(m); else z = new Montgomery(m);
-      return this.exp(e,z);
-    }
-
-    // protected
-    BigInteger.prototype.copyTo = bnpCopyTo;
-    BigInteger.prototype.fromInt = bnpFromInt;
-    BigInteger.prototype.fromString = bnpFromString;
-    BigInteger.prototype.clamp = bnpClamp;
-    BigInteger.prototype.dlShiftTo = bnpDLShiftTo;
-    BigInteger.prototype.drShiftTo = bnpDRShiftTo;
-    BigInteger.prototype.lShiftTo = bnpLShiftTo;
-    BigInteger.prototype.rShiftTo = bnpRShiftTo;
-    BigInteger.prototype.subTo = bnpSubTo;
-    BigInteger.prototype.multiplyTo = bnpMultiplyTo;
-    BigInteger.prototype.squareTo = bnpSquareTo;
-    BigInteger.prototype.divRemTo = bnpDivRemTo;
-    BigInteger.prototype.invDigit = bnpInvDigit;
-    BigInteger.prototype.isEven = bnpIsEven;
-    BigInteger.prototype.exp = bnpExp;
-
-    // public
-    BigInteger.prototype.toString = bnToString;
-    BigInteger.prototype.negate = bnNegate;
-    BigInteger.prototype.abs = bnAbs;
-    BigInteger.prototype.compareTo = bnCompareTo;
-    BigInteger.prototype.bitLength = bnBitLength;
-    BigInteger.prototype.mod = bnMod;
-    BigInteger.prototype.modPowInt = bnModPowInt;
-
-    // "constants"
-    BigInteger.ZERO = nbv(0);
-    BigInteger.ONE = nbv(1);
-
-    // Copyright (c) 2005-2009  Tom Wu
-    // All Rights Reserved.
-    // See "LICENSE" for details.
-
-    // Extended JavaScript BN functions, required for RSA private ops.
-
-    // Version 1.1: new BigInteger("0", 10) returns "proper" zero
-    // Version 1.2: square() API, isProbablePrime fix
-
-    // (public)
-    function bnClone() { var r = nbi(); this.copyTo(r); return r; }
-
-    // (public) return value as integer
-    function bnIntValue() {
-      if(this.s < 0) {
-        if(this.t == 1) return this[0]-this.DV;
-        else if(this.t == 0) return -1;
-      }
-      else if(this.t == 1) return this[0];
-      else if(this.t == 0) return 0;
-      // assumes 16 < DB < 32
-      return ((this[1]&((1<<(32-this.DB))-1))<<this.DB)|this[0];
-    }
-
-    // (public) return value as byte
-    function bnByteValue() { return (this.t==0)?this.s:(this[0]<<24)>>24; }
-
-    // (public) return value as short (assumes DB>=16)
-    function bnShortValue() { return (this.t==0)?this.s:(this[0]<<16)>>16; }
-
-    // (protected) return x s.t. r^x < DV
-    function bnpChunkSize(r) { return Math.floor(Math.LN2*this.DB/Math.log(r)); }
-
-    // (public) 0 if this == 0, 1 if this > 0
-    function bnSigNum() {
-      if(this.s < 0) return -1;
-      else if(this.t <= 0 || (this.t == 1 && this[0] <= 0)) return 0;
-      else return 1;
-    }
-
-    // (protected) convert to radix string
-    function bnpToRadix(b) {
-      if(b == null) b = 10;
-      if(this.signum() == 0 || b < 2 || b > 36) return "0";
-      var cs = this.chunkSize(b);
-      var a = Math.pow(b,cs);
-      var d = nbv(a), y = nbi(), z = nbi(), r = "";
-      this.divRemTo(d,y,z);
-      while(y.signum() > 0) {
-        r = (a+z.intValue()).toString(b).substr(1) + r;
-        y.divRemTo(d,y,z);
-      }
-      return z.intValue().toString(b) + r;
-    }
-
-    // (protected) convert from radix string
-    function bnpFromRadix(s,b) {
-      this.fromInt(0);
-      if(b == null) b = 10;
-      var cs = this.chunkSize(b);
-      var d = Math.pow(b,cs), mi = false, j = 0, w = 0;
-      for(var i = 0; i < s.length; ++i) {
-        var x = intAt(s,i);
-        if(x < 0) {
-          if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
-          continue;
-        }
-        w = b*w+x;
-        if(++j >= cs) {
-          this.dMultiply(d);
-          this.dAddOffset(w,0);
-          j = 0;
-          w = 0;
-        }
-      }
-      if(j > 0) {
-        this.dMultiply(Math.pow(b,j));
-        this.dAddOffset(w,0);
-      }
-      if(mi) BigInteger.ZERO.subTo(this,this);
-    }
-
-    // (protected) alternate constructor
-    function bnpFromNumber(a,b,c) {
-      if("number" == typeof b) {
-        // new BigInteger(int,int,RNG)
-        if(a < 2) this.fromInt(1);
-        else {
-          this.fromNumber(a,c);
-          if(!this.testBit(a-1))	// force MSB set
-            this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
-          if(this.isEven()) this.dAddOffset(1,0); // force odd
-          while(!this.isProbablePrime(b)) {
-            this.dAddOffset(2,0);
-            if(this.bitLength() > a) this.subTo(BigInteger.ONE.shiftLeft(a-1),this);
-          }
-        }
-      }
-      else {
-        // new BigInteger(int,RNG)
-        var x = new Array(), t = a&7;
-        x.length = (a>>3)+1;
-        b.nextBytes(x);
-        if(t > 0) x[0] &= ((1<<t)-1); else x[0] = 0;
-        this.fromString(x,256);
-      }
-    }
-
-    // (public) convert to bigendian byte array
-    function bnToByteArray() {
-      var i = this.t, r = new Array();
-      r[0] = this.s;
-      var p = this.DB-(i*this.DB)%8, d, k = 0;
-      if(i-- > 0) {
-        if(p < this.DB && (d = this[i]>>p) != (this.s&this.DM)>>p)
-          r[k++] = d|(this.s<<(this.DB-p));
-        while(i >= 0) {
-          if(p < 8) {
-            d = (this[i]&((1<<p)-1))<<(8-p);
-            d |= this[--i]>>(p+=this.DB-8);
-          }
-          else {
-            d = (this[i]>>(p-=8))&0xff;
-            if(p <= 0) { p += this.DB; --i; }
-          }
-          if((d&0x80) != 0) d |= -256;
-          if(k == 0 && (this.s&0x80) != (d&0x80)) ++k;
-          if(k > 0 || d != this.s) r[k++] = d;
-        }
-      }
-      return r;
-    }
-
-    function bnEquals(a) { return(this.compareTo(a)==0); }
-    function bnMin(a) { return(this.compareTo(a)<0)?this:a; }
-    function bnMax(a) { return(this.compareTo(a)>0)?this:a; }
-
-    // (protected) r = this op a (bitwise)
-    function bnpBitwiseTo(a,op,r) {
-      var i, f, m = Math.min(a.t,this.t);
-      for(i = 0; i < m; ++i) r[i] = op(this[i],a[i]);
-      if(a.t < this.t) {
-        f = a.s&this.DM;
-        for(i = m; i < this.t; ++i) r[i] = op(this[i],f);
-        r.t = this.t;
-      }
-      else {
-        f = this.s&this.DM;
-        for(i = m; i < a.t; ++i) r[i] = op(f,a[i]);
-        r.t = a.t;
-      }
-      r.s = op(this.s,a.s);
-      r.clamp();
-    }
-
-    // (public) this & a
-    function op_and(x,y) { return x&y; }
-    function bnAnd(a) { var r = nbi(); this.bitwiseTo(a,op_and,r); return r; }
-
-    // (public) this | a
-    function op_or(x,y) { return x|y; }
-    function bnOr(a) { var r = nbi(); this.bitwiseTo(a,op_or,r); return r; }
-
-    // (public) this ^ a
-    function op_xor(x,y) { return x^y; }
-    function bnXor(a) { var r = nbi(); this.bitwiseTo(a,op_xor,r); return r; }
-
-    // (public) this & ~a
-    function op_andnot(x,y) { return x&~y; }
-    function bnAndNot(a) { var r = nbi(); this.bitwiseTo(a,op_andnot,r); return r; }
-
-    // (public) ~this
-    function bnNot() {
-      var r = nbi();
-      for(var i = 0; i < this.t; ++i) r[i] = this.DM&~this[i];
-      r.t = this.t;
-      r.s = ~this.s;
-      return r;
-    }
-
-    // (public) this << n
-    function bnShiftLeft(n) {
-      var r = nbi();
-      if(n < 0) this.rShiftTo(-n,r); else this.lShiftTo(n,r);
-      return r;
-    }
-
-    // (public) this >> n
-    function bnShiftRight(n) {
-      var r = nbi();
-      if(n < 0) this.lShiftTo(-n,r); else this.rShiftTo(n,r);
-      return r;
-    }
-
-    // return index of lowest 1-bit in x, x < 2^31
-    function lbit(x) {
-      if(x == 0) return -1;
-      var r = 0;
-      if((x&0xffff) == 0) { x >>= 16; r += 16; }
-      if((x&0xff) == 0) { x >>= 8; r += 8; }
-      if((x&0xf) == 0) { x >>= 4; r += 4; }
-      if((x&3) == 0) { x >>= 2; r += 2; }
-      if((x&1) == 0) ++r;
-      return r;
-    }
-
-    // (public) returns index of lowest 1-bit (or -1 if none)
-    function bnGetLowestSetBit() {
-      for(var i = 0; i < this.t; ++i)
-        if(this[i] != 0) return i*this.DB+lbit(this[i]);
-      if(this.s < 0) return this.t*this.DB;
-      return -1;
-    }
-
-    // return number of 1 bits in x
-    function cbit(x) {
-      var r = 0;
-      while(x != 0) { x &= x-1; ++r; }
-      return r;
-    }
-
-    // (public) return number of set bits
-    function bnBitCount() {
-      var r = 0, x = this.s&this.DM;
-      for(var i = 0; i < this.t; ++i) r += cbit(this[i]^x);
-      return r;
-    }
-
-    // (public) true iff nth bit is set
-    function bnTestBit(n) {
-      var j = Math.floor(n/this.DB);
-      if(j >= this.t) return(this.s!=0);
-      return((this[j]&(1<<(n%this.DB)))!=0);
-    }
-
-    // (protected) this op (1<<n)
-    function bnpChangeBit(n,op) {
-      var r = BigInteger.ONE.shiftLeft(n);
-      this.bitwiseTo(r,op,r);
-      return r;
-    }
-
-    // (public) this | (1<<n)
-    function bnSetBit(n) { return this.changeBit(n,op_or); }
-
-    // (public) this & ~(1<<n)
-    function bnClearBit(n) { return this.changeBit(n,op_andnot); }
-
-    // (public) this ^ (1<<n)
-    function bnFlipBit(n) { return this.changeBit(n,op_xor); }
-
-    // (protected) r = this + a
-    function bnpAddTo(a,r) {
-      var i = 0, c = 0, m = Math.min(a.t,this.t);
-      while(i < m) {
-        c += this[i]+a[i];
-        r[i++] = c&this.DM;
-        c >>= this.DB;
-      }
-      if(a.t < this.t) {
-        c += a.s;
-        while(i < this.t) {
-          c += this[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += this.s;
-      }
-      else {
-        c += this.s;
-        while(i < a.t) {
-          c += a[i];
-          r[i++] = c&this.DM;
-          c >>= this.DB;
-        }
-        c += a.s;
-      }
-      r.s = (c<0)?-1:0;
-      if(c > 0) r[i++] = c;
-      else if(c < -1) r[i++] = this.DV+c;
-      r.t = i;
-      r.clamp();
-    }
-
-    // (public) this + a
-    function bnAdd(a) { var r = nbi(); this.addTo(a,r); return r; }
-
-    // (public) this - a
-    function bnSubtract(a) { var r = nbi(); this.subTo(a,r); return r; }
-
-    // (public) this * a
-    function bnMultiply(a) { var r = nbi(); this.multiplyTo(a,r); return r; }
-
-    // (public) this^2
-    function bnSquare() { var r = nbi(); this.squareTo(r); return r; }
-
-    // (public) this / a
-    function bnDivide(a) { var r = nbi(); this.divRemTo(a,r,null); return r; }
-
-    // (public) this % a
-    function bnRemainder(a) { var r = nbi(); this.divRemTo(a,null,r); return r; }
-
-    // (public) [this/a,this%a]
-    function bnDivideAndRemainder(a) {
-      var q = nbi(), r = nbi();
-      this.divRemTo(a,q,r);
-      return new Array(q,r);
-    }
-
-    // (protected) this *= n, this >= 0, 1 < n < DV
-    function bnpDMultiply(n) {
-      this[this.t] = this.am(0,n-1,this,0,0,this.t);
-      ++this.t;
-      this.clamp();
-    }
-
-    // (protected) this += n << w words, this >= 0
-    function bnpDAddOffset(n,w) {
-      if(n == 0) return;
-      while(this.t <= w) this[this.t++] = 0;
-      this[w] += n;
-      while(this[w] >= this.DV) {
-        this[w] -= this.DV;
-        if(++w >= this.t) this[this.t++] = 0;
-        ++this[w];
-      }
-    }
-
-    // A "null" reducer
-    function NullExp() {}
-    function nNop(x) { return x; }
-    function nMulTo(x,y,r) { x.multiplyTo(y,r); }
-    function nSqrTo(x,r) { x.squareTo(r); }
-
-    NullExp.prototype.convert = nNop;
-    NullExp.prototype.revert = nNop;
-    NullExp.prototype.mulTo = nMulTo;
-    NullExp.prototype.sqrTo = nSqrTo;
-
-    // (public) this^e
-    function bnPow(e) { return this.exp(e,new NullExp()); }
-
-    // (protected) r = lower n words of "this * a", a.t <= n
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyLowerTo(a,n,r) {
-      var i = Math.min(this.t+a.t,n);
-      r.s = 0; // assumes a,this >= 0
-      r.t = i;
-      while(i > 0) r[--i] = 0;
-      var j;
-      for(j = r.t-this.t; i < j; ++i) r[i+this.t] = this.am(0,a[i],r,i,0,this.t);
-      for(j = Math.min(a.t,n); i < j; ++i) this.am(0,a[i],r,i,0,n-i);
-      r.clamp();
-    }
-
-    // (protected) r = "this * a" without lower n words, n > 0
-    // "this" should be the larger one if appropriate.
-    function bnpMultiplyUpperTo(a,n,r) {
-      --n;
-      var i = r.t = this.t+a.t-n;
-      r.s = 0; // assumes a,this >= 0
-      while(--i >= 0) r[i] = 0;
-      for(i = Math.max(n-this.t,0); i < a.t; ++i)
-        r[this.t+i-n] = this.am(n-i,a[i],r,0,0,this.t+i-n);
-      r.clamp();
-      r.drShiftTo(1,r);
-    }
-
-    // Barrett modular reduction
-    function Barrett(m) {
-      // setup Barrett
-      this.r2 = nbi();
-      this.q3 = nbi();
-      BigInteger.ONE.dlShiftTo(2*m.t,this.r2);
-      this.mu = this.r2.divide(m);
-      this.m = m;
-    }
-
-    function barrettConvert(x) {
-      if(x.s < 0 || x.t > 2*this.m.t) return x.mod(this.m);
-      else if(x.compareTo(this.m) < 0) return x;
-      else { var r = nbi(); x.copyTo(r); this.reduce(r); return r; }
-    }
-
-    function barrettRevert(x) { return x; }
-
-    // x = x mod m (HAC 14.42)
-    function barrettReduce(x) {
-      x.drShiftTo(this.m.t-1,this.r2);
-      if(x.t > this.m.t+1) { x.t = this.m.t+1; x.clamp(); }
-      this.mu.multiplyUpperTo(this.r2,this.m.t+1,this.q3);
-      this.m.multiplyLowerTo(this.q3,this.m.t+1,this.r2);
-      while(x.compareTo(this.r2) < 0) x.dAddOffset(1,this.m.t+1);
-      x.subTo(this.r2,x);
-      while(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
-    }
-
-    // r = x^2 mod m; x != r
-    function barrettSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
-
-    // r = x*y mod m; x,y != r
-    function barrettMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
-
-    Barrett.prototype.convert = barrettConvert;
-    Barrett.prototype.revert = barrettRevert;
-    Barrett.prototype.reduce = barrettReduce;
-    Barrett.prototype.mulTo = barrettMulTo;
-    Barrett.prototype.sqrTo = barrettSqrTo;
-
-    // (public) this^e % m (HAC 14.85)
-    function bnModPow(e,m) {
-      var i = e.bitLength(), k, r = nbv(1), z;
-      if(i <= 0) return r;
-      else if(i < 18) k = 1;
-      else if(i < 48) k = 3;
-      else if(i < 144) k = 4;
-      else if(i < 768) k = 5;
-      else k = 6;
-      if(i < 8)
-        z = new Classic(m);
-      else if(m.isEven())
-        z = new Barrett(m);
-      else
-        z = new Montgomery(m);
-
-      // precomputation
-      var g = new Array(), n = 3, k1 = k-1, km = (1<<k)-1;
-      g[1] = z.convert(this);
-      if(k > 1) {
-        var g2 = nbi();
-        z.sqrTo(g[1],g2);
-        while(n <= km) {
-          g[n] = nbi();
-          z.mulTo(g2,g[n-2],g[n]);
-          n += 2;
-        }
-      }
-
-      var j = e.t-1, w, is1 = true, r2 = nbi(), t;
-      i = nbits(e[j])-1;
-      while(j >= 0) {
-        if(i >= k1) w = (e[j]>>(i-k1))&km;
-        else {
-          w = (e[j]&((1<<(i+1))-1))<<(k1-i);
-          if(j > 0) w |= e[j-1]>>(this.DB+i-k1);
-        }
-
-        n = k;
-        while((w&1) == 0) { w >>= 1; --n; }
-        if((i -= n) < 0) { i += this.DB; --j; }
-        if(is1) {	// ret == 1, don't bother squaring or multiplying it
-          g[w].copyTo(r);
-          is1 = false;
-        }
-        else {
-          while(n > 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
-          if(n > 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
-          z.mulTo(r2,g[w],r);
-        }
-
-        while(j >= 0 && (e[j]&(1<<i)) == 0) {
-          z.sqrTo(r,r2); t = r; r = r2; r2 = t;
-          if(--i < 0) { i = this.DB-1; --j; }
-        }
-      }
-      return z.revert(r);
-    }
-
-    // (public) gcd(this,a) (HAC 14.54)
-    function bnGCD(a) {
-      var x = (this.s<0)?this.negate():this.clone();
-      var y = (a.s<0)?a.negate():a.clone();
-      if(x.compareTo(y) < 0) { var t = x; x = y; y = t; }
-      var i = x.getLowestSetBit(), g = y.getLowestSetBit();
-      if(g < 0) return x;
-      if(i < g) g = i;
-      if(g > 0) {
-        x.rShiftTo(g,x);
-        y.rShiftTo(g,y);
-      }
-      while(x.signum() > 0) {
-        if((i = x.getLowestSetBit()) > 0) x.rShiftTo(i,x);
-        if((i = y.getLowestSetBit()) > 0) y.rShiftTo(i,y);
-        if(x.compareTo(y) >= 0) {
-          x.subTo(y,x);
-          x.rShiftTo(1,x);
-        }
-        else {
-          y.subTo(x,y);
-          y.rShiftTo(1,y);
-        }
-      }
-      if(g > 0) y.lShiftTo(g,y);
-      return y;
-    }
-
-    // (protected) this % n, n < 2^26
-    function bnpModInt(n) {
-      if(n <= 0) return 0;
-      var d = this.DV%n, r = (this.s<0)?n-1:0;
-      if(this.t > 0)
-        if(d == 0) r = this[0]%n;
-        else for(var i = this.t-1; i >= 0; --i) r = (d*r+this[i])%n;
-      return r;
-    }
-
-    // (public) 1/this % m (HAC 14.61)
-    function bnModInverse(m) {
-      var ac = m.isEven();
-      if((this.isEven() && ac) || m.signum() == 0) return BigInteger.ZERO;
-      var u = m.clone(), v = this.clone();
-      var a = nbv(1), b = nbv(0), c = nbv(0), d = nbv(1);
-      while(u.signum() != 0) {
-        while(u.isEven()) {
-          u.rShiftTo(1,u);
-          if(ac) {
-            if(!a.isEven() || !b.isEven()) { a.addTo(this,a); b.subTo(m,b); }
-            a.rShiftTo(1,a);
-          }
-          else if(!b.isEven()) b.subTo(m,b);
-          b.rShiftTo(1,b);
-        }
-        while(v.isEven()) {
-          v.rShiftTo(1,v);
-          if(ac) {
-            if(!c.isEven() || !d.isEven()) { c.addTo(this,c); d.subTo(m,d); }
-            c.rShiftTo(1,c);
-          }
-          else if(!d.isEven()) d.subTo(m,d);
-          d.rShiftTo(1,d);
-        }
-        if(u.compareTo(v) >= 0) {
-          u.subTo(v,u);
-          if(ac) a.subTo(c,a);
-          b.subTo(d,b);
-        }
-        else {
-          v.subTo(u,v);
-          if(ac) c.subTo(a,c);
-          d.subTo(b,d);
-        }
-      }
-      if(v.compareTo(BigInteger.ONE) != 0) return BigInteger.ZERO;
-      if(d.compareTo(m) >= 0) return d.subtract(m);
-      if(d.signum() < 0) d.addTo(m,d); else return d;
-      if(d.signum() < 0) return d.add(m); else return d;
-    }
-
-    var lowprimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997];
-    var lplim = (1<<26)/lowprimes[lowprimes.length-1];
-
-    // (public) test primality with certainty >= 1-.5^t
-    function bnIsProbablePrime(t) {
-      var i, x = this.abs();
-      if(x.t == 1 && x[0] <= lowprimes[lowprimes.length-1]) {
-        for(i = 0; i < lowprimes.length; ++i)
-          if(x[0] == lowprimes[i]) return true;
-        return false;
-      }
-      if(x.isEven()) return false;
-      i = 1;
-      while(i < lowprimes.length) {
-        var m = lowprimes[i], j = i+1;
-        while(j < lowprimes.length && m < lplim) m *= lowprimes[j++];
-        m = x.modInt(m);
-        while(i < j) if(m%lowprimes[i++] == 0) return false;
-      }
-      return x.millerRabin(t);
-    }
-
-    // (protected) true if probably prime (HAC 4.24, Miller-Rabin)
-    function bnpMillerRabin(t) {
-      var n1 = this.subtract(BigInteger.ONE);
-      var k = n1.getLowestSetBit();
-      if(k <= 0) return false;
-      var r = n1.shiftRight(k);
-      t = (t+1)>>1;
-      if(t > lowprimes.length) t = lowprimes.length;
-      var a = nbi();
-      for(var i = 0; i < t; ++i) {
-        //Pick bases at random, instead of starting at 2
-        a.fromInt(lowprimes[Math.floor(Math.random()*lowprimes.length)]);
-        var y = a.modPow(r,this);
-        if(y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
-          var j = 1;
-          while(j++ < k && y.compareTo(n1) != 0) {
-            y = y.modPowInt(2,this);
-            if(y.compareTo(BigInteger.ONE) == 0) return false;
-          }
-          if(y.compareTo(n1) != 0) return false;
-        }
-      }
-      return true;
-    }
-
-    // protected
-    BigInteger.prototype.chunkSize = bnpChunkSize;
-    BigInteger.prototype.toRadix = bnpToRadix;
-    BigInteger.prototype.fromRadix = bnpFromRadix;
-    BigInteger.prototype.fromNumber = bnpFromNumber;
-    BigInteger.prototype.bitwiseTo = bnpBitwiseTo;
-    BigInteger.prototype.changeBit = bnpChangeBit;
-    BigInteger.prototype.addTo = bnpAddTo;
-    BigInteger.prototype.dMultiply = bnpDMultiply;
-    BigInteger.prototype.dAddOffset = bnpDAddOffset;
-    BigInteger.prototype.multiplyLowerTo = bnpMultiplyLowerTo;
-    BigInteger.prototype.multiplyUpperTo = bnpMultiplyUpperTo;
-    BigInteger.prototype.modInt = bnpModInt;
-    BigInteger.prototype.millerRabin = bnpMillerRabin;
-
-    // public
-    BigInteger.prototype.clone = bnClone;
-    BigInteger.prototype.intValue = bnIntValue;
-    BigInteger.prototype.byteValue = bnByteValue;
-    BigInteger.prototype.shortValue = bnShortValue;
-    BigInteger.prototype.signum = bnSigNum;
-    BigInteger.prototype.toByteArray = bnToByteArray;
-    BigInteger.prototype.equals = bnEquals;
-    BigInteger.prototype.min = bnMin;
-    BigInteger.prototype.max = bnMax;
-    BigInteger.prototype.and = bnAnd;
-    BigInteger.prototype.or = bnOr;
-    BigInteger.prototype.xor = bnXor;
-    BigInteger.prototype.andNot = bnAndNot;
-    BigInteger.prototype.not = bnNot;
-    BigInteger.prototype.shiftLeft = bnShiftLeft;
-    BigInteger.prototype.shiftRight = bnShiftRight;
-    BigInteger.prototype.getLowestSetBit = bnGetLowestSetBit;
-    BigInteger.prototype.bitCount = bnBitCount;
-    BigInteger.prototype.testBit = bnTestBit;
-    BigInteger.prototype.setBit = bnSetBit;
-    BigInteger.prototype.clearBit = bnClearBit;
-    BigInteger.prototype.flipBit = bnFlipBit;
-    BigInteger.prototype.add = bnAdd;
-    BigInteger.prototype.subtract = bnSubtract;
-    BigInteger.prototype.multiply = bnMultiply;
-    BigInteger.prototype.divide = bnDivide;
-    BigInteger.prototype.remainder = bnRemainder;
-    BigInteger.prototype.divideAndRemainder = bnDivideAndRemainder;
-    BigInteger.prototype.modPow = bnModPow;
-    BigInteger.prototype.modInverse = bnModInverse;
-    BigInteger.prototype.pow = bnPow;
-    BigInteger.prototype.gcd = bnGCD;
-    BigInteger.prototype.isProbablePrime = bnIsProbablePrime;
-
-    // JSBN-specific extension
-    BigInteger.prototype.square = bnSquare;
-
-    // Expose the Barrett function
-    BigInteger.prototype.Barrett = Barrett
-
-    // BigInteger interfaces not implemented in jsbn:
-
-    // BigInteger(int signum, byte[] magnitude)
-    // double doubleValue()
-    // float floatValue()
-    // int hashCode()
-    // long longValue()
-    // static BigInteger valueOf(long val)
-
-	// Random number generator - requires a PRNG backend, e.g. prng4.js
-
-	// For best results, put code like
-	// <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
-	// in your main HTML document.
-
-	var rng_state;
-	var rng_pool;
-	var rng_pptr;
-
-	// Mix in a 32-bit integer into the pool
-	function rng_seed_int(x) {
-	  rng_pool[rng_pptr++] ^= x & 255;
-	  rng_pool[rng_pptr++] ^= (x >> 8) & 255;
-	  rng_pool[rng_pptr++] ^= (x >> 16) & 255;
-	  rng_pool[rng_pptr++] ^= (x >> 24) & 255;
-	  if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
-	}
-
-	// Mix in the current time (w/milliseconds) into the pool
-	function rng_seed_time() {
-	  rng_seed_int(new Date().getTime());
-	}
-
-	// Initialize the pool with junk if needed.
-	if(rng_pool == null) {
-	  rng_pool = new Array();
-	  rng_pptr = 0;
-	  var t;
-	  if(typeof window !== "undefined" && window.crypto) {
-		if (window.crypto.getRandomValues) {
-		  // Use webcrypto if available
-		  var ua = new Uint8Array(32);
-		  window.crypto.getRandomValues(ua);
-		  for(t = 0; t < 32; ++t)
-			rng_pool[rng_pptr++] = ua[t];
-		}
-		else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
-		  // Extract entropy (256 bits) from NS4 RNG if available
-		  var z = window.crypto.random(32);
-		  for(t = 0; t < z.length; ++t)
-			rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
-		}
-	  }
-	  while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-		t = Math.floor(65536 * Math.random());
-		rng_pool[rng_pptr++] = t >>> 8;
-		rng_pool[rng_pptr++] = t & 255;
-	  }
-	  rng_pptr = 0;
-	  rng_seed_time();
-	  //rng_seed_int(window.screenX);
-	  //rng_seed_int(window.screenY);
-	}
-
-	function rng_get_byte() {
-	  if(rng_state == null) {
-		rng_seed_time();
-		rng_state = prng_newstate();
-		rng_state.init(rng_pool);
-		for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
-		  rng_pool[rng_pptr] = 0;
-		rng_pptr = 0;
-		//rng_pool = null;
-	  }
-	  // TODO: allow reseeding after first request
-	  return rng_state.next();
-	}
-
-	function rng_get_bytes(ba) {
-	  var i;
-	  for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
-	}
-
-	function SecureRandom() {}
-
-	SecureRandom.prototype.nextBytes = rng_get_bytes;
-
-	// prng4.js - uses Arcfour as a PRNG
-
-	function Arcfour() {
-	  this.i = 0;
-	  this.j = 0;
-	  this.S = new Array();
-	}
-
-	// Initialize arcfour context from key, an array of ints, each from [0..255]
-	function ARC4init(key) {
-	  var i, j, t;
-	  for(i = 0; i < 256; ++i)
-		this.S[i] = i;
-	  j = 0;
-	  for(i = 0; i < 256; ++i) {
-		j = (j + this.S[i] + key[i % key.length]) & 255;
-		t = this.S[i];
-		this.S[i] = this.S[j];
-		this.S[j] = t;
-	  }
-	  this.i = 0;
-	  this.j = 0;
-	}
-
-	function ARC4next() {
-	  var t;
-	  this.i = (this.i + 1) & 255;
-	  this.j = (this.j + this.S[this.i]) & 255;
-	  t = this.S[this.i];
-	  this.S[this.i] = this.S[this.j];
-	  this.S[this.j] = t;
-	  return this.S[(t + this.S[this.i]) & 255];
-	}
-
-	Arcfour.prototype.init = ARC4init;
-	Arcfour.prototype.next = ARC4next;
-
-	// Plug in your RNG constructor here
-	function prng_newstate() {
-	  return new Arcfour();
-	}
-
-	// Pool size must be a multiple of 4 and greater than 32.
-	// An array of bytes the size of the pool will be passed to init()
-	var rng_psize = 256;
-
-  BigInteger.SecureRandom = SecureRandom;
-  BigInteger.BigInteger = BigInteger;
-  if (true) {
-    exports = module.exports = BigInteger;
-  } else {}
-
-}).call(this);
 
 
 /***/ }),
@@ -92748,7 +86753,7 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
-/* global global, define, Symbol, Reflect, Promise, SuppressedError */
+/* global global, define, Symbol, Reflect, Promise, SuppressedError, Iterator */
 var __extends;
 var __assign;
 var __rest;
@@ -92780,6 +86785,7 @@ var __classPrivateFieldIn;
 var __createBinding;
 var __addDisposableResource;
 var __disposeResources;
+var __rewriteRelativeImportExtension;
 (function (factory) {
     var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
     if (typeof define === "function" && define.amd) {
@@ -92907,8 +86913,8 @@ var __disposeResources;
     };
 
     __generator = function (thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+        return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
         function verb(n) { return function (v) { return step([n, v]); }; }
         function step(op) {
             if (f) throw new TypeError("Generator is already executing.");
@@ -93012,10 +87018,11 @@ var __disposeResources;
     __asyncGenerator = function (thisArg, _arguments, generator) {
         if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
         var g = generator.apply(thisArg, _arguments || []), i, q = [];
-        return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-        function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+        return i = Object.create((typeof AsyncIterator === "function" ? AsyncIterator : Object).prototype), verb("next"), verb("throw"), verb("return", awaitReturn), i[Symbol.asyncIterator] = function () { return this; }, i;
+        function awaitReturn(f) { return function (v) { return Promise.resolve(v).then(f, reject); }; }
+        function verb(n, f) { if (g[n]) { i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; if (f) i[n] = f(i[n]); } }
         function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
-        function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);  }
+        function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
         function fulfill(value) { resume("next", value); }
         function reject(value) { resume("throw", value); }
         function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
@@ -93046,10 +87053,19 @@ var __disposeResources;
         o["default"] = v;
     };
 
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+
     __importStar = function (mod) {
         if (mod && mod.__esModule) return mod;
         var result = {};
-        if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
         __setModuleDefault(result, mod);
         return result;
     };
@@ -93079,7 +87095,7 @@ var __disposeResources;
     __addDisposableResource = function (env, value, async) {
         if (value !== null && value !== void 0) {
             if (typeof value !== "object" && typeof value !== "function") throw new TypeError("Object expected.");
-            var dispose;
+            var dispose, inner;
             if (async) {
                 if (!Symbol.asyncDispose) throw new TypeError("Symbol.asyncDispose is not defined.");
                 dispose = value[Symbol.asyncDispose];
@@ -93087,8 +87103,10 @@ var __disposeResources;
             if (dispose === void 0) {
                 if (!Symbol.dispose) throw new TypeError("Symbol.dispose is not defined.");
                 dispose = value[Symbol.dispose];
+                if (async) inner = dispose;
             }
             if (typeof dispose !== "function") throw new TypeError("Object not disposable.");
+            if (inner) dispose = function() { try { inner.call(this); } catch (e) { return Promise.reject(e); } };
             env.stack.push({ value: value, dispose: dispose, async: async });
         }
         else if (async) {
@@ -93107,20 +87125,34 @@ var __disposeResources;
             env.error = env.hasError ? new _SuppressedError(e, env.error, "An error was suppressed during disposal.") : e;
             env.hasError = true;
         }
+        var r, s = 0;
         function next() {
-            while (env.stack.length) {
-                var rec = env.stack.pop();
+            while (r = env.stack.pop()) {
                 try {
-                    var result = rec.dispose && rec.dispose.call(rec.value);
-                    if (rec.async) return Promise.resolve(result).then(next, function(e) { fail(e); return next(); });
+                    if (!r.async && s === 1) return s = 0, env.stack.push(r), Promise.resolve().then(next);
+                    if (r.dispose) {
+                        var result = r.dispose.call(r.value);
+                        if (r.async) return s |= 2, Promise.resolve(result).then(next, function(e) { fail(e); return next(); });
+                    }
+                    else s |= 1;
                 }
                 catch (e) {
                     fail(e);
                 }
             }
+            if (s === 1) return env.hasError ? Promise.reject(env.error) : Promise.resolve();
             if (env.hasError) throw env.error;
         }
         return next();
+    };
+
+    __rewriteRelativeImportExtension = function (path, preserveJsx) {
+        if (typeof path === "string" && /^\.\.?\//.test(path)) {
+            return path.replace(/\.(tsx)$|((?:\.d)?)((?:\.[^./]+?)?)\.([cm]?)ts$/i, function (m, tsx, d, ext, cm) {
+                return tsx ? preserveJsx ? ".jsx" : ".js" : d && (!ext || !cm) ? m : (d + ext + "." + cm.toLowerCase() + "js");
+            });
+        }
+        return path;
     };
 
     exporter("__extends", __extends);
@@ -93154,7 +87186,10 @@ var __disposeResources;
     exporter("__classPrivateFieldIn", __classPrivateFieldIn);
     exporter("__addDisposableResource", __addDisposableResource);
     exporter("__disposeResources", __disposeResources);
+    exporter("__rewriteRelativeImportExtension", __rewriteRelativeImportExtension);
 });
+
+0 && (0);
 
 
 /***/ }),
@@ -118254,38 +112289,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ 95077:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-exports.fromCallback = function (fn) {
-  return Object.defineProperty(function (...args) {
-    if (typeof args[args.length - 1] === 'function') fn.apply(this, args)
-    else {
-      return new Promise((resolve, reject) => {
-        args.push((err, res) => (err != null) ? reject(err) : resolve(res))
-        fn.apply(this, args)
-      })
-    }
-  }, 'name', { value: fn.name })
-}
-
-exports.fromPromise = function (fn) {
-  return Object.defineProperty(function (...args) {
-    const cb = args[args.length - 1]
-    if (typeof cb !== 'function') return fn.apply(this, args)
-    else {
-      args.pop()
-      fn.apply(this, args).then(r => cb(null, r), cb)
-    }
-  }, 'name', { value: fn.name })
-}
-
-
-/***/ }),
-
 /***/ 94058:
 /***/ (function(module) {
 
@@ -118490,6 +112493,24 @@ exports.fromPromise = function (fn) {
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
+Object.defineProperty(exports, "NIL", ({
+  enumerable: true,
+  get: function () {
+    return _nil.default;
+  }
+}));
+Object.defineProperty(exports, "parse", ({
+  enumerable: true,
+  get: function () {
+    return _parse.default;
+  }
+}));
+Object.defineProperty(exports, "stringify", ({
+  enumerable: true,
+  get: function () {
+    return _stringify.default;
+  }
+}));
 Object.defineProperty(exports, "v1", ({
   enumerable: true,
   get: function () {
@@ -118514,34 +112535,16 @@ Object.defineProperty(exports, "v5", ({
     return _v4.default;
   }
 }));
-Object.defineProperty(exports, "NIL", ({
-  enumerable: true,
-  get: function () {
-    return _nil.default;
-  }
-}));
-Object.defineProperty(exports, "version", ({
-  enumerable: true,
-  get: function () {
-    return _version.default;
-  }
-}));
 Object.defineProperty(exports, "validate", ({
   enumerable: true,
   get: function () {
     return _validate.default;
   }
 }));
-Object.defineProperty(exports, "stringify", ({
+Object.defineProperty(exports, "version", ({
   enumerable: true,
   get: function () {
-    return _stringify.default;
-  }
-}));
-Object.defineProperty(exports, "parse", ({
-  enumerable: true,
-  get: function () {
-    return _parse.default;
+    return _version.default;
   }
 }));
 
@@ -118593,6 +112596,28 @@ function md5(bytes) {
 }
 
 var _default = md5;
+exports["default"] = _default;
+
+/***/ }),
+
+/***/ 54221:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports["default"] = void 0;
+
+var _crypto = _interopRequireDefault(__nccwpck_require__(76982));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var _default = {
+  randomUUID: _crypto.default.randomUUID
+};
 exports["default"] = _default;
 
 /***/ }),
@@ -118750,6 +112775,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
+exports.unsafeStringify = unsafeStringify;
 
 var _validate = _interopRequireDefault(__nccwpck_require__(36200));
 
@@ -118762,13 +112788,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const byteToHex = [];
 
 for (let i = 0; i < 256; ++i) {
-  byteToHex.push((i + 0x100).toString(16).substr(1));
+  byteToHex.push((i + 0x100).toString(16).slice(1));
+}
+
+function unsafeStringify(arr, offset = 0) {
+  // Note: Be careful editing this code!  It's been tuned for performance
+  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+  return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
 }
 
 function stringify(arr, offset = 0) {
-  // Note: Be careful editing this code!  It's been tuned for performance
-  // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
-  const uuid = (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + '-' + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + '-' + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + '-' + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + '-' + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase(); // Consistency check for valid UUID.  If this throws, it's likely due to one
+  const uuid = unsafeStringify(arr, offset); // Consistency check for valid UUID.  If this throws, it's likely due to one
   // of the following:
   // - One or more input array values don't map to a hex octet (leading to
   // "undefined" in the uuid)
@@ -118799,7 +112829,7 @@ exports["default"] = void 0;
 
 var _rng = _interopRequireDefault(__nccwpck_require__(12973));
 
-var _stringify = _interopRequireDefault(__nccwpck_require__(37597));
+var _stringify = __nccwpck_require__(37597);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -118892,7 +112922,7 @@ function v1(options, buf, offset) {
     b[i + n] = node[n];
   }
 
-  return buf || (0, _stringify.default)(b);
+  return buf || (0, _stringify.unsafeStringify)(b);
 }
 
 var _default = v1;
@@ -118932,10 +112962,10 @@ exports["default"] = _default;
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports["default"] = _default;
 exports.URL = exports.DNS = void 0;
+exports["default"] = v35;
 
-var _stringify = _interopRequireDefault(__nccwpck_require__(37597));
+var _stringify = __nccwpck_require__(37597);
 
 var _parse = _interopRequireDefault(__nccwpck_require__(17267));
 
@@ -118958,8 +112988,10 @@ exports.DNS = DNS;
 const URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 exports.URL = URL;
 
-function _default(name, version, hashfunc) {
+function v35(name, version, hashfunc) {
   function generateUUID(value, namespace, buf, offset) {
+    var _namespace;
+
     if (typeof value === 'string') {
       value = stringToBytes(value);
     }
@@ -118968,7 +113000,7 @@ function _default(name, version, hashfunc) {
       namespace = (0, _parse.default)(namespace);
     }
 
-    if (namespace.length !== 16) {
+    if (((_namespace = namespace) === null || _namespace === void 0 ? void 0 : _namespace.length) !== 16) {
       throw TypeError('Namespace must be array-like (16 iterable integer values, 0-255)');
     } // Compute hash of namespace and value, Per 4.3
     // Future: Use spread syntax when supported on all platforms, e.g. `bytes =
@@ -118992,7 +113024,7 @@ function _default(name, version, hashfunc) {
       return buf;
     }
 
-    return (0, _stringify.default)(bytes);
+    return (0, _stringify.unsafeStringify)(bytes);
   } // Function#name is not settable on some platforms (#270)
 
 
@@ -119019,13 +113051,19 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 
+var _native = _interopRequireDefault(__nccwpck_require__(54221));
+
 var _rng = _interopRequireDefault(__nccwpck_require__(12973));
 
-var _stringify = _interopRequireDefault(__nccwpck_require__(37597));
+var _stringify = __nccwpck_require__(37597);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function v4(options, buf, offset) {
+  if (_native.default.randomUUID && !buf && !options) {
+    return _native.default.randomUUID();
+  }
+
   options = options || {};
 
   const rnds = options.random || (options.rng || _rng.default)(); // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
@@ -119044,7 +113082,7 @@ function v4(options, buf, offset) {
     return buf;
   }
 
-  return (0, _stringify.default)(rnds);
+  return (0, _stringify.unsafeStringify)(rnds);
 }
 
 var _default = v4;
@@ -119119,7 +113157,7 @@ function version(uuid) {
     throw TypeError('Invalid UUID');
   }
 
-  return parseInt(uuid.substr(14, 1), 16);
+  return parseInt(uuid.slice(14, 15), 16);
 }
 
 var _default = version;
@@ -119585,509 +113623,6 @@ WError.prototype.cause = function we_cause(c)
 
 /***/ }),
 
-/***/ 39962:
-/***/ ((module) => {
-
-"use strict";
-
-module.exports = function (Yallist) {
-  Yallist.prototype[Symbol.iterator] = function* () {
-    for (let walker = this.head; walker; walker = walker.next) {
-      yield walker.value
-    }
-  }
-}
-
-
-/***/ }),
-
-/***/ 17864:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-module.exports = Yallist
-
-Yallist.Node = Node
-Yallist.create = Yallist
-
-function Yallist (list) {
-  var self = this
-  if (!(self instanceof Yallist)) {
-    self = new Yallist()
-  }
-
-  self.tail = null
-  self.head = null
-  self.length = 0
-
-  if (list && typeof list.forEach === 'function') {
-    list.forEach(function (item) {
-      self.push(item)
-    })
-  } else if (arguments.length > 0) {
-    for (var i = 0, l = arguments.length; i < l; i++) {
-      self.push(arguments[i])
-    }
-  }
-
-  return self
-}
-
-Yallist.prototype.removeNode = function (node) {
-  if (node.list !== this) {
-    throw new Error('removing node which does not belong to this list')
-  }
-
-  var next = node.next
-  var prev = node.prev
-
-  if (next) {
-    next.prev = prev
-  }
-
-  if (prev) {
-    prev.next = next
-  }
-
-  if (node === this.head) {
-    this.head = next
-  }
-  if (node === this.tail) {
-    this.tail = prev
-  }
-
-  node.list.length--
-  node.next = null
-  node.prev = null
-  node.list = null
-
-  return next
-}
-
-Yallist.prototype.unshiftNode = function (node) {
-  if (node === this.head) {
-    return
-  }
-
-  if (node.list) {
-    node.list.removeNode(node)
-  }
-
-  var head = this.head
-  node.list = this
-  node.next = head
-  if (head) {
-    head.prev = node
-  }
-
-  this.head = node
-  if (!this.tail) {
-    this.tail = node
-  }
-  this.length++
-}
-
-Yallist.prototype.pushNode = function (node) {
-  if (node === this.tail) {
-    return
-  }
-
-  if (node.list) {
-    node.list.removeNode(node)
-  }
-
-  var tail = this.tail
-  node.list = this
-  node.prev = tail
-  if (tail) {
-    tail.next = node
-  }
-
-  this.tail = node
-  if (!this.head) {
-    this.head = node
-  }
-  this.length++
-}
-
-Yallist.prototype.push = function () {
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    push(this, arguments[i])
-  }
-  return this.length
-}
-
-Yallist.prototype.unshift = function () {
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    unshift(this, arguments[i])
-  }
-  return this.length
-}
-
-Yallist.prototype.pop = function () {
-  if (!this.tail) {
-    return undefined
-  }
-
-  var res = this.tail.value
-  this.tail = this.tail.prev
-  if (this.tail) {
-    this.tail.next = null
-  } else {
-    this.head = null
-  }
-  this.length--
-  return res
-}
-
-Yallist.prototype.shift = function () {
-  if (!this.head) {
-    return undefined
-  }
-
-  var res = this.head.value
-  this.head = this.head.next
-  if (this.head) {
-    this.head.prev = null
-  } else {
-    this.tail = null
-  }
-  this.length--
-  return res
-}
-
-Yallist.prototype.forEach = function (fn, thisp) {
-  thisp = thisp || this
-  for (var walker = this.head, i = 0; walker !== null; i++) {
-    fn.call(thisp, walker.value, i, this)
-    walker = walker.next
-  }
-}
-
-Yallist.prototype.forEachReverse = function (fn, thisp) {
-  thisp = thisp || this
-  for (var walker = this.tail, i = this.length - 1; walker !== null; i--) {
-    fn.call(thisp, walker.value, i, this)
-    walker = walker.prev
-  }
-}
-
-Yallist.prototype.get = function (n) {
-  for (var i = 0, walker = this.head; walker !== null && i < n; i++) {
-    // abort out of the list early if we hit a cycle
-    walker = walker.next
-  }
-  if (i === n && walker !== null) {
-    return walker.value
-  }
-}
-
-Yallist.prototype.getReverse = function (n) {
-  for (var i = 0, walker = this.tail; walker !== null && i < n; i++) {
-    // abort out of the list early if we hit a cycle
-    walker = walker.prev
-  }
-  if (i === n && walker !== null) {
-    return walker.value
-  }
-}
-
-Yallist.prototype.map = function (fn, thisp) {
-  thisp = thisp || this
-  var res = new Yallist()
-  for (var walker = this.head; walker !== null;) {
-    res.push(fn.call(thisp, walker.value, this))
-    walker = walker.next
-  }
-  return res
-}
-
-Yallist.prototype.mapReverse = function (fn, thisp) {
-  thisp = thisp || this
-  var res = new Yallist()
-  for (var walker = this.tail; walker !== null;) {
-    res.push(fn.call(thisp, walker.value, this))
-    walker = walker.prev
-  }
-  return res
-}
-
-Yallist.prototype.reduce = function (fn, initial) {
-  var acc
-  var walker = this.head
-  if (arguments.length > 1) {
-    acc = initial
-  } else if (this.head) {
-    walker = this.head.next
-    acc = this.head.value
-  } else {
-    throw new TypeError('Reduce of empty list with no initial value')
-  }
-
-  for (var i = 0; walker !== null; i++) {
-    acc = fn(acc, walker.value, i)
-    walker = walker.next
-  }
-
-  return acc
-}
-
-Yallist.prototype.reduceReverse = function (fn, initial) {
-  var acc
-  var walker = this.tail
-  if (arguments.length > 1) {
-    acc = initial
-  } else if (this.tail) {
-    walker = this.tail.prev
-    acc = this.tail.value
-  } else {
-    throw new TypeError('Reduce of empty list with no initial value')
-  }
-
-  for (var i = this.length - 1; walker !== null; i--) {
-    acc = fn(acc, walker.value, i)
-    walker = walker.prev
-  }
-
-  return acc
-}
-
-Yallist.prototype.toArray = function () {
-  var arr = new Array(this.length)
-  for (var i = 0, walker = this.head; walker !== null; i++) {
-    arr[i] = walker.value
-    walker = walker.next
-  }
-  return arr
-}
-
-Yallist.prototype.toArrayReverse = function () {
-  var arr = new Array(this.length)
-  for (var i = 0, walker = this.tail; walker !== null; i++) {
-    arr[i] = walker.value
-    walker = walker.prev
-  }
-  return arr
-}
-
-Yallist.prototype.slice = function (from, to) {
-  to = to || this.length
-  if (to < 0) {
-    to += this.length
-  }
-  from = from || 0
-  if (from < 0) {
-    from += this.length
-  }
-  var ret = new Yallist()
-  if (to < from || to < 0) {
-    return ret
-  }
-  if (from < 0) {
-    from = 0
-  }
-  if (to > this.length) {
-    to = this.length
-  }
-  for (var i = 0, walker = this.head; walker !== null && i < from; i++) {
-    walker = walker.next
-  }
-  for (; walker !== null && i < to; i++, walker = walker.next) {
-    ret.push(walker.value)
-  }
-  return ret
-}
-
-Yallist.prototype.sliceReverse = function (from, to) {
-  to = to || this.length
-  if (to < 0) {
-    to += this.length
-  }
-  from = from || 0
-  if (from < 0) {
-    from += this.length
-  }
-  var ret = new Yallist()
-  if (to < from || to < 0) {
-    return ret
-  }
-  if (from < 0) {
-    from = 0
-  }
-  if (to > this.length) {
-    to = this.length
-  }
-  for (var i = this.length, walker = this.tail; walker !== null && i > to; i--) {
-    walker = walker.prev
-  }
-  for (; walker !== null && i > from; i--, walker = walker.prev) {
-    ret.push(walker.value)
-  }
-  return ret
-}
-
-Yallist.prototype.splice = function (start, deleteCount, ...nodes) {
-  if (start > this.length) {
-    start = this.length - 1
-  }
-  if (start < 0) {
-    start = this.length + start;
-  }
-
-  for (var i = 0, walker = this.head; walker !== null && i < start; i++) {
-    walker = walker.next
-  }
-
-  var ret = []
-  for (var i = 0; walker && i < deleteCount; i++) {
-    ret.push(walker.value)
-    walker = this.removeNode(walker)
-  }
-  if (walker === null) {
-    walker = this.tail
-  }
-
-  if (walker !== this.head && walker !== this.tail) {
-    walker = walker.prev
-  }
-
-  for (var i = 0; i < nodes.length; i++) {
-    walker = insert(this, walker, nodes[i])
-  }
-  return ret;
-}
-
-Yallist.prototype.reverse = function () {
-  var head = this.head
-  var tail = this.tail
-  for (var walker = head; walker !== null; walker = walker.prev) {
-    var p = walker.prev
-    walker.prev = walker.next
-    walker.next = p
-  }
-  this.head = tail
-  this.tail = head
-  return this
-}
-
-function insert (self, node, value) {
-  var inserted = node === self.head ?
-    new Node(value, null, node, self) :
-    new Node(value, node, node.next, self)
-
-  if (inserted.next === null) {
-    self.tail = inserted
-  }
-  if (inserted.prev === null) {
-    self.head = inserted
-  }
-
-  self.length++
-
-  return inserted
-}
-
-function push (self, item) {
-  self.tail = new Node(item, self.tail, null, self)
-  if (!self.head) {
-    self.head = self.tail
-  }
-  self.length++
-}
-
-function unshift (self, item) {
-  self.head = new Node(item, null, self.head, self)
-  if (!self.tail) {
-    self.tail = self.head
-  }
-  self.length++
-}
-
-function Node (value, prev, next, list) {
-  if (!(this instanceof Node)) {
-    return new Node(value, prev, next, list)
-  }
-
-  this.list = list
-  this.value = value
-
-  if (prev) {
-    prev.next = this
-    this.prev = prev
-  } else {
-    this.prev = null
-  }
-
-  if (next) {
-    next.prev = this
-    this.next = next
-  } else {
-    this.next = null
-  }
-}
-
-try {
-  // add if support for Symbol.iterator is present
-  __nccwpck_require__(39962)(Yallist)
-} catch (er) {}
-
-
-/***/ }),
-
-/***/ 87936:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const core = __nccwpck_require__(37484);
-var BoxSDK = __nccwpck_require__(58212);
-const fs = __nccwpck_require__(73024);
-const path = __nccwpck_require__(76760);
-
-/**
- * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
- */
-async function run() {
-    // Get the sdkConfig supplied by GH actions
-    const sdkConfig = JSON.parse(core.getInput('box-client-sdk-config'));
-    var sdk = BoxSDK.getPreconfiguredInstance(sdkConfig);
-
-    // Get the service account client, used to create and manage app user accounts
-    // The enterprise ID is pre-populated by the JSON configuration,
-    // so you don't need to specify it here
-    var client = sdk.getAppAuthClient('enterprise');
-
-    // Get file to upload
-    const fileName = core.getInput('file');
-    var fileStream = fs.createReadStream(fileName);
-
-    // What should we name the file when uploading? If not specified, use the source file name.
-    var destinationFilename = core.getInput('destination-filename');
-    if (!destinationFilename) destinationFilename = path.basename(fileName);
-
-    // Upload to Box
-    const boxFolderID = core.getInput('box-folder-id');
-    core.info(`Uploading file ${fileName}`);
-    client.files.uploadFile(boxFolderID, destinationFilename, fileStream)
-        .catch(error => { core.setFailed(error.message) });
-
-    // Get a shareable link
-    const folder = client.folders.get(boxFolderID, { fields: 'shared_link' });
-    if (folder.shared_link) {
-        let url = folder.shared_link.url;
-        core.info(`Shared Folder Link: ${url}`);
-        core.setOutput("shared-link", url);
-    } else {
-        core.info('No shared link found');
-    }
-}
-
-module.exports = {
-    run
-}
-
-/***/ }),
-
 /***/ 60075:
 /***/ ((module) => {
 
@@ -120133,14 +113668,6 @@ module.exports = require("child_process");
 
 "use strict";
 module.exports = require("console");
-
-/***/ }),
-
-/***/ 49140:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("constants");
 
 /***/ }),
 
@@ -120229,22 +113756,6 @@ module.exports = require("node:crypto");
 
 "use strict";
 module.exports = require("node:events");
-
-/***/ }),
-
-/***/ 73024:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:fs");
-
-/***/ }),
-
-/***/ 76760:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:path");
 
 /***/ }),
 
@@ -120468,7 +113979,7 @@ Dicer.prototype._write = function (data, encoding, cb) {
   if (this._headerFirst && this._isPreamble) {
     if (!this._part) {
       this._part = new PartStream(this._partOpts)
-      if (this._events.preamble) { this.emit('preamble', this._part) } else { this._ignore() }
+      if (this.listenerCount('preamble') !== 0) { this.emit('preamble', this._part) } else { this._ignore() }
     }
     const r = this._hparser.push(data)
     if (!this._inHeader && r !== undefined && r < data.length) { data = data.slice(r) } else { return cb() }
@@ -120525,7 +114036,7 @@ Dicer.prototype._oninfo = function (isMatch, data, start, end) {
       }
     }
     if (this._dashes === 2) {
-      if ((start + i) < end && this._events.trailer) { this.emit('trailer', data.slice(start + i, end)) }
+      if ((start + i) < end && this.listenerCount('trailer') !== 0) { this.emit('trailer', data.slice(start + i, end)) }
       this.reset()
       this._finished = true
       // no more parts will be added
@@ -120543,7 +114054,13 @@ Dicer.prototype._oninfo = function (isMatch, data, start, end) {
     this._part._read = function (n) {
       self._unpause()
     }
-    if (this._isPreamble && this._events.preamble) { this.emit('preamble', this._part) } else if (this._isPreamble !== true && this._events.part) { this.emit('part', this._part) } else { this._ignore() }
+    if (this._isPreamble && this.listenerCount('preamble') !== 0) {
+      this.emit('preamble', this._part)
+    } else if (this._isPreamble !== true && this.listenerCount('part') !== 0) {
+      this.emit('part', this._part)
+    } else {
+      this._ignore()
+    }
     if (!this._isPreamble) { this._inHeader = true }
   }
   if (data && start < end && !this._ignoreData) {
@@ -121226,7 +114743,7 @@ function Multipart (boy, cfg) {
 
         ++nfiles
 
-        if (!boy._events.file) {
+        if (boy.listenerCount('file') === 0) {
           self.parser._ignore()
           return
         }
@@ -121755,7 +115272,7 @@ const decoders = {
     if (textDecoders.has(this.toString())) {
       try {
         return textDecoders.get(this).decode(data)
-      } catch (e) { }
+      } catch {}
     }
     return typeof data === 'string'
       ? data
@@ -123294,24 +116811,108 @@ module.exports = /*#__PURE__*/JSON.parse('{"application/1d-interleaved-parityfec
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(37484);
+// EXTERNAL MODULE: ./node_modules/box-node-sdk/lib-esm/box-node-sdk.js
+var box_node_sdk = __nccwpck_require__(31430);
+;// CONCATENATED MODULE: external "node:fs"
+const external_node_fs_namespaceObject = require("node:fs");
+var external_node_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_node_fs_namespaceObject);
+;// CONCATENATED MODULE: external "node:path"
+const external_node_path_namespaceObject = require("node:path");
+var external_node_path_default = /*#__PURE__*/__nccwpck_require__.n(external_node_path_namespaceObject);
+;// CONCATENATED MODULE: ./src/main.js
+
+
+
+
+
+/**
+ * The main function for the action.
+ * @returns {Promise<void>} Resolves when the action is complete.
+ */
+async function run() {
+    // Get the sdkConfig supplied by GH actions
+    const sdkConfig = box_node_sdk.JwtConfig.fromConfigJsonString(core.getInput('box-client-sdk-config'));
+    const auth = new box_node_sdk.BoxJwtAuth({ config: sdkConfig });
+
+    // Get the service account client, used to create and manage app user accounts
+    // The enterprise ID is pre-populated by the JSON configuration,
+    // so you don't need to specify it here
+    const client = new box_node_sdk.BoxClient({ auth });
+
+    // Get file to upload
+    const fileName = core.getInput('file');
+
+    // What should we name the file when uploading? If not specified, use the source file name.
+    var destinationFilename = core.getInput('destination-filename');
+    if (!destinationFilename) destinationFilename = external_node_path_default().basename(fileName);
+
+    // Upload to Box
+    const boxFolderID = core.getInput('box-folder-id');
+    const attrs = { name: destinationFilename, parent: { id: boxFolderID} };
+    const body = {
+        attributes: attrs,
+        file: external_node_fs_default().createReadStream(fileName),
+    };
+    const files = await client.uploads.uploadFile(body);
+    const file = files.entries[0];
+    console.log(`File uploaded with id ${file.id}, name ${file.name}`);
+}
+;// CONCATENATED MODULE: ./src/index.js
 /**
  * The entrypoint for the action.
  */
-const { run } = __nccwpck_require__(87936);
-const core = __nccwpck_require__(37484);
 
-try{
-	run();
+
+
+try {
+  run();
 } catch (error) {
-    // Fail the workflow run if an error occurs
-    core.setFailed(error.message)
+  // Fail the workflow run if an error occurs
+  if (error instanceof Error) core.core.setFailed(error.message);
 }
+})();
+
 module.exports = __webpack_exports__;
 /******/ })()
 ;
