@@ -2,14 +2,10 @@
 
 A GitHub action for uploading files or build artifacts to Box.
 
-## Build
-1. `npm i -g @vercel/ncc #Install NCC`
-2. `ncc build src/index.js`
-
 ## Example
 ```yaml
 - name: Upload cat pic to Box
-  uses: benjaminejarrell/box-upload-gh-actions@v1.2
+  uses: benjaminejarrell/box-upload-gh-actions@v2.0
   id: BoxUpload
   with:
     box-client-sdk-config: ${{ secrets.BOX_CLIENT_SDK_CONFIG }}
@@ -54,3 +50,6 @@ File in local repository or pipeline to upload.
 
 ### `destination-filename`
 Destination filename in Box. If not specified, the file will be named after the source file.
+      
+## Package for deployment
+1. `npm run package`

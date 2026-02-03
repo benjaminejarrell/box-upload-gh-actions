@@ -1,47 +1,36 @@
-const core = require('@actions/core');
-var BoxSDK = require('box-node-sdk');
-const fs = require('node:fs');
-const path = require('node:path');
+import * as core from '@actions/core';
+import { BoxClient, BoxJwtAuth, JwtConfig } from 'box-node-sdk';
+import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
-async function run() {
+export async function run() {
     // Get the sdkConfig supplied by GH actions
-    const sdkConfig = JSON.parse(core.getInput('box-client-sdk-config'));
-    var sdk = BoxSDK.getPreconfiguredInstance(sdkConfig);
+    const sdkConfig = JwtConfig.fromConfigJsonString(core.getInput('box-client-sdk-config'));
+    const auth = new BoxJwtAuth({ config: sdkConfig });
 
     // Get the service account client, used to create and manage app user accounts
     // The enterprise ID is pre-populated by the JSON configuration,
     // so you don't need to specify it here
-    var client = sdk.getAppAuthClient('enterprise');
+    const client = new BoxClient({ auth });
 
     // Get file to upload
     const fileName = core.getInput('file');
-    var fileStream = fs.createReadStream(fileName);
 
-    // What should we name the file when uploading? If not specified, use the source file name.
     var destinationFilename = core.getInput('destination-filename');
     if (!destinationFilename) destinationFilename = path.basename(fileName);
 
     // Upload to Box
     const boxFolderID = core.getInput('box-folder-id');
-    core.info(`Uploading file ${fileName}`);
-    client.files.uploadFile(boxFolderID, destinationFilename, fileStream)
-        .catch(error => { core.setFailed(error.message) });
-
-    // Get a shareable link
-    const folder = client.folders.get(boxFolderID, { fields: 'shared_link' });
-    if (folder.shared_link) {
-        let url = folder.shared_link.url;
-        core.info(`Shared Folder Link: ${url}`);
-        core.setOutput("shared-link", url);
-    } else {
-        core.info('No shared link found');
-    }
-}
-
-module.exports = {
-    run
+    const attrs = { name: destinationFilename, parent: { id: boxFolderID} };
+    const body = {
+        attributes: attrs,
+        file: fs.createReadStream(fileName),
+    };
+    const files = await client.uploads.uploadFile(body);
+    const file = files.entries[0];
+    console.log(`File uploaded with id ${file.id}, name ${file.name}`);
 }
