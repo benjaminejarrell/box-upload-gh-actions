@@ -5,7 +5,7 @@ A GitHub action for uploading files or build artifacts to Box.
 ## Example
 ```yaml
 - name: Upload cat pic to Box
-  uses: benjaminejarrell/box-upload-gh-actions@v2.0
+  uses: benjaminejarrell/box-upload-gh-actions@v2.1
   id: BoxUpload
   with:
     box-client-sdk-config: ${{ secrets.BOX_CLIENT_SDK_CONFIG }}
