@@ -20,7 +20,6 @@ export async function run() {
     // Get file to upload
     const fileName = core.getInput('file');
 
-    // What should we name the file when uploading? If not specified, use the source file name.
     var destinationFilename = core.getInput('destination-filename');
     if (!destinationFilename) destinationFilename = path.basename(fileName);
 
